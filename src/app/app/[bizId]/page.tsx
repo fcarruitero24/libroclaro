@@ -138,8 +138,8 @@ export default async function ComplaintsPage({
             <tbody className="divide-y divide-slate-100">
               {rows.map((c) => (
                 <tr key={c.id} className="hover:bg-slate-50">
-                  <td className="px-4 py-3 font-mono text-xs font-semibold text-slate-800">{c.code}</td>
-                  <td className="px-4 py-3 text-slate-600">{fmtDate(c.created_at)}</td>
+                  <td className="whitespace-nowrap px-4 py-3 font-mono text-xs font-semibold text-slate-800">{c.code}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-slate-600">{fmtDate(c.created_at)}</td>
                   <td className="px-4 py-3">
                     <p className="font-medium text-slate-900">{c.consumer_name}</p>
                     <p className="text-xs text-slate-500">{c.consumer_email}</p>

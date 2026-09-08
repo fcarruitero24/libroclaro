@@ -81,7 +81,7 @@ export default async function ComplaintDetailPage({ params }: { params: Promise<
               <p className="mt-2 text-xs text-slate-500">Respondido el {fmtDateTime(c.responded_at)}</p>
             )}
             <div className="mt-4">
-              <ResponseForm complaint={c} />
+              <ResponseForm key={`${c.status}-${c.responded_at ?? ""}-${c.response?.length ?? 0}`} complaint={c} />
             </div>
           </Card>
         </div>

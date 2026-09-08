@@ -42,7 +42,7 @@ export default async function SettingsPage({
         </div>
 
         <div className="grid gap-4 lg:grid-cols-3">
-          <Card className="lg:col-span-2">
+          <Card className="min-w-0 lg:col-span-2">
             <h3 className="font-semibold text-slate-900">1. Enlace directo</h3>
             <p className="mt-1 text-sm text-slate-600">Úsalo en Instagram, Facebook, WhatsApp Business, tu tienda online o catálogos.</p>
             <div className="mt-3 flex flex-wrap items-center gap-2">
