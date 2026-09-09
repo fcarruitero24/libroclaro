@@ -130,7 +130,13 @@ export function ComplaintForm({ slug, color }: { slug: string; color: string }) 
             </div>
             {fe.kind && <p className="mt-1 text-xs text-red-600">{fe.kind}</p>}
           </div>
-          <Field label={`Detalle del ${kind}`} htmlFor="detail" required error={fe.detail} hint="Cuéntanos qué pasó, cuándo y cómo.">
+          <Field
+            label={kind === "queja" ? "Detalle de la queja" : "Detalle del reclamo"}
+            htmlFor="detail"
+            required
+            error={fe.detail}
+            hint="Cuéntanos qué pasó, cuándo y cómo."
+          >
             <Textarea id="detail" name="detail" required minLength={10} maxLength={5000} className="min-h-36" />
           </Field>
           <Field label="Pedido" htmlFor="request" required error={fe.request} hint="¿Qué solicitas al proveedor? (devolución, cambio, reparación, disculpas…)">
@@ -144,7 +150,8 @@ export function ComplaintForm({ slug, color }: { slug: string; color: string }) 
           <input type="checkbox" name="accept" className="mt-1 h-4 w-4 rounded border-slate-300" />
           <span>
             Declaro que la información consignada es verdadera y autorizo el tratamiento de mis datos personales para la
-            atención de este {kind}, conforme a la Ley N.º 29733. <span className="text-red-600">*</span>
+            atención de {kind === "queja" ? "esta queja" : "este reclamo"}, conforme a la Ley N.º 29733.{" "}
+            <span className="text-red-600">*</span>
           </span>
         </label>
         {fe.accept && <p className="text-xs text-red-600">{fe.accept}</p>}
