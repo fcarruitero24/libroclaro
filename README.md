@@ -2,6 +2,11 @@
 
 Libro de Reclamaciones Virtual para negocios peruanos. Obligatorio por ley para todo proveedor que vende a consumidores (Ley 29571, D.S. 011-2011-PCM y modificatorias). Modelo freemium B2B con suscripción mensual.
 
+- **Producción:** https://libroclaro.vercel.app (Vercel, proyecto `libroclaro`, auto-deploy desde `main`)
+- **Demo pública:** https://libroclaro.vercel.app/r/demo
+- **Base de datos:** Supabase, proyecto `libroclaro` (`rcjgprzmvtspviwyyrhy`, São Paulo)
+- **Repo:** https://github.com/fcarruitero24/libroclaro (privado)
+
 ## Qué hace
 
 - **Formulario público** `/r/{slug}` con el formato oficial de la hoja de reclamación (consumidor, bien contratado, detalle, pedido), aviso oficial y definiciones de reclamo/queja.
