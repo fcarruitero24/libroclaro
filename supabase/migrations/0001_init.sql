@@ -75,7 +75,9 @@ create policy "owner can update business" on public.businesses for update using 
 create policy "owner can delete business" on public.businesses for delete using (auth.uid() = owner_id);
 
 create or replace function public.set_updated_at()
-returns trigger language plpgsql as $$
+returns trigger language plpgsql
+set search_path = public
+as $$
 begin
   new.updated_at := now();
   return new;
