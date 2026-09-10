@@ -14,6 +14,8 @@ export interface Business {
   plan_expires_at: string | null;
   mp_preapproval_id: string | null;
   complaint_seq: number;
+  /** Si no es null, el libro está archivado: no acepta reclamos nuevos. */
+  archived_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -55,6 +57,7 @@ export interface BusinessPublic {
   plan: string;
   plan_expires_at: string | null;
   website: string | null;
+  archived_at: string | null;
 }
 
 export interface ComplaintPublic {

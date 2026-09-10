@@ -81,9 +81,24 @@ export default async function PublicBookPage({ params }: { params: Promise<{ slu
           </ul>
         </section>
 
-        <div className="mt-8">
-          <ComplaintForm slug={biz.slug} color={color} />
-        </div>
+        {biz.archived_at ? (
+          <section className="mt-8 rounded-xl border border-amber-200 bg-amber-50 p-6">
+            <h2 className="text-base font-semibold text-amber-900">Este libro ya no recibe reclamos</h2>
+            <p className="mt-2 text-sm text-amber-900">
+              {biz.name} cerró este Libro de Reclamaciones Virtual, por lo que no es posible registrar nuevos reclamos
+              ni quejas aquí. Si ya registraste uno, el enlace que recibiste por correo sigue funcionando y tu hoja
+              sigue disponible.
+            </p>
+            <p className="mt-3 text-sm text-amber-900">
+              Para presentar un nuevo reclamo, comunícate directamente con el proveedor. También puedes acudir al
+              INDECOPI a través de su servicio Reclama Virtual.
+            </p>
+          </section>
+        ) : (
+          <div className="mt-8">
+            <ComplaintForm slug={biz.slug} color={color} />
+          </div>
+        )}
 
         {plan.branding && <PoweredBy />}
       </div>

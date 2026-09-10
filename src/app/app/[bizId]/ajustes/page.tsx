@@ -2,8 +2,9 @@ import { notFound } from "next/navigation";
 import { BusinessForm } from "@/components/business-form";
 import { CopyButton } from "@/components/copy-button";
 import { Alert, Button, Card, Input } from "@/components/ui";
-import { deleteBusiness } from "@/lib/actions/business";
+import { archiveBusiness, restoreBusiness } from "@/lib/actions/business";
 import { getAppUrl } from "@/lib/env";
+import { fmtDate } from "@/lib/format";
 import { planFor } from "@/lib/plans";
 import { createClient } from "@/lib/supabase/server";
 import type { Business } from "@/lib/types";
@@ -93,21 +94,41 @@ export default async function SettingsPage({
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-lg font-bold text-red-700">Zona de peligro</h2>
-        {sp.error === "confirmacion" && <Alert kind="error">Escribe ELIMINAR para confirmar.</Alert>}
-        <Card className="border-red-200">
-          <p className="text-sm text-slate-700">
-            Eliminar este negocio borrará también todas sus hojas de reclamación. Recuerda que la norma exige conservar los
-            registros por al menos dos años. Exporta antes si lo necesitas.
-          </p>
-          <form action={deleteBusiness} className="mt-4 flex flex-wrap items-center gap-3">
-            <input type="hidden" name="id" value={biz.id} />
-            <Input name="confirm" placeholder="Escribe ELIMINAR" className="max-w-56" required />
-            <Button type="submit" variant="danger">
-              Eliminar negocio
-            </Button>
-          </form>
-        </Card>
+        <h2 className="text-lg font-bold text-slate-900">Cerrar este libro</h2>
+        {sp.error === "confirmacion" && <Alert kind="error">Escribe ARCHIVAR para confirmar.</Alert>}
+        {sp.error === "archivar" && <Alert kind="error">No se pudo archivar el libro. Intenta de nuevo.</Alert>}
+
+        {biz.archived_at ? (
+          <Card className="border-amber-200 bg-amber-50/40">
+            <p className="text-sm text-slate-700">
+              Este libro está <strong>archivado</strong> desde el {fmtDate(biz.archived_at)}. No acepta reclamos nuevos,
+              pero sus hojas siguen guardadas y los consumidores pueden seguir consultando las suyas.
+            </p>
+            <form action={restoreBusiness} className="mt-4">
+              <input type="hidden" name="id" value={biz.id} />
+              <Button type="submit">Reactivar este libro</Button>
+            </form>
+          </Card>
+        ) : (
+          <Card className="border-slate-200">
+            <p className="text-sm text-slate-700">
+              Si dejas de usar este libro, archívalo. El formulario público deja de aceptar reclamos nuevos y el negocio
+              sale de tu panel, liberando un cupo de tu plan.
+            </p>
+            <p className="mt-3 text-sm text-slate-700">
+              <strong>No borramos tus hojas de reclamación.</strong> El reglamento obliga al proveedor a conservarlas por
+              al menos dos años, así que quedan archivadas y los enlaces que ya recibieron tus clientes siguen
+              funcionando. Puedes reactivar el libro cuando quieras.
+            </p>
+            <form action={archiveBusiness} className="mt-4 flex flex-wrap items-center gap-3">
+              <input type="hidden" name="id" value={biz.id} />
+              <Input name="confirm" placeholder="Escribe ARCHIVAR" className="max-w-56" required />
+              <Button type="submit" variant="secondary">
+                Archivar libro
+              </Button>
+            </form>
+          </Card>
+        )}
       </section>
     </div>
   );

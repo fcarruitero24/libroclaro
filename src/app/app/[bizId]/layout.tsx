@@ -30,9 +30,10 @@ export default async function BusinessLayout({
         <div className="mx-auto max-w-6xl px-4 pt-6 sm:px-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <h1 className="text-xl font-bold text-slate-900">{biz.name}</h1>
                 <Badge tone={plan.id === "free" ? "slate" : "blue"}>Plan {plan.name}</Badge>
+                {biz.archived_at && <Badge tone="amber">Archivado</Badge>}
               </div>
               <p className="mt-0.5 text-sm text-slate-500">
                 RUC {biz.ruc} · {biz.address}
@@ -50,6 +51,12 @@ export default async function BusinessLayout({
               <CopyButton text={publicUrl} label="Copiar enlace" />
             </div>
           </div>
+          {biz.archived_at && (
+            <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+              Este libro está archivado y no acepta reclamos nuevos. Sus hojas siguen guardadas. Puedes reactivarlo en
+              Ajustes.
+            </p>
+          )}
           <div className="mt-5">
             <BizTabs bizId={biz.id} />
           </div>

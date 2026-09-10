@@ -47,11 +47,13 @@ export async function createBusiness(_prev: ActionState, formData: FormData): Pr
   const { fieldErrors, values } = validateBusiness(formData, { requireSlug: true });
   if (Object.keys(fieldErrors).length) return { fieldErrors, error: "Revisa los campos marcados." };
 
-  // Límite de negocios según el plan más alto que tenga el usuario
+  // Límite de negocios según el plan más alto que tenga el usuario.
+  // Los archivados no cuentan: ya no reciben reclamos.
   const { data: existing, error: listError } = await supabase
     .from("businesses")
     .select("id, plan, plan_expires_at")
-    .eq("owner_id", user.id);
+    .eq("owner_id", user.id)
+    .is("archived_at", null);
   if (listError) return { error: "No se pudo verificar tu plan. Intenta de nuevo." };
 
   const maxAllowed = Math.max(PLANS.free.maxBusinesses, ...(existing ?? []).map((b) => planFor(b).maxBusinesses));
@@ -117,13 +119,48 @@ export async function updateBusiness(_prev: ActionState, formData: FormData): Pr
   return { success: "Cambios guardados." };
 }
 
-export async function deleteBusiness(formData: FormData): Promise<void> {
+/**
+ * Archiva el libro: deja de recibir reclamos nuevos, sale del panel activo y
+ * libera el cupo del plan. Las hojas ya emitidas se conservan, porque el
+ * reglamento obliga al proveedor a guardarlas por al menos dos años.
+ */
+export async function archiveBusiness(formData: FormData): Promise<void> {
   await requireUser();
   const supabase = await createClient();
   const id = str(formData, "id");
   const confirm = str(formData, "confirm");
-  if (!id || confirm !== "ELIMINAR") redirect(`/app/${id}/ajustes?error=confirmacion`);
-  await supabase.from("businesses").delete().eq("id", id);
+  if (!id) redirect("/app");
+  if (confirm !== "ARCHIVAR") redirect(`/app/${id}/ajustes?error=confirmacion`);
+
+  const { error } = await supabase
+    .from("businesses")
+    .update({ archived_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) redirect(`/app/${id}/ajustes?error=archivar`);
+
   revalidatePath("/app", "layout");
-  redirect("/app");
+  redirect("/app/negocios?archivado=1");
+}
+
+/** Reactiva un libro archivado, si el plan todavía tiene cupo. */
+export async function restoreBusiness(formData: FormData): Promise<void> {
+  const user = await requireUser();
+  const supabase = await createClient();
+  const id = str(formData, "id");
+  if (!id) redirect("/app/negocios");
+
+  const { data: active } = await supabase
+    .from("businesses")
+    .select("id, plan, plan_expires_at")
+    .eq("owner_id", user.id)
+    .is("archived_at", null);
+
+  const maxAllowed = Math.max(PLANS.free.maxBusinesses, ...(active ?? []).map((b) => planFor(b).maxBusinesses));
+  if ((active?.length ?? 0) >= maxAllowed) redirect("/app/negocios?error=cupo");
+
+  const { error } = await supabase.from("businesses").update({ archived_at: null }).eq("id", id);
+  if (error) redirect("/app/negocios?error=restaurar");
+
+  revalidatePath("/app", "layout");
+  redirect(`/app/${id}`);
 }

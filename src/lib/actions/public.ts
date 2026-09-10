@@ -85,7 +85,10 @@ export async function submitComplaint(_prev: ActionState, formData: FormData): P
   });
 
   if (error) {
-    if (error.message.includes("NEGOCIO_NO_ENCONTRADO")) return { error: "Este libro de reclamaciones no existe o fue desactivado." };
+    if (error.message.includes("NEGOCIO_NO_ENCONTRADO")) return { error: "Este libro de reclamaciones no existe." };
+    if (error.message.includes("NEGOCIO_ARCHIVADO")) {
+      return { error: "Este libro de reclamaciones fue cerrado por el proveedor y ya no acepta reclamos nuevos." };
+    }
     console.error("[submit_complaint]", error);
     return { error: "No se pudo registrar tu reclamo. Intenta nuevamente en unos minutos." };
   }

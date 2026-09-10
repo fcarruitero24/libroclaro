@@ -40,7 +40,7 @@ src/app/
   api/admin/activate          Activación manual (Yape/Plin)
   api/cron/reminders          Recordatorios diarios (Pro)
 src/lib/                      supabase/, actions/, plans.ts, business-days.ts, email.ts
-supabase/migrations/          Esquema SQL (ya aplicado en el proyecto "libroclaro")
+supabase/migrations/          Esquema SQL. 0001 aplicado; aplicar cada nueva desde el SQL Editor de Supabase
 ```
 
 ## Desarrollo local
