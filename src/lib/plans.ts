@@ -1,9 +1,13 @@
 export type PlanId = "free" | "pro" | "business";
+export type BillingPeriod = "monthly" | "yearly";
 
 export interface PlanDef {
   id: PlanId;
   name: string;
-  priceMonthly: number; // en soles (PEN)
+  /** Precio en soles pagando mes a mes. */
+  priceMonthly: number;
+  /** Precio en soles pagando el año completo por adelantado. */
+  priceYearly: number;
   maxBusinesses: number;
   /** Muestra "Powered by LibroClaro" en el formulario público y la hoja */
   branding: boolean;
@@ -20,6 +24,7 @@ export const PLANS: Record<PlanId, PlanDef> = {
     id: "free",
     name: "Gratis",
     priceMonthly: 0,
+    priceYearly: 0,
     maxBusinesses: 1,
     branding: true,
     businessAlerts: false,
@@ -37,7 +42,8 @@ export const PLANS: Record<PlanId, PlanDef> = {
   pro: {
     id: "pro",
     name: "Pro",
-    priceMonthly: 29,
+    priceMonthly: 12,
+    priceYearly: 99,
     maxBusinesses: 3,
     branding: false,
     businessAlerts: true,
@@ -56,7 +62,8 @@ export const PLANS: Record<PlanId, PlanDef> = {
   business: {
     id: "business",
     name: "Empresa",
-    priceMonthly: 79,
+    priceMonthly: 35,
+    priceYearly: 299,
     maxBusinesses: 25,
     branding: false,
     businessAlerts: true,
@@ -70,6 +77,26 @@ export const PLANS: Record<PlanId, PlanDef> = {
     ],
   },
 };
+
+/** Precio del plan según el periodo de facturación elegido. */
+export function priceFor(plan: PlanDef, period: BillingPeriod): number {
+  return period === "yearly" ? plan.priceYearly : plan.priceMonthly;
+}
+
+/** Porcentaje de ahorro al pagar el año completo por adelantado. */
+export function yearlySavings(plan: PlanDef): number {
+  if (plan.priceMonthly === 0) return 0;
+  return Math.round((1 - plan.priceYearly / (plan.priceMonthly * 12)) * 100);
+}
+
+/** Equivalente mensual de un plan anual, redondeado a un decimal. */
+export function monthlyEquivalent(plan: PlanDef): number {
+  return Math.round((plan.priceYearly / 12) * 10) / 10;
+}
+
+export function isBillingPeriod(v: unknown): v is BillingPeriod {
+  return v === "monthly" || v === "yearly";
+}
 
 const GRACE_MS = 3 * 24 * 60 * 60 * 1000; // 3 días de gracia tras vencer
 

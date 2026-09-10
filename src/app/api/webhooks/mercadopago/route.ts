@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
-import { PLANS, type PlanId } from "@/lib/plans";
+import { isBillingPeriod, PLANS, type BillingPeriod, type PlanId } from "@/lib/plans";
 import { createAdminClient, hasAdminClient } from "@/lib/supabase/admin";
 
 interface Preapproval {
@@ -79,8 +79,9 @@ export async function POST(request: NextRequest) {
   const pre = await fetchPreapproval(preapprovalId, token);
   if (!pre) return NextResponse.json({ error: "No se pudo leer la suscripción" }, { status: 502 });
 
-  const [businessId, planRaw] = String(pre.external_reference ?? "").split("|");
+  const [businessId, planRaw, periodRaw] = String(pre.external_reference ?? "").split("|");
   const plan = (planRaw in PLANS && planRaw !== "free" ? planRaw : "pro") as PlanId;
+  const period: BillingPeriod = isBillingPeriod(periodRaw) ? periodRaw : "monthly";
 
   const admin = createAdminClient();
   await admin.from("payment_events").insert({
@@ -94,7 +95,10 @@ export async function POST(request: NextRequest) {
   if (!businessId) return NextResponse.json({ ok: true, ignored: "sin external_reference" });
 
   if (pre.status === "authorized") {
-    const base = pre.next_payment_date ? new Date(pre.next_payment_date) : new Date(Date.now() + 30 * 86400000);
+    const cycleDays = period === "yearly" ? 365 : 30;
+    const base = pre.next_payment_date
+      ? new Date(pre.next_payment_date)
+      : new Date(Date.now() + cycleDays * 86400000);
     const expires = new Date(base.getTime() + 3 * 86400000); // margen para el cobro recurrente
     await admin
       .from("businesses")

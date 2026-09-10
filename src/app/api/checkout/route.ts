@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getAppUrl } from "@/lib/env";
-import { PLANS, type PlanId } from "@/lib/plans";
+import { isBillingPeriod, PLANS, priceFor, type BillingPeriod, type PlanId } from "@/lib/plans";
 import { createClient, getUser } from "@/lib/supabase/server";
 
 /**
@@ -15,6 +15,8 @@ export async function POST(request: NextRequest) {
   const fd = await request.formData();
   const businessId = String(fd.get("business_id") ?? "");
   const plan = String(fd.get("plan") ?? "") as PlanId;
+  const rawPeriod = String(fd.get("period") ?? "yearly");
+  const period: BillingPeriod = isBillingPeriod(rawPeriod) ? rawPeriod : "yearly";
   if (!businessId || !(plan in PLANS) || plan === "free") {
     return NextResponse.json({ error: "Solicitud inválida" }, { status: 400 });
   }
@@ -28,13 +30,13 @@ export async function POST(request: NextRequest) {
 
   const body = {
     reason: `LibroClaro ${PLANS[plan].name} · ${biz.name}`,
-    external_reference: `${biz.id}|${plan}`,
+    external_reference: `${biz.id}|${plan}|${period}`,
     payer_email: user.email,
     back_url: `${appUrl}/app/${biz.id}/plan?status=success`,
     auto_recurring: {
-      frequency: 1,
+      frequency: period === "yearly" ? 12 : 1,
       frequency_type: "months",
-      transaction_amount: PLANS[plan].priceMonthly,
+      transaction_amount: priceFor(PLANS[plan], period),
       currency_id: "PEN",
     },
     status: "pending",

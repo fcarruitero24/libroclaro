@@ -2,7 +2,7 @@ import Link from "next/link";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Badge, ButtonLink } from "@/components/ui";
-import { PLANS } from "@/lib/plans";
+import { monthlyEquivalent, PLANS, yearlySavings } from "@/lib/plans";
 
 const FEATURES = [
   {
@@ -211,7 +211,10 @@ export default function HomePage() {
         <section id="precios" className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight text-slate-900">Precios simples</h2>
-            <p className="mt-3 text-slate-600">Empieza gratis. Paga solo cuando quieras más.</p>
+            <p className="mt-3 text-slate-600">
+              Empieza gratis y quédate gratis el tiempo que quieras. Los planes pagados se cobran por año, como cualquier
+              trámite de tu negocio, y también puedes pagarlos mes a mes.
+            </p>
           </div>
           <div className="mt-12 grid gap-6 md:grid-cols-3">
             {(["free", "pro", "business"] as const).map((id) => {
@@ -232,12 +235,25 @@ export default function HomePage() {
                     </span>
                   )}
                   <h3 className="text-lg font-semibold text-slate-900">{p.name}</h3>
-                  <p className="mt-2 flex items-baseline gap-1">
-                    <span className="text-4xl font-extrabold text-slate-900">
-                      {p.priceMonthly === 0 ? "S/ 0" : `S/ ${p.priceMonthly}`}
-                    </span>
-                    <span className="text-sm text-slate-500">/mes</span>
-                  </p>
+                  {p.priceYearly === 0 ? (
+                    <>
+                      <p className="mt-2 flex items-baseline gap-1">
+                        <span className="text-4xl font-extrabold text-slate-900">S/ 0</span>
+                      </p>
+                      <p className="mt-1 text-sm text-slate-500">Para siempre, sin tarjeta.</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="mt-2 flex items-baseline gap-1">
+                        <span className="text-4xl font-extrabold text-slate-900">S/ {p.priceYearly}</span>
+                        <span className="text-sm text-slate-500">/año</span>
+                      </p>
+                      <p className="mt-1 text-sm text-slate-500">
+                        Equivale a S/ {monthlyEquivalent(p)} al mes. También S/ {p.priceMonthly} mensuales sin
+                        compromiso, {yearlySavings(p)}% más caro.
+                      </p>
+                    </>
+                  )}
                   <ul className="mt-6 space-y-2 text-sm text-slate-700">
                     {p.features.map((f) => (
                       <li key={f} className="flex gap-2">
@@ -258,7 +274,8 @@ export default function HomePage() {
             })}
           </div>
           <p className="mt-6 text-center text-sm text-slate-500">
-            Pagos con tarjeta vía Mercado Pago, o con Yape / Plin. Cancela cuando quieras.
+            Pagos con Yape, Plin o tarjeta. Cancela cuando quieras. Todos los planes, incluido el gratuito, reciben
+            reclamos ilimitados: nunca te cobramos por recibir más.
           </p>
         </section>
 
