@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { RevealOnScroll } from "@/components/reveal-on-scroll";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Badge, ButtonLink } from "@/components/ui";
@@ -57,6 +58,7 @@ const FAQ = [
 export default function HomePage() {
   return (
     <>
+      <RevealOnScroll />
       <SiteHeader />
       <main className="flex-1">
         {/* Hero */}

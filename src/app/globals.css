@@ -51,30 +51,42 @@ body {
    formulario del consumidor, el aviso legal, la hoja de
    reclamación ni la cabecera.
    --------------------------------------------------------------- */
-@keyframes reveal-in {
-  from {
+/* La clase `.reveal` sola no hace NADA: no lleva opacity ni transform.
+   El componente RevealOnScroll agrega `.will-reveal` a lo que está
+   fuera de pantalla y luego `.is-revealed` cuando entra. Si el
+   JavaScript no corre, ninguna de las dos se agrega y el contenido
+   se ve normal. Ese es el respaldo. */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal.will-reveal {
     opacity: 0;
     transform: translateY(18px);
+    transition:
+      opacity 420ms ease-out,
+      transform 420ms ease-out;
   }
-  to {
+
+  /* Cascada para hermanos en grilla: las tarjetas de una fila no
+     aparecen todas de golpe. */
+  .reveal.will-reveal:nth-child(2) {
+    transition-delay: 90ms;
+  }
+  .reveal.will-reveal:nth-child(3) {
+    transition-delay: 180ms;
+  }
+  .reveal.will-reveal:nth-child(4) {
+    transition-delay: 60ms;
+  }
+  .reveal.will-reveal:nth-child(5) {
+    transition-delay: 150ms;
+  }
+  .reveal.will-reveal:nth-child(6) {
+    transition-delay: 240ms;
+  }
+
+  /* Va después para ganar por orden a igual especificidad. */
+  .reveal.is-revealed {
     opacity: 1;
     transform: none;
-  }
-}
-
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .reveal {
-      animation-name: reveal-in;
-      animation-timing-function: ease-out;
-      animation-fill-mode: both;
-      animation-timeline: view();
-      /* El rango de "entry" mide lo mismo que el alto del elemento, así
-         que esto solo se percibe en elementos chicos: una tarjeta de
-         250px se revela en ~90px de scroll. Aplicado a una sección de
-         900px el desvanecido se repartía en 240px y era invisible. */
-      animation-range: entry 5% entry 40%;
-    }
   }
 }
 
