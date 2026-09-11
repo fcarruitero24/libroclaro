@@ -132,7 +132,7 @@ export default function HomePage() {
 
         {/* Por qué */}
         <section className="border-y border-slate-200 bg-white">
-          <div className="mx-auto grid max-w-6xl gap-6 px-4 py-10 sm:px-6 md:grid-cols-3">
+          <div className="reveal mx-auto grid max-w-6xl gap-6 px-4 py-10 sm:px-6 md:grid-cols-3">
             <div>
               <p className="text-3xl font-extrabold text-blue-700">Obligatorio</p>
               <p className="mt-1 text-sm text-slate-600">
@@ -155,7 +155,7 @@ export default function HomePage() {
         </section>
 
         {/* Cómo funciona */}
-        <section id="como-funciona" className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+        <section id="como-funciona" className="reveal mx-auto max-w-6xl px-4 py-20 sm:px-6">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight text-slate-900">Cómo funciona</h2>
             <p className="mt-3 text-slate-600">Tres pasos y tu negocio queda en regla.</p>
@@ -191,7 +191,7 @@ export default function HomePage() {
 
         {/* Features */}
         <section className="bg-slate-900 text-white">
-          <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+          <div className="reveal mx-auto max-w-6xl px-4 py-20 sm:px-6">
             <div className="mx-auto max-w-2xl text-center">
               <h2 className="text-3xl font-bold tracking-tight">Todo lo que exige el reglamento, sin que lo pienses</h2>
               <p className="mt-3 text-slate-300">Diseñado a partir del formato oficial de la hoja de reclamación.</p>
@@ -208,7 +208,7 @@ export default function HomePage() {
         </section>
 
         {/* Precios */}
-        <section id="precios" className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+        <section id="precios" className="reveal mx-auto max-w-6xl px-4 py-20 sm:px-6">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight text-slate-900">Precios simples</h2>
             <p className="mt-3 text-slate-600">
@@ -225,8 +225,8 @@ export default function HomePage() {
                   key={id}
                   className={
                     highlight
-                      ? "relative rounded-2xl border-2 border-blue-700 bg-white p-6 shadow-xl"
-                      : "rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+                      ? "relative rounded-2xl border-2 border-blue-700 bg-white p-6 shadow-xl transition duration-200 ease-out hover:-translate-y-1 hover:shadow-2xl"
+                      : "rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition duration-200 ease-out hover:-translate-y-1 hover:shadow-lg"
                   }
                 >
                   {highlight && (
@@ -281,7 +281,7 @@ export default function HomePage() {
 
         {/* FAQ */}
         <section id="faq" className="border-t border-slate-200 bg-white">
-          <div className="mx-auto max-w-3xl px-4 py-20 sm:px-6">
+          <div className="reveal mx-auto max-w-3xl px-4 py-20 sm:px-6">
             <h2 className="text-center text-3xl font-bold tracking-tight text-slate-900">Preguntas frecuentes</h2>
             <div className="mt-10 divide-y divide-slate-200">
               {FAQ.map((item) => (
@@ -298,7 +298,7 @@ export default function HomePage() {
         </section>
 
         {/* CTA final */}
-        <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+        <section className="reveal mx-auto max-w-6xl px-4 py-20 sm:px-6">
           <div className="rounded-3xl bg-blue-700 px-6 py-14 text-center text-white shadow-xl">
             <h2 className="text-3xl font-bold tracking-tight">Pon tu negocio en regla hoy</h2>
             <p className="mx-auto mt-3 max-w-xl text-blue-100">

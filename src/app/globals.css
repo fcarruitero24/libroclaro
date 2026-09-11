@@ -20,6 +20,134 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* ---------------------------------------------------------------
+   Accesibilidad: respeta a quien pidió menos movimiento en su
+   sistema operativo. Lleva !important para ganarle a cualquier
+   regla o utilidad de Tailwind, sin importar el orden del archivo.
+   --------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  html {
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------------------------------------------------------------
+   Aparición de secciones al hacer scroll.
+
+   El estado base NUNCA es opacity: 0. Si el navegador no soporta
+   animation-timeline (Firefox estable todavía lo tiene detrás de
+   un flag), el peor caso es que no haya animación, nunca que el
+   contenido quede invisible.
+
+   Solo se usa en secciones decorativas de la landing. Jamás en el
+   formulario del consumidor, el aviso legal, la hoja de
+   reclamación ni la cabecera.
+   --------------------------------------------------------------- */
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation-name: reveal-in;
+      animation-timing-function: ease-out;
+      animation-fill-mode: both;
+      animation-timeline: view();
+      /* Rango corto: una sección al final de una página corta
+         alcanza a completarse y no queda semitransparente. */
+      animation-range: entry 0% entry 40%;
+    }
+  }
+}
+
+/* ---------------------------------------------------------------
+   Entradas puntuales (errores de formulario, confirmaciones).
+   Solo opacity y transform.
+   --------------------------------------------------------------- */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.anim-fade-up {
+  animation: fade-up 180ms ease-out both;
+}
+
+@keyframes fade-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.anim-fade-rise {
+  animation: fade-rise 300ms 380ms ease-out both;
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.anim-pop-in {
+  animation: pop-in 200ms ease-out both;
+}
+
+/* ---------------------------------------------------------------
+   Check dibujándose en la confirmación del reclamo registrado.
+   --------------------------------------------------------------- */
+@keyframes draw-stroke {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.anim-check-ring {
+  stroke-dasharray: 88;
+  stroke-dashoffset: 88;
+  animation: draw-stroke 520ms ease-out forwards;
+}
+
+/* 22 ≈ largo real del trazo del check, para que empiece a dibujarse
+   de inmediato en vez de esperar a que el offset baje. */
+.anim-check-mark {
+  stroke-dasharray: 22;
+  stroke-dashoffset: 22;
+  animation: draw-stroke 320ms 360ms ease-out forwards;
+}
+
 @media print {
   .no-print {
     display: none !important;

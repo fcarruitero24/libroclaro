@@ -34,8 +34,8 @@ export default async function PlanPage({
         href={`/app/${bizId}/plan?periodo=${value === "yearly" ? "anual" : "mensual"}`}
         className={
           active
-            ? "rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm"
-            : "rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-900"
+            ? "rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition duration-200 ease-out"
+            : "rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 transition duration-200 ease-out hover:text-slate-900"
         }
       >
         {label}

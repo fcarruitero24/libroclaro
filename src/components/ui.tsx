@@ -32,7 +32,7 @@ export function ButtonLink({
 }
 
 const control =
-  "w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20 disabled:bg-slate-50";
+  "w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 transition-[color,border-color,box-shadow] duration-150 ease-out placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20 disabled:bg-slate-50";
 
 export function Input({ className, ...props }: ComponentProps<"input">) {
   return <input className={cn(control, className)} {...props} />;
@@ -71,7 +71,7 @@ export function Field({
       </label>
       {children}
       {error ? (
-        <p className="text-xs text-red-600">{error}</p>
+        <p className="anim-fade-up text-xs text-red-600">{error}</p>
       ) : hint ? (
         <p className="text-xs text-slate-500">{hint}</p>
       ) : null}
@@ -106,7 +106,10 @@ export function Alert({
   className?: string;
 }) {
   return (
-    <div role={kind === "error" ? "alert" : "status"} className={cn("rounded-lg border px-4 py-3 text-sm", alertStyles[kind], className)}>
+    <div
+      role={kind === "error" ? "alert" : "status"}
+      className={cn("anim-fade-up rounded-lg border px-4 py-3 text-sm", alertStyles[kind], className)}
+    >
       {children}
     </div>
   );

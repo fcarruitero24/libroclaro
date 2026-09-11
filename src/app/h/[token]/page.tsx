@@ -40,8 +40,35 @@ export default async function PublicComplaintPage({
       <div className="mx-auto max-w-3xl px-4 sm:px-6">
         {sp.registrado && (
           <Alert kind="success" className="no-print mb-6">
-            <strong>Tu {KIND_LABEL[row.kind].toLowerCase()} fue registrado con el N.º {row.code}.</strong> Te enviamos una copia a{" "}
-            <strong>{row.consumer_email}</strong>. Guarda este enlace: es tu constancia.
+            <div className="flex items-start gap-3">
+              <svg viewBox="0 0 40 40" aria-hidden="true" className="mt-0.5 h-9 w-9 shrink-0 text-green-600">
+                <circle
+                  cx="20"
+                  cy="20"
+                  r="14"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  transform="rotate(-90 20 20)"
+                  className="anim-check-ring"
+                />
+                <path
+                  d="M13 20.5l5 5 9-10"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="anim-check-mark"
+                />
+              </svg>
+              <p className="anim-fade-rise">
+                <strong>
+                  Tu {KIND_LABEL[row.kind].toLowerCase()} fue registrado con el N.º {row.code}.
+                </strong>{" "}
+                Te enviamos una copia a <strong>{row.consumer_email}</strong>. Guarda este enlace: es tu constancia.
+              </p>
+            </div>
           </Alert>
         )}
 
