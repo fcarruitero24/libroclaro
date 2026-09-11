@@ -54,7 +54,7 @@ body {
 @keyframes reveal-in {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(18px);
   }
   to {
     opacity: 1;
@@ -69,9 +69,11 @@ body {
       animation-timing-function: ease-out;
       animation-fill-mode: both;
       animation-timeline: view();
-      /* Rango corto: una sección al final de una página corta
-         alcanza a completarse y no queda semitransparente. */
-      animation-range: entry 0% entry 40%;
+      /* El rango de "entry" mide lo mismo que el alto del elemento, así
+         que esto solo se percibe en elementos chicos: una tarjeta de
+         250px se revela en ~90px de scroll. Aplicado a una sección de
+         900px el desvanecido se repartía en 240px y era invisible. */
+      animation-range: entry 5% entry 40%;
     }
   }
 }

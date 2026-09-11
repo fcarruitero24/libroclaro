@@ -155,8 +155,8 @@ export default function HomePage() {
         </section>
 
         {/* Cómo funciona */}
-        <section id="como-funciona" className="reveal mx-auto max-w-6xl px-4 py-20 sm:px-6">
-          <div className="mx-auto max-w-2xl text-center">
+        <section id="como-funciona" className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+          <div className="reveal mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight text-slate-900">Cómo funciona</h2>
             <p className="mt-3 text-slate-600">Tres pasos y tu negocio queda en regla.</p>
           </div>
@@ -178,7 +178,7 @@ export default function HomePage() {
                 d: "Cada reclamo llega numerado a tu panel con la cuenta regresiva de días hábiles. Respondes y el cliente recibe la respuesta por correo.",
               },
             ].map((s) => (
-              <li key={s.n} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <li key={s.n} className="reveal rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-blue-700 text-lg font-bold text-white">
                   {s.n}
                 </span>
@@ -191,14 +191,14 @@ export default function HomePage() {
 
         {/* Features */}
         <section className="bg-slate-900 text-white">
-          <div className="reveal mx-auto max-w-6xl px-4 py-20 sm:px-6">
-            <div className="mx-auto max-w-2xl text-center">
+          <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+            <div className="reveal mx-auto max-w-2xl text-center">
               <h2 className="text-3xl font-bold tracking-tight">Todo lo que exige el reglamento, sin que lo pienses</h2>
               <p className="mt-3 text-slate-300">Diseñado a partir del formato oficial de la hoja de reclamación.</p>
             </div>
             <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {FEATURES.map((f) => (
-                <div key={f.title} className="rounded-2xl border border-white/10 bg-white/5 p-6">
+                <div key={f.title} className="reveal rounded-2xl border border-white/10 bg-white/5 p-6">
                   <h3 className="font-semibold">{f.title}</h3>
                   <p className="mt-2 text-sm text-slate-300">{f.text}</p>
                 </div>
@@ -208,8 +208,8 @@ export default function HomePage() {
         </section>
 
         {/* Precios */}
-        <section id="precios" className="reveal mx-auto max-w-6xl px-4 py-20 sm:px-6">
-          <div className="mx-auto max-w-2xl text-center">
+        <section id="precios" className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+          <div className="reveal mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight text-slate-900">Precios simples</h2>
             <p className="mt-3 text-slate-600">
               Empieza gratis y quédate gratis el tiempo que quieras. Los planes pagados se cobran por año, como cualquier
@@ -281,11 +281,11 @@ export default function HomePage() {
 
         {/* FAQ */}
         <section id="faq" className="border-t border-slate-200 bg-white">
-          <div className="reveal mx-auto max-w-3xl px-4 py-20 sm:px-6">
-            <h2 className="text-center text-3xl font-bold tracking-tight text-slate-900">Preguntas frecuentes</h2>
+          <div className="mx-auto max-w-3xl px-4 py-20 sm:px-6">
+            <h2 className="reveal text-center text-3xl font-bold tracking-tight text-slate-900">Preguntas frecuentes</h2>
             <div className="mt-10 divide-y divide-slate-200">
               {FAQ.map((item) => (
-                <details key={item.q} className="group py-4">
+                <details key={item.q} className="reveal group py-4">
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-left font-medium text-slate-900">
                     {item.q}
                     <span className="text-slate-400 transition group-open:rotate-45">+</span>
@@ -298,8 +298,8 @@ export default function HomePage() {
         </section>
 
         {/* CTA final */}
-        <section className="reveal mx-auto max-w-6xl px-4 py-20 sm:px-6">
-          <div className="rounded-3xl bg-blue-700 px-6 py-14 text-center text-white shadow-xl">
+        <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+          <div className="reveal rounded-3xl bg-blue-700 px-6 py-14 text-center text-white shadow-xl">
             <h2 className="text-3xl font-bold tracking-tight">Pon tu negocio en regla hoy</h2>
             <p className="mx-auto mt-3 max-w-xl text-blue-100">
               Crea tu Libro de Reclamaciones Virtual gratis y recibe tu enlace y aviso oficial en menos de 5 minutos.
