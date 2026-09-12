@@ -62,31 +62,35 @@ export default function HomePage() {
       <SiteHeader />
       <main className="flex-1">
         {/* Hero */}
-        <section className="relative overflow-hidden">
-          <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(60%_50%_at_50%_0%,#dbeafe_0%,transparent_70%)]" />
-          <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 md:grid-cols-2 md:py-24">
+        <section className="relative overflow-hidden bg-[#0b1f1d]">
+          <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(65%_55%_at_50%_0%,rgba(15,118,110,0.35)_0%,transparent_70%)]" />
+          <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 md:grid-cols-2 md:py-28">
             <div className="space-y-6">
-              <Badge tone="blue">Cumple con INDECOPI · D.S. 011-2011-PCM</Badge>
-              <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
+              <Badge tone="teal">Cumple con INDECOPI · D.S. 011-2011-PCM</Badge>
+              <h1 className="font-display text-4xl tracking-tight text-white sm:text-5xl md:text-[3.25rem] md:leading-[1.15]">
                 Tu Libro de Reclamaciones Virtual, listo en 5 minutos
               </h1>
-              <p className="text-lg text-slate-600">
+              <p className="text-lg leading-relaxed text-slate-300">
                 Registra tu negocio, copia el enlace en tu web o redes y recibe los reclamos ordenados, numerados y
                 con el plazo legal bajo control. Sin abogados, sin cuadernos.
               </p>
               <div className="flex flex-wrap gap-3">
-                <ButtonLink href="/registro" className="px-6 py-3 text-base">
+                <ButtonLink href="/registro" variant="white" className="px-6 py-3 text-base">
                   Crear mi libro gratis
                 </ButtonLink>
-                <ButtonLink href="/r/demo" variant="secondary" className="px-6 py-3 text-base">
-                  Ver un ejemplo
+                <ButtonLink
+                  href="/r/demo"
+                  variant="ghost"
+                  className="px-6 py-3 text-base text-slate-300 hover:bg-white/10 hover:text-white"
+                >
+                  Ver un ejemplo →
                 </ButtonLink>
               </div>
               <p className="text-sm text-slate-500">Sin tarjeta · Reclamos ilimitados · Hecho en Perú 🇵🇪</p>
             </div>
 
             <div className="relative">
-              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
+              <div className="rounded-2xl border border-white/10 bg-white p-6 shadow-2xl shadow-black/40">
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Hoja de reclamación</p>
@@ -109,14 +113,14 @@ export default function HomePage() {
                   </div>
                   <div>
                     <dt className="text-slate-500">Plazo</dt>
-                    <dd className="font-medium text-red-700">Vence en 3 días hábiles</dd>
+                    <dd className="font-medium text-amber-700">Vence en 3 días hábiles</dd>
                   </div>
                 </dl>
                 <div className="mt-5 rounded-lg bg-slate-50 p-3 text-sm text-slate-700">
-                  “El producto llegó con la caja dañada y no encendía. Solicito el cambio o la devolución del dinero.”
+                  &ldquo;El producto llegó con la caja dañada y no encendía. Solicito el cambio o la devolución del dinero.&rdquo;
                 </div>
                 <div className="mt-5 flex gap-2">
-                  <span className="inline-flex flex-1 items-center justify-center rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white">
+                  <span className="inline-flex flex-1 items-center justify-center rounded-lg bg-teal-700 px-4 py-2 text-sm font-semibold text-white">
                     Responder
                   </span>
                   <span className="inline-flex items-center justify-center rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">
@@ -133,22 +137,22 @@ export default function HomePage() {
         </section>
 
         {/* Por qué */}
-        <section className="border-y border-slate-200 bg-white">
+        <section className="border-y border-stone-200 bg-[#faf7f2]">
           <div className="reveal mx-auto grid max-w-6xl gap-6 px-4 py-10 sm:px-6 md:grid-cols-3">
             <div>
-              <p className="text-3xl font-extrabold text-blue-700">Obligatorio</p>
+              <p className="text-3xl font-extrabold text-teal-700">Obligatorio</p>
               <p className="mt-1 text-sm text-slate-600">
                 Para todo negocio que vende a consumidores, en el local y en su web o redes sociales.
               </p>
             </div>
             <div>
-              <p className="text-3xl font-extrabold text-blue-700">15 días hábiles</p>
+              <p className="text-3xl font-extrabold text-teal-700">15 días hábiles</p>
               <p className="mt-1 text-sm text-slate-600">
                 Plazo máximo e improrrogable para responder cada reclamo o queja.
               </p>
             </div>
             <div>
-              <p className="text-3xl font-extrabold text-blue-700">Multas</p>
+              <p className="text-3xl font-extrabold text-teal-700">Multas</p>
               <p className="mt-1 text-sm text-slate-600">
                 INDECOPI sanciona no tener el libro, no exhibir el aviso o no responder a tiempo.
               </p>
@@ -159,7 +163,7 @@ export default function HomePage() {
         {/* Cómo funciona */}
         <section id="como-funciona" className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
           <div className="reveal mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900">Cómo funciona</h2>
+            <h2 className="font-display text-3xl tracking-tight text-slate-900">Cómo funciona</h2>
             <p className="mt-3 text-slate-600">Tres pasos y tu negocio queda en regla.</p>
           </div>
           <ol className="mt-12 grid gap-8 md:grid-cols-3">
@@ -181,7 +185,7 @@ export default function HomePage() {
               },
             ].map((s) => (
               <li key={s.n} className="reveal rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-blue-700 text-lg font-bold text-white">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-teal-700 text-lg font-bold text-white">
                   {s.n}
                 </span>
                 <h3 className="mt-4 text-lg font-semibold text-slate-900">{s.t}</h3>
@@ -192,17 +196,22 @@ export default function HomePage() {
         </section>
 
         {/* Features */}
-        <section className="bg-slate-900 text-white">
+        <section className="bg-[#faf7f2]">
           <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
             <div className="reveal mx-auto max-w-2xl text-center">
-              <h2 className="text-3xl font-bold tracking-tight">Todo lo que exige el reglamento, sin que lo pienses</h2>
-              <p className="mt-3 text-slate-300">Diseñado a partir del formato oficial de la hoja de reclamación.</p>
+              <h2 className="font-display text-3xl tracking-tight text-slate-900">
+                Todo lo que exige el reglamento, sin que lo pienses
+              </h2>
+              <p className="mt-3 text-slate-500">Diseñado a partir del formato oficial de la hoja de reclamación.</p>
             </div>
-            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {FEATURES.map((f) => (
-                <div key={f.title} className="reveal rounded-2xl border border-white/10 bg-white/5 p-6">
-                  <h3 className="font-semibold">{f.title}</h3>
-                  <p className="mt-2 text-sm text-slate-300">{f.text}</p>
+                <div
+                  key={f.title}
+                  className="reveal rounded-2xl border border-stone-200 border-l-[3px] border-l-teal-600 bg-white p-6 shadow-sm"
+                >
+                  <h3 className="font-semibold text-slate-900">{f.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600">{f.text}</p>
                 </div>
               ))}
             </div>
@@ -212,7 +221,7 @@ export default function HomePage() {
         {/* Precios */}
         <section id="precios" className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
           <div className="reveal mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900">Precios simples</h2>
+            <h2 className="font-display text-3xl tracking-tight text-slate-900">Precios simples</h2>
             <p className="mt-3 text-slate-600">
               Empieza gratis y quédate gratis el tiempo que quieras. Los planes pagados se cobran por año, como cualquier
               trámite de tu negocio, y también puedes pagarlos mes a mes.
@@ -227,46 +236,52 @@ export default function HomePage() {
                   key={id}
                   className={
                     highlight
-                      ? "relative rounded-2xl border-2 border-blue-700 bg-white p-6 shadow-xl transition duration-200 ease-out hover:-translate-y-1 hover:shadow-2xl"
+                      ? "relative rounded-2xl bg-teal-900 p-6 shadow-xl transition duration-200 ease-out hover:-translate-y-1 hover:shadow-2xl"
                       : "rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition duration-200 ease-out hover:-translate-y-1 hover:shadow-lg"
                   }
                 >
                   {highlight && (
-                    <span className="absolute -top-3 left-6 rounded-full bg-blue-700 px-3 py-1 text-xs font-semibold text-white">
+                    <span className="absolute -top-3 left-6 rounded-full bg-teal-400 px-3 py-1 text-xs font-semibold text-teal-900">
                       Más popular
                     </span>
                   )}
-                  <h3 className="text-lg font-semibold text-slate-900">{p.name}</h3>
+                  <h3 className={`text-lg font-semibold ${highlight ? "text-white" : "text-slate-900"}`}>{p.name}</h3>
                   {p.priceYearly === 0 ? (
                     <>
                       <p className="mt-2 flex items-baseline gap-1">
-                        <span className="text-4xl font-extrabold text-slate-900">S/ 0</span>
+                        <span className={`text-4xl font-extrabold ${highlight ? "text-white" : "text-slate-900"}`}>
+                          S/ 0
+                        </span>
                       </p>
-                      <p className="mt-1 text-sm text-slate-500">Para siempre, sin tarjeta.</p>
+                      <p className={`mt-1 text-sm ${highlight ? "text-teal-300" : "text-slate-500"}`}>
+                        Para siempre, sin tarjeta.
+                      </p>
                     </>
                   ) : (
                     <>
                       <p className="mt-2 flex items-baseline gap-1">
-                        <span className="text-4xl font-extrabold text-slate-900">S/ {p.priceYearly}</span>
-                        <span className="text-sm text-slate-500">/año</span>
+                        <span className={`text-4xl font-extrabold ${highlight ? "text-white" : "text-slate-900"}`}>
+                          S/ {p.priceYearly}
+                        </span>
+                        <span className={`text-sm ${highlight ? "text-teal-300" : "text-slate-500"}`}>/año</span>
                       </p>
-                      <p className="mt-1 text-sm text-slate-500">
+                      <p className={`mt-1 text-sm ${highlight ? "text-teal-300" : "text-slate-500"}`}>
                         Equivale a S/ {monthlyEquivalent(p)} al mes. También S/ {p.priceMonthly} mensuales sin
                         compromiso, {yearlySavings(p)}% más caro.
                       </p>
                     </>
                   )}
-                  <ul className="mt-6 space-y-2 text-sm text-slate-700">
+                  <ul className={`mt-6 space-y-2 text-sm ${highlight ? "text-teal-100" : "text-slate-700"}`}>
                     {p.features.map((f) => (
                       <li key={f} className="flex gap-2">
-                        <span className="text-blue-700">✓</span>
+                        <span className={highlight ? "text-teal-400" : "text-teal-700"}>✓</span>
                         {f}
                       </li>
                     ))}
                   </ul>
                   <ButtonLink
                     href="/registro"
-                    variant={highlight ? "primary" : "secondary"}
+                    variant={highlight ? "white" : "secondary"}
                     className="mt-8 w-full"
                   >
                     {id === "free" ? "Empezar gratis" : `Elegir ${p.name}`}
@@ -284,13 +299,15 @@ export default function HomePage() {
         {/* FAQ */}
         <section id="faq" className="border-t border-slate-200 bg-white">
           <div className="mx-auto max-w-3xl px-4 py-20 sm:px-6">
-            <h2 className="reveal text-center text-3xl font-bold tracking-tight text-slate-900">Preguntas frecuentes</h2>
+            <h2 className="reveal font-display text-center text-3xl tracking-tight text-slate-900">
+              Preguntas frecuentes
+            </h2>
             <div className="mt-10 divide-y divide-slate-200">
               {FAQ.map((item) => (
-                <details key={item.q} className="reveal group py-4">
+                <details key={item.q} className="reveal group py-5">
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-left font-medium text-slate-900">
                     {item.q}
-                    <span className="text-slate-400 transition group-open:rotate-45">+</span>
+                    <span className="shrink-0 text-teal-600 transition group-open:rotate-45">+</span>
                   </summary>
                   <p className="mt-3 text-sm leading-relaxed text-slate-600">{item.a}</p>
                 </details>
@@ -301,16 +318,19 @@ export default function HomePage() {
 
         {/* CTA final */}
         <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-          <div className="reveal rounded-3xl bg-blue-700 px-6 py-14 text-center text-white shadow-xl">
-            <h2 className="text-3xl font-bold tracking-tight">Pon tu negocio en regla hoy</h2>
-            <p className="mx-auto mt-3 max-w-xl text-blue-100">
+          <div className="reveal rounded-3xl bg-gradient-to-br from-teal-900 via-teal-800 to-teal-700 px-6 py-16 text-center text-white shadow-xl">
+            <h2 className="font-display text-3xl tracking-tight">Pon tu negocio en regla hoy</h2>
+            <p className="mx-auto mt-3 max-w-xl text-teal-100">
               Crea tu Libro de Reclamaciones Virtual gratis y recibe tu enlace y aviso oficial en menos de 5 minutos.
             </p>
             <div className="mt-8 flex justify-center gap-3">
               <ButtonLink href="/registro" variant="white" className="px-6 py-3 text-base">
                 Crear mi libro gratis
               </ButtonLink>
-              <Link href="/r/demo" className="inline-flex items-center px-4 text-sm font-semibold text-white/90 hover:text-white">
+              <Link
+                href="/r/demo"
+                className="inline-flex items-center px-4 text-sm font-semibold text-teal-100 hover:text-white"
+              >
                 Ver demo →
               </Link>
             </div>

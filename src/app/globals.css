@@ -3,6 +3,7 @@
 @theme inline {
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-display: var(--font-instrument-serif), Georgia, serif;
 }
 
 :root {
@@ -14,7 +15,7 @@ html {
 }
 
 body {
-  background: #f8fafc;
+  background: #fafaf8;
   color: #0f172a;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -22,8 +23,7 @@ body {
 
 /* ---------------------------------------------------------------
    Accesibilidad: respeta a quien pidió menos movimiento en su
-   sistema operativo. Lleva !important para ganarle a cualquier
-   regla o utilidad de Tailwind, sin importar el orden del archivo.
+   sistema operativo.
    --------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -41,21 +41,7 @@ body {
 
 /* ---------------------------------------------------------------
    Aparición de secciones al hacer scroll.
-
-   El estado base NUNCA es opacity: 0. Si el navegador no soporta
-   animation-timeline (Firefox estable todavía lo tiene detrás de
-   un flag), el peor caso es que no haya animación, nunca que el
-   contenido quede invisible.
-
-   Solo se usa en secciones decorativas de la landing. Jamás en el
-   formulario del consumidor, el aviso legal, la hoja de
-   reclamación ni la cabecera.
    --------------------------------------------------------------- */
-/* La clase `.reveal` sola no hace NADA: no lleva opacity ni transform.
-   El componente RevealOnScroll agrega `.will-reveal` a lo que está
-   fuera de pantalla y luego `.is-revealed` cuando entra. Si el
-   JavaScript no corre, ninguna de las dos se agrega y el contenido
-   se ve normal. Ese es el respaldo. */
 @media (prefers-reduced-motion: no-preference) {
   .reveal.will-reveal {
     opacity: 0;
@@ -65,8 +51,6 @@ body {
       transform 420ms ease-out;
   }
 
-  /* Cascada para hermanos en grilla: las tarjetas de una fila no
-     aparecen todas de golpe. */
   .reveal.will-reveal:nth-child(2) {
     transition-delay: 90ms;
   }
@@ -83,7 +67,6 @@ body {
     transition-delay: 240ms;
   }
 
-  /* Va después para ganar por orden a igual especificidad. */
   .reveal.is-revealed {
     opacity: 1;
     transform: none;
@@ -91,8 +74,7 @@ body {
 }
 
 /* ---------------------------------------------------------------
-   Entradas puntuales (errores de formulario, confirmaciones).
-   Solo opacity y transform.
+   Entradas puntuales.
    --------------------------------------------------------------- */
 @keyframes fade-up {
   from {
@@ -154,8 +136,6 @@ body {
   animation: draw-stroke 520ms ease-out forwards;
 }
 
-/* 22 ≈ largo real del trazo del check, para que empiece a dibujarse
-   de inmediato en vez de esperar a que el offset baje. */
 .anim-check-mark {
   stroke-dasharray: 22;
   stroke-dashoffset: 22;
