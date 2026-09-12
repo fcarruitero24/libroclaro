@@ -68,7 +68,7 @@ export default async function ComplaintsPage({
       )}
 
       <div className="grid gap-4 sm:grid-cols-4">
-        <Stat label="Abiertos" value={open.length} tone="blue" href={`/app/${bizId}?estado=abiertos`} />
+        <Stat label="Abiertos" value={open.length} tone="teal" href={`/app/${bizId}?estado=abiertos`} />
         <Stat label="Por vencer (≤3 d.h.)" value={soon.length} tone="amber" href={`/app/${bizId}?estado=abiertos`} />
         <Stat label="Vencidos" value={overdue.length} tone="red" href={`/app/${bizId}?estado=vencidos`} />
         <Stat label="Respondidos" value={responded.length} tone="green" href={`/app/${bizId}?estado=respondido`} />
@@ -95,7 +95,7 @@ export default async function ComplaintsPage({
             Exportar CSV
           </ButtonLink>
         ) : (
-          <Link href={`/app/${bizId}/plan`} className="text-xs font-semibold text-blue-700 hover:underline">
+          <Link href={`/app/${bizId}/plan`} className="text-xs font-semibold text-teal-700 hover:underline">
             Exportar a Excel (Pro) →
           </Link>
         )}
@@ -154,7 +154,7 @@ export default async function ComplaintsPage({
                     <DeadlineBadge status={c.status} dueAt={c.due_at} />
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <Link href={`/app/${bizId}/reclamo/${c.id}`} className="font-semibold text-blue-700 hover:underline">
+                    <Link href={`/app/${bizId}/reclamo/${c.id}`} className="font-semibold text-teal-700 hover:underline">
                       {isOpen(c) ? "Responder" : "Ver"}
                     </Link>
                   </td>
@@ -168,10 +168,10 @@ export default async function ComplaintsPage({
   );
 }
 
-function Stat({ label, value, tone, href }: { label: string; value: number; tone: "blue" | "amber" | "red" | "green"; href: string }) {
-  const color = { blue: "text-blue-700", amber: "text-amber-700", red: "text-red-700", green: "text-green-700" }[tone];
+function Stat({ label, value, tone, href }: { label: string; value: number; tone: "teal" | "amber" | "red" | "green"; href: string }) {
+  const color = { teal: "text-teal-700", amber: "text-amber-700", red: "text-red-700", green: "text-green-700" }[tone];
   return (
-    <Link href={href} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-blue-300">
+    <Link href={href} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-teal-300">
       <p className="text-xs font-medium text-slate-500">{label}</p>
       <p className={`mt-1 text-3xl font-extrabold ${color}`}>{value}</p>
     </Link>

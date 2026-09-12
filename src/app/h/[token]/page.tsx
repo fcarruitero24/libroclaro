@@ -31,7 +31,7 @@ export default async function PublicComplaintPage({
   if (!row) notFound();
 
   const plan = planFor({ plan: row.business_plan, plan_expires_at: row.business_plan_expires_at });
-  const color = plan.customBranding ? row.business_color : "#1d4ed8";
+  const color = plan.customBranding ? row.business_color : "#0f766e";
   const logo = plan.customBranding ? row.business_logo_url : null;
   const answered = Boolean(row.response) && (row.status === "respondido" || row.status === "cerrado");
 

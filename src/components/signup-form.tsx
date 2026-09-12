@@ -83,7 +83,7 @@ export function SignupForm({ appUrl }: { appUrl: string }) {
         <Alert kind="success">{state.success}</Alert>
         <p className="text-center text-sm text-slate-600">
           ¿Ya confirmaste?{" "}
-          <Link href="/login" className="font-semibold text-blue-700 hover:underline">
+          <Link href="/login" className="font-semibold text-teal-700 hover:underline">
             Inicia sesión
           </Link>
         </p>
@@ -241,7 +241,7 @@ export function SignupForm({ appUrl }: { appUrl: string }) {
 
       <p className="text-center text-sm text-slate-600">
         ¿Ya tienes cuenta?{" "}
-        <Link href="/login" className="font-semibold text-blue-700 hover:underline">
+        <Link href="/login" className="font-semibold text-teal-700 hover:underline">
           Inicia sesión
         </Link>
       </p>

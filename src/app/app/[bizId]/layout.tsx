@@ -32,7 +32,7 @@ export default async function BusinessLayout({
             <div>
               <div className="flex flex-wrap items-center gap-3">
                 <h1 className="text-xl font-bold text-slate-900">{biz.name}</h1>
-                <Badge tone={plan.id === "free" ? "slate" : "blue"}>Plan {plan.name}</Badge>
+                <Badge tone={plan.id === "free" ? "slate" : "teal"}>Plan {plan.name}</Badge>
                 {biz.archived_at && <Badge tone="amber">Archivado</Badge>}
               </div>
               <p className="mt-0.5 text-sm text-slate-500">
@@ -43,7 +43,7 @@ export default async function BusinessLayout({
               <Link
                 href={publicUrl}
                 target="_blank"
-                className="max-w-full truncate rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 font-mono text-xs text-slate-700 hover:border-blue-300"
+                className="max-w-full truncate rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 font-mono text-xs text-slate-700 hover:border-teal-300"
                 title="Abrir formulario público"
               >
                 {publicUrl.replace(/^https?:\/\//, "")}

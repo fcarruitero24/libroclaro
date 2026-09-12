@@ -68,7 +68,7 @@ export default async function SettingsPage({
             <p className="mt-1 text-sm text-slate-600">Imprímelo y pégalo en caja o mostrador, junto al aviso.</p>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={qrUrl} alt={`QR del libro de reclamaciones de ${biz.name}`} width={220} height={220} className="mx-auto mt-4 rounded-lg border border-slate-200" />
-            <a href={qrUrl} target="_blank" rel="noreferrer" className="mt-3 block text-center text-sm font-semibold text-blue-700 hover:underline">
+            <a href={qrUrl} target="_blank" rel="noreferrer" className="mt-3 block text-center text-sm font-semibold text-teal-700 hover:underline">
               Abrir QR en grande
             </a>
           </Card>

@@ -112,7 +112,7 @@ export function BusinessForm({
                     id="primary_color"
                     name="primary_color"
                     type="color"
-                    defaultValue={business?.primary_color ?? "#1d4ed8"}
+                    defaultValue={business?.primary_color ?? "#0f766e"}
                     className="h-10 w-14 cursor-pointer rounded border border-slate-300"
                   />
                   <span className="text-sm text-slate-500">Se usa en el formulario y la hoja.</span>
@@ -123,7 +123,7 @@ export function BusinessForm({
             <p className="text-sm text-slate-600">
               Con el plan Pro puedes mostrar tu logo y color, y quitar la marca LibroClaro.{" "}
               {business && (
-                <Link href={`/app/${business.id}/plan`} className="font-semibold text-blue-700 hover:underline">
+                <Link href={`/app/${business.id}/plan`} className="font-semibold text-teal-700 hover:underline">
                   Ver planes →
                 </Link>
               )}

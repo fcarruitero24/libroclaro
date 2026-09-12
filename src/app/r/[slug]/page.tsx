@@ -29,7 +29,7 @@ export default async function PublicBookPage({ params }: { params: Promise<{ slu
   if (!biz) notFound();
 
   const plan = planFor(biz);
-  const color = plan.customBranding ? biz.primary_color : "#1d4ed8";
+  const color = plan.customBranding ? biz.primary_color : "#0f766e";
   const logo = plan.customBranding ? biz.logo_url : null;
 
   return (

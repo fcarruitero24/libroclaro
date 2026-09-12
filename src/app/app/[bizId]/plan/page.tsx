@@ -77,7 +77,7 @@ export default async function PlanPage({
           const isCurrent = current.id === id;
           const price = priceFor(p, period);
           return (
-            <Card key={id} className={id === "pro" ? "border-2 border-blue-700" : ""}>
+            <Card key={id} className={id === "pro" ? "border-2 border-teal-700" : ""}>
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-slate-900">{p.name}</h3>
                 {isCurrent && <Badge tone="green">Actual</Badge>}
@@ -96,7 +96,7 @@ export default async function PlanPage({
               <ul className="mt-4 space-y-1.5 text-sm text-slate-700">
                 {p.features.map((f) => (
                   <li key={f} className="flex gap-2">
-                    <span className="text-blue-700">✓</span>
+                    <span className="text-teal-700">✓</span>
                     {f}
                   </li>
                 ))}

@@ -4,7 +4,7 @@ import { STATUS_LABEL } from "@/lib/format";
 
 export function StatusBadge({ status }: { status: string }) {
   const tone =
-    status === "respondido" ? "green" : status === "cerrado" ? "slate" : status === "en_proceso" ? "blue" : "amber";
+    status === "respondido" ? "green" : status === "cerrado" ? "slate" : status === "en_proceso" ? "teal" : "amber";
   return <Badge tone={tone}>{STATUS_LABEL[status] ?? status}</Badge>;
 }
 

@@ -46,14 +46,14 @@ export async function sendEmail(input: SendEmailInput): Promise<{ ok: boolean; s
 function layout(title: string, body: string, footer = "Enviado por LibroClaro · Libro de Reclamaciones Virtual") {
   return `<!doctype html><html lang="es"><body style="margin:0;background:#f4f6fb;font-family:Segoe UI,Arial,sans-serif;color:#0f172a">
   <div style="max-width:560px;margin:32px auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0">
-    <div style="background:#1d4ed8;color:#fff;padding:20px 28px;font-size:18px;font-weight:700">${escapeHtml(title)}</div>
+    <div style="background:#0f766e;color:#fff;padding:20px 28px;font-size:18px;font-weight:700">${escapeHtml(title)}</div>
     <div style="padding:28px;font-size:15px;line-height:1.6">${body}</div>
     <div style="padding:16px 28px;background:#f8fafc;color:#64748b;font-size:12px">${escapeHtml(footer)}</div>
   </div></body></html>`;
 }
 
 function button(href: string, label: string) {
-  return `<p style="margin:24px 0"><a href="${href}" style="background:#1d4ed8;color:#fff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:600;display:inline-block">${escapeHtml(label)}</a></p>`;
+  return `<p style="margin:24px 0"><a href="${href}" style="background:#0f766e;color:#fff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:600;display:inline-block">${escapeHtml(label)}</a></p>`;
 }
 
 export function tplConsumerCopy(p: {
@@ -93,7 +93,7 @@ export function tplBusinessAlert(p: {
     html: layout(
       `Nuevo ${kind} recibido`,
       `<p><strong>${escapeHtml(p.businessName)}</strong> recibió un nuevo ${kind.toLowerCase()} de <strong>${escapeHtml(p.consumerName)}</strong>.</p>
-       <blockquote style="margin:16px 0;padding:12px 16px;background:#f8fafc;border-left:4px solid #1d4ed8;color:#334155">${escapeHtml(p.detail).slice(0, 600)}</blockquote>
+       <blockquote style="margin:16px 0;padding:12px 16px;background:#f8fafc;border-left:4px solid #0f766e;color:#334155">${escapeHtml(p.detail).slice(0, 600)}</blockquote>
        <p>Plazo legal de respuesta: <strong>15 días hábiles</strong>, vence el <strong>${fmtDate(p.dueAt)}</strong>.</p>
        ${button(p.dashboardUrl, "Responder ahora")}`,
     ),

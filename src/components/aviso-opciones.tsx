@@ -116,7 +116,7 @@ export function AvisoOpciones({ publicUrl, avisoUrl }: { publicUrl: string; avis
         <div className="flex flex-wrap items-center gap-3">
           <CopyButton text={codigo} label="Copiar código" />
           {estilo === "completo" && (
-            <a href={avisoUrl} download className="text-sm font-semibold text-blue-700 hover:underline">
+            <a href={avisoUrl} download className="text-sm font-semibold text-teal-700 hover:underline">
               Descargar aviso (SVG)
             </a>
           )}

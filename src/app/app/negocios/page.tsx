@@ -61,13 +61,13 @@ export default async function BusinessesPage({
           const plan = planFor(b);
           return (
             <Link key={b.id} href={`/app/${b.id}`} className="block">
-              <Card className="h-full transition hover:border-blue-300 hover:shadow-md">
+              <Card className="h-full transition hover:border-teal-300 hover:shadow-md">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="font-semibold text-slate-900">{b.name}</p>
                     <p className="text-xs text-slate-500">RUC {b.ruc}</p>
                   </div>
-                  <Badge tone={plan.id === "free" ? "slate" : "blue"}>{plan.name}</Badge>
+                  <Badge tone={plan.id === "free" ? "slate" : "teal"}>{plan.name}</Badge>
                 </div>
                 <p className="mt-3 text-sm text-slate-600">/r/{b.slug}</p>
                 <p className="mt-1 text-xs text-slate-500">{b.complaint_seq} reclamo(s) registrados</p>
@@ -112,7 +112,7 @@ export default async function BusinessesPage({
                       Reactivar
                     </Button>
                   </form>
-                  <Link href={`/app/${b.id}`} className="text-sm font-semibold text-blue-700 hover:underline">
+                  <Link href={`/app/${b.id}`} className="text-sm font-semibold text-teal-700 hover:underline">
                     Ver hojas
                   </Link>
                 </div>
