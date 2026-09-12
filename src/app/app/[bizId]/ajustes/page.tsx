@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { AvisoOpciones } from "@/components/aviso-opciones";
 import { BusinessForm } from "@/components/business-form";
 import { CopyButton } from "@/components/copy-button";
 import { Alert, Button, Card, Input } from "@/components/ui";
@@ -28,7 +29,6 @@ export default async function SettingsPage({
   const appUrl = await getAppUrl();
   const publicUrl = `${appUrl}/r/${biz.slug}`;
   const avisoUrl = `${appUrl}/aviso-libro-reclamaciones.svg`;
-  const snippet = `<a href="${publicUrl}" target="_blank" rel="noopener" title="Libro de Reclamaciones">\n  <img src="${avisoUrl}" alt="Libro de Reclamaciones" width="240" height="90" />\n</a>`;
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(publicUrl)}`;
 
   return (
@@ -53,21 +53,13 @@ export default async function SettingsPage({
               <CopyButton text={publicUrl} />
             </div>
 
-            <h3 className="mt-6 font-semibold text-slate-900">2. Aviso oficial con enlace (HTML)</h3>
-            <p className="mt-1 text-sm text-slate-600">Pega este código en el pie de página de tu sitio (Shopify, WooCommerce, Wix, WordPress…).</p>
-            <div className="mt-3 flex flex-col gap-2">
-              <pre className="overflow-x-auto rounded-lg border border-slate-200 bg-slate-900 p-3 text-xs text-slate-100">{snippet}</pre>
-              <div className="flex items-center gap-3">
-                <CopyButton text={snippet} label="Copiar código" />
-                <a href={avisoUrl} download className="text-sm font-semibold text-blue-700 hover:underline">
-                  Descargar aviso (SVG)
-                </a>
-              </div>
-            </div>
-            <div className="mt-4 rounded-lg border border-dashed border-slate-300 bg-white p-4">
-              <p className="mb-2 text-xs text-slate-500">Vista previa:</p>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/aviso-libro-reclamaciones.svg" alt="Libro de Reclamaciones" width={240} height={90} />
+            <h3 className="mt-6 font-semibold text-slate-900">2. Aviso para tu web (HTML)</h3>
+            <p className="mt-1 text-sm text-slate-600">
+              Elige el estilo que encaje con tu sitio y pega el código en el pie de página (Shopify, WooCommerce, Wix,
+              WordPress…). Los tres llevan al mismo formulario.
+            </p>
+            <div className="mt-4">
+              <AvisoOpciones publicUrl={publicUrl} avisoUrl={avisoUrl} />
             </div>
           </Card>
 
