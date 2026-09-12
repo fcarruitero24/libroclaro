@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ComplaintForm } from "@/components/complaint-form";
 import { PoweredBy } from "@/components/powered-by";
@@ -99,6 +100,14 @@ export default async function PublicBookPage({ params }: { params: Promise<{ slu
             <ComplaintForm slug={biz.slug} color={color} />
           </div>
         )}
+
+        {/* Canal para que la empresa real avise si alguien registró su RUC. */}
+        <p className="no-print mt-8 text-center text-xs text-slate-500">
+          ¿Eres {biz.name} y no creaste este libro?{" "}
+          <Link href={`/r/${biz.slug}/reportar`} className="font-semibold text-slate-600 underline hover:text-slate-900">
+            Repórtalo
+          </Link>
+        </p>
 
         {plan.branding && <PoweredBy />}
       </div>

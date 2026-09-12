@@ -71,6 +71,12 @@ export async function createBusiness(_prev: ActionState, formData: FormData): Pr
 
   if (error) {
     if (error.code === "23505") return { fieldErrors: { slug: "Ese enlace ya está en uso. Elige otro." }, error: "Revisa los campos marcados." };
+    if (error.message.includes("RUC_DE_OTRO_DUENO")) {
+      return {
+        fieldErrors: { ruc: "Otra cuenta ya registró un libro con este RUC." },
+        error: "Revisa los campos marcados.",
+      };
+    }
     return { error: `No se pudo crear el negocio: ${error.message}` };
   }
 
@@ -113,7 +119,15 @@ export async function updateBusiness(_prev: ActionState, formData: FormData): Pr
   }
 
   const { error } = await supabase.from("businesses").update(patch).eq("id", id);
-  if (error) return { error: `No se pudo guardar: ${error.message}` };
+  if (error) {
+    if (error.message.includes("RUC_DE_OTRO_DUENO")) {
+      return {
+        fieldErrors: { ruc: "Otra cuenta ya registró un libro con este RUC." },
+        error: "Revisa los campos marcados.",
+      };
+    }
+    return { error: `No se pudo guardar: ${error.message}` };
+  }
 
   revalidatePath(`/app/${id}`, "layout");
   return { success: "Cambios guardados." };

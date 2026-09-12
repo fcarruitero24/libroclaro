@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { direccionCompleta, lookupRuc } from "@/lib/ruc";
+import { createClient } from "@/lib/supabase/server";
 
 /**
  * Consulta pública de RUC para el formulario de registro.
@@ -52,6 +53,16 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ ok: false, reason: r.reason, mensaje: mensajes[r.reason] });
   }
 
+  // ¿Otro dueño ya registró este RUC? Se avisa antes de crear la cuenta.
+  let disponible = true;
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.rpc("ruc_disponible", { p_ruc: numero.replace(/\D/g, "") });
+    if (data === false) disponible = false;
+  } catch {
+    // Si la consulta falla, el trigger de la base igual bloquea el duplicado.
+  }
+
   return NextResponse.json({
     ok: true,
     razonSocial: r.data.razonSocial,
@@ -59,5 +70,6 @@ export async function GET(request: NextRequest) {
     estado: r.data.estado,
     condicion: r.data.condicion,
     activo: (r.data.estado ?? "").toUpperCase().startsWith("ACTIVO"),
+    disponible,
   });
 }

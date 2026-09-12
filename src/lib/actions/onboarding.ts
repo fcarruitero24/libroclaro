@@ -70,6 +70,19 @@ export async function signUpWithBusiness(_prev: ActionState, formData: FormData)
   if (Object.keys(fieldErrors).length) return { fieldErrors, error: "Revisa los campos marcados." };
 
   const supabase = await createClient();
+
+  // Un RUC, un dueño. Se comprueba antes de crear la cuenta para no dejar
+  // usuarios huérfanos. La base lo vuelve a bloquear con un trigger.
+  const { data: libre } = await supabase.rpc("ruc_disponible", { p_ruc: ruc });
+  if (libre === false) {
+    return {
+      fieldErrors: {
+        ruc: "Ya existe un libro registrado con este RUC. Si es tu empresa y no fuiste tú quien lo creó, repórtalo desde el formulario público de ese libro.",
+      },
+      error: "Revisa los campos marcados.",
+    };
+  }
+
   const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email, password });
 
   if (signUpError) {
@@ -115,6 +128,12 @@ export async function signUpWithBusiness(_prev: ActionState, formData: FormData)
       break;
     }
     ultimoError = error.message;
+    if (error.message.includes("RUC_DE_OTRO_DUENO")) {
+      return {
+        fieldErrors: { ruc: "Ya existe un libro registrado con este RUC." },
+        error: "Revisa los campos marcados.",
+      };
+    }
     if (error.code !== "23505") break; // solo reintenta por enlace duplicado
   }
 
