@@ -9,9 +9,10 @@ type Estilo = "oficial" | "compacto" | "texto";
 /**
  * Los tres formatos del aviso que el negocio pega en su propia web.
  *
- * El oficial reproduce el Anexo III del D.S. 011-2011-PCM, que es el que la
- * norma define para portales web: solo el título y el libro abierto, sin el
- * párrafo ni el correo que sí lleva el Anexo II de los locales físicos.
+ * El oficial es la propia ilustración del Anexo III del D.S. 011-2011-PCM,
+ * extraída del documento que publica INDECOPI, no un dibujo parecido: solo el
+ * título y el libro abierto, sin el párrafo ni el correo que sí lleva el
+ * Anexo II de los locales físicos.
  * Va primero y es el recomendado, porque es el único que cumple el formato.
  *
  * El compacto y el de texto son comodidades de diseño, no formatos oficiales:
@@ -31,7 +32,7 @@ const LIBRO_SVG =
 
 function snippetOficial(url: string, avisoUrl: string): string {
   return `<a href="${escaparAtributo(url)}" target="_blank" rel="noopener" title="Libro de Reclamaciones">
-  <img src="${escaparAtributo(avisoUrl)}" alt="Libro de Reclamaciones" width="220" height="144" />
+  <img src="${escaparAtributo(avisoUrl)}" alt="Libro de Reclamaciones" width="220" height="132" />
 </a>`;
 }
 
@@ -52,7 +53,8 @@ const OPCIONES: { id: Estilo; titulo: string; para: string }[] = [
   {
     id: "oficial",
     titulo: "Oficial",
-    para: "Reproduce el Anexo III del reglamento, el formato que la norma define para portales web. Es el recomendado.",
+    para:
+      "Es la imagen del Anexo III del reglamento tal como la publica INDECOPI, el formato que la norma define para portales web. Es el recomendado.",
   },
   {
     id: "compacto",
@@ -118,7 +120,7 @@ export function AvisoOpciones({
 
         {estilo === "oficial" ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={avisoUrl} alt="Libro de Reclamaciones" width={220} height={144} />
+          <img src={avisoUrl} alt="Libro de Reclamaciones" width={220} height={132} />
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-lg bg-white p-4 text-center text-slate-700 ring-1 ring-slate-200">
@@ -158,7 +160,7 @@ export function AvisoOpciones({
         <h4 className="text-sm font-semibold text-slate-900">¿Tienes local físico?</h4>
         <p className="mt-1 text-sm text-slate-600">
           Ahí va otro aviso distinto, el del Anexo II: lleva además el párrafo del Código y el correo de INDECOPI, y la
-          norma exige que mida como mínimo una hoja A4. Este archivo ya viene en ese tamaño exacto, listo para imprimir.
+          norma exige que mida como mínimo una hoja A4. Este archivo usa la misma ilustración oficial y ya viene en ese tamaño exacto, listo para imprimir.
         </p>
         <a
           href={avisoLocalUrl}

@@ -57,7 +57,7 @@ export default async function PublicBookPage({ params }: { params: Promise<{ slu
             </div>
           </div>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/aviso-libro-reclamaciones.svg" alt="Libro de Reclamaciones" width={176} height={116} className="shrink-0" />
+          <img src="/aviso-libro-reclamaciones.svg" alt="Libro de Reclamaciones" width={176} height={105} className="shrink-0" />
         </header>
 
         <section className="mt-8 rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-700 shadow-sm">
