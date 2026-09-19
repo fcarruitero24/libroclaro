@@ -1,9 +1,22 @@
 import Link from "next/link";
+import type { CSSProperties } from "react";
+import { BackToTop } from "@/components/back-to-top";
 import { RevealOnScroll } from "@/components/reveal-on-scroll";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Badge, ButtonLink } from "@/components/ui";
 import { monthlyEquivalent, PLANS, yearlySavings } from "@/lib/plans";
+
+/** Índice para la cascada del reveal: lo lee `--i` en globals.css. */
+const paso = (i: number) => ({ "--i": i }) as CSSProperties;
+
+/**
+ * Tarjeta que reacciona al puntero: se levanta apenas y gana sombra.
+ * No toca el color del borde a propósito: las tarjetas de features
+ * llevan una barra teal a la izquierda y cambiarles el borde en hover
+ * la apagaba.
+ */
+const tarjeta = "transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg";
 
 const FEATURES = [
   {
@@ -92,7 +105,7 @@ export default function HomePage() {
             </div>
 
             <div className="relative">
-              <div className="rounded-2xl border border-white/10 bg-white p-6 shadow-2xl shadow-black/40">
+              <div className="anim-rise-in rounded-2xl border border-white/10 bg-white p-6 shadow-2xl shadow-black/40">
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Hoja de reclamación</p>
@@ -130,7 +143,7 @@ export default function HomePage() {
                   </span>
                 </div>
               </div>
-              <div className="absolute -bottom-4 -left-4 hidden rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-lg sm:block">
+              <div className="anim-fade-rise absolute -bottom-4 -left-4 hidden rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-lg sm:block">
                 <p className="text-xs text-slate-500">Copia enviada a</p>
                 <p className="text-sm font-semibold text-slate-900">maria@correo.com ✓</p>
               </div>
@@ -140,20 +153,20 @@ export default function HomePage() {
 
         {/* Por qué */}
         <section className="border-y border-stone-200 bg-[#faf7f2]">
-          <div className="reveal mx-auto grid max-w-6xl gap-6 px-4 py-10 sm:px-6 md:grid-cols-3">
-            <div>
+          <div className="mx-auto grid max-w-6xl gap-6 px-4 py-10 sm:px-6 md:grid-cols-3">
+            <div className="reveal" style={paso(0)}>
               <p className="text-3xl font-extrabold text-teal-700">Obligatorio</p>
               <p className="mt-1 text-sm text-slate-600">
                 Para todo negocio que vende a consumidores, en el local y en su web o redes sociales.
               </p>
             </div>
-            <div>
+            <div className="reveal" style={paso(1)}>
               <p className="text-3xl font-extrabold text-teal-700">15 días hábiles</p>
               <p className="mt-1 text-sm text-slate-600">
                 Plazo máximo e improrrogable para responder cada reclamo o queja.
               </p>
             </div>
-            <div>
+            <div className="reveal" style={paso(2)}>
               <p className="text-3xl font-extrabold text-teal-700">Multas</p>
               <p className="mt-1 text-sm text-slate-600">
                 INDECOPI sanciona no tener el libro, no exhibir el aviso o no responder a tiempo.
@@ -185,8 +198,12 @@ export default function HomePage() {
                 t: "Recibe y responde",
                 d: "Cada reclamo llega numerado a tu panel con la cuenta regresiva de días hábiles. Respondes y el cliente recibe la respuesta por correo.",
               },
-            ].map((s) => (
-              <li key={s.n} className="reveal rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            ].map((s, i) => (
+              <li
+                key={s.n}
+                style={paso(i)}
+                className={`reveal rounded-2xl border border-slate-200 bg-white p-6 shadow-sm ${tarjeta}`}
+              >
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-teal-700 text-lg font-bold text-white">
                   {s.n}
                 </span>
@@ -207,10 +224,11 @@ export default function HomePage() {
               <p className="mt-3 text-slate-500">Diseñado a partir del formato oficial de la hoja de reclamación.</p>
             </div>
             <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {FEATURES.map((f) => (
+              {FEATURES.map((f, i) => (
                 <div
                   key={f.title}
-                  className="reveal rounded-2xl border border-stone-200 border-l-[3px] border-l-teal-600 bg-white p-6 shadow-sm"
+                  style={paso(i)}
+                  className={`reveal rounded-2xl border border-stone-200 border-l-[3px] border-l-teal-600 bg-white p-6 shadow-sm ${tarjeta}`}
                 >
                   <h3 className="font-semibold text-slate-900">{f.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-slate-600">{f.text}</p>
@@ -230,16 +248,17 @@ export default function HomePage() {
             </p>
           </div>
           <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {(["free", "pro", "business"] as const).map((id) => {
+            {(["free", "pro", "business"] as const).map((id, i) => {
               const p = PLANS[id];
               const highlight = id === "pro";
               return (
                 <div
                   key={id}
+                  style={paso(i)}
                   className={
                     highlight
-                      ? "relative rounded-2xl bg-teal-900 p-6 shadow-xl transition duration-200 ease-out hover:-translate-y-1 hover:shadow-2xl"
-                      : "rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition duration-200 ease-out hover:-translate-y-1 hover:shadow-lg"
+                      ? "reveal relative rounded-2xl bg-teal-900 p-6 shadow-xl transition duration-200 ease-out hover:-translate-y-1 hover:shadow-2xl"
+                      : "reveal rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition duration-200 ease-out hover:-translate-y-1 hover:shadow-lg"
                   }
                 >
                   {highlight && (
@@ -305,8 +324,8 @@ export default function HomePage() {
               Preguntas frecuentes
             </h2>
             <div className="mt-10 divide-y divide-slate-200">
-              {FAQ.map((item) => (
-                <details key={item.q} className="reveal group py-5">
+              {FAQ.map((item, i) => (
+                <details key={item.q} style={paso(i)} className="reveal group py-5">
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-left font-medium text-slate-900">
                     {item.q}
                     <span className="shrink-0 text-teal-600 transition group-open:rotate-45">+</span>
@@ -340,6 +359,7 @@ export default function HomePage() {
         </section>
       </main>
       <SiteFooter />
+      <BackToTop />
     </>
   );
 }

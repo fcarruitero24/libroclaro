@@ -1,16 +1,49 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="320" height="120" viewBox="0 0 320 120" role="img" aria-label="Libro de Reclamaciones">
-  <rect x="1" y="1" width="318" height="118" rx="12" fill="#ffffff" stroke="#0f766e" stroke-width="2"/>
-  <g transform="translate(18 26)">
-    <rect x="0" y="0" width="56" height="68" rx="6" fill="#0f766e"/>
-    <rect x="8" y="8" width="40" height="52" rx="3" fill="#ffffff"/>
-    <rect x="14" y="16" width="28" height="4" rx="2" fill="#0f766e"/>
-    <rect x="14" y="26" width="28" height="4" rx="2" fill="#99f6e4"/>
-    <rect x="14" y="36" width="20" height="4" rx="2" fill="#99f6e4"/>
-    <rect x="14" y="46" width="24" height="4" rx="2" fill="#99f6e4"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="210" viewBox="0 0 320 210" role="img" aria-label="Libro de Reclamaciones">
+  <title>Libro de Reclamaciones</title>
+  <!--
+    Anexo III del D.S. 011-2011-PCM: "Aviso de Libro de Reclamaciones para
+    portales web". A diferencia del Anexo II (locales físicos), este solo
+    lleva el título y el libro abierto, sin párrafo ni correo, y la norma
+    pide únicamente que sea "legible y visible de acuerdo al diseño de la
+    página web de inicio", sin fijar medidas.
+    Fuente: https://consumidor.gob.pe/wp-content/uploads/2020/07/Aviso_LR-1.pdf
+  -->
+  <defs>
+    <linearGradient id="tituloAzul" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2f9bf5"/>
+      <stop offset="1" stop-color="#0d5ec4"/>
+    </linearGradient>
+    <linearGradient id="hojaIzq" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#e9edf2"/>
+      <stop offset="1" stop-color="#ffffff"/>
+    </linearGradient>
+    <linearGradient id="hojaDer" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#e9edf2"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="1" y="1" width="318" height="208" rx="4" fill="#ffffff" stroke="#c9d2dc" stroke-width="2"/>
+
+  <text x="160" y="52" text-anchor="middle" font-family="Arial, Helvetica, sans-serif"
+        font-size="34" font-weight="700" fill="url(#tituloAzul)">Libro de</text>
+  <text x="160" y="90" text-anchor="middle" font-family="Arial, Helvetica, sans-serif"
+        font-size="34" font-weight="700" fill="url(#tituloAzul)">Reclamaciones</text>
+
+  <g>
+    <ellipse cx="160" cy="184" rx="88" ry="6" fill="#0f172a" opacity="0.10"/>
+    <path d="M160 116 C139 103 107 97 74 97 L56 97 V166 h18 c33 0 65 6 86 19 Z"
+          fill="url(#hojaIzq)" stroke="#8d97a3" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M160 116 c21 -13 53 -19 86 -19 h18 v69 h-18 c-33 0 -65 6 -86 19 Z"
+          fill="url(#hojaDer)" stroke="#8d97a3" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M160 116 V185" stroke="#8d97a3" stroke-width="2" stroke-linecap="round"/>
+    <g stroke="#c2cad4" stroke-width="1.5" stroke-linecap="round">
+      <path d="M78 116 h62"/>
+      <path d="M78 131 h62"/>
+      <path d="M78 146 h48"/>
+      <path d="M180 116 h62"/>
+      <path d="M180 131 h62"/>
+      <path d="M180 146 h48"/>
+    </g>
   </g>
-  <text x="92" y="42" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#0f766e">LIBRO DE</text>
-  <text x="92" y="62" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#0f766e">RECLAMACIONES</text>
-  <text x="92" y="82" font-family="Arial, Helvetica, sans-serif" font-size="9.5" fill="#334155">Conforme al Código de Protección y Defensa</text>
-  <text x="92" y="94" font-family="Arial, Helvetica, sans-serif" font-size="9.5" fill="#334155">del Consumidor, este establecimiento cuenta</text>
-  <text x="92" y="106" font-family="Arial, Helvetica, sans-serif" font-size="9.5" fill="#334155">con un Libro de Reclamaciones a tu disposición.</text>
 </svg>

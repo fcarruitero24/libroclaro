@@ -29,6 +29,7 @@ export default async function SettingsPage({
   const appUrl = await getAppUrl();
   const publicUrl = `${appUrl}/r/${biz.slug}`;
   const avisoUrl = `${appUrl}/aviso-libro-reclamaciones.svg`;
+  const avisoLocalUrl = `${appUrl}/aviso-libro-reclamaciones-local.svg`;
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(publicUrl)}`;
 
   return (
@@ -59,7 +60,7 @@ export default async function SettingsPage({
               WordPress…). Los tres llevan al mismo formulario.
             </p>
             <div className="mt-4">
-              <AvisoOpciones publicUrl={publicUrl} avisoUrl={avisoUrl} />
+              <AvisoOpciones publicUrl={publicUrl} avisoUrl={avisoUrl} avisoLocalUrl={avisoLocalUrl} />
             </div>
           </Card>
 

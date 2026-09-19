@@ -4,15 +4,19 @@ import { useState } from "react";
 import { CopyButton } from "@/components/copy-button";
 import { cn } from "@/lib/cn";
 
-type Estilo = "compacto" | "completo" | "texto";
+type Estilo = "oficial" | "compacto" | "texto";
 
 /**
  * Los tres formatos del aviso que el negocio pega en su propia web.
  *
- * El compacto y el de texto van como código en línea y usan currentColor,
- * así heredan el color del sitio donde se peguen. El completo es un archivo
- * de imagen alojado en nuestro servidor: se ve igual en todos lados, pero
- * no puede cambiar de color.
+ * El oficial reproduce el Anexo III del D.S. 011-2011-PCM, que es el que la
+ * norma define para portales web: solo el título y el libro abierto, sin el
+ * párrafo ni el correo que sí lleva el Anexo II de los locales físicos.
+ * Va primero y es el recomendado, porque es el único que cumple el formato.
+ *
+ * El compacto y el de texto son comodidades de diseño, no formatos oficiales:
+ * van como código en línea y usan currentColor, así heredan el color del sitio
+ * donde se peguen.
  */
 
 function escaparAtributo(v: string): string {
@@ -25,6 +29,12 @@ const LIBRO_SVG =
   '<path d="M21 5h-4c-2 0-4 .7-5 2v13c1-1.3 3-2 5-2h4z"/>' +
   "</svg>";
 
+function snippetOficial(url: string, avisoUrl: string): string {
+  return `<a href="${escaparAtributo(url)}" target="_blank" rel="noopener" title="Libro de Reclamaciones">
+  <img src="${escaparAtributo(avisoUrl)}" alt="Libro de Reclamaciones" width="220" height="144" />
+</a>`;
+}
+
 function snippetCompacto(url: string): string {
   const u = escaparAtributo(url);
   return `<a href="${u}" target="_blank" rel="noopener" title="Libro de Reclamaciones"
@@ -34,30 +44,44 @@ function snippetCompacto(url: string): string {
 </a>`;
 }
 
-function snippetCompleto(url: string, avisoUrl: string): string {
-  return `<a href="${escaparAtributo(url)}" target="_blank" rel="noopener" title="Libro de Reclamaciones">
-  <img src="${escaparAtributo(avisoUrl)}" alt="Libro de Reclamaciones" width="240" height="90" />
-</a>`;
-}
-
 function snippetTexto(url: string): string {
   return `<a href="${escaparAtributo(url)}" target="_blank" rel="noopener">Libro de Reclamaciones</a>`;
 }
 
 const OPCIONES: { id: Estilo; titulo: string; para: string }[] = [
-  { id: "compacto", titulo: "Compacto", para: "Se adapta al color de tu web. Ideal para pies de página modernos." },
-  { id: "completo", titulo: "Completo", para: "El aviso con el texto de la norma. Se nota más." },
-  { id: "texto", titulo: "Solo texto", para: "Un enlace más entre los legales. Nunca desentona." },
+  {
+    id: "oficial",
+    titulo: "Oficial",
+    para: "Reproduce el Anexo III del reglamento, el formato que la norma define para portales web. Es el recomendado.",
+  },
+  {
+    id: "compacto",
+    titulo: "Compacto",
+    para: "Versión reducida que hereda el color de tu web. Cómoda para pies de página, pero no es el formato oficial.",
+  },
+  {
+    id: "texto",
+    titulo: "Solo texto",
+    para: "Un enlace más entre los legales. Es lo mínimo y tampoco es el formato oficial.",
+  },
 ];
 
-export function AvisoOpciones({ publicUrl, avisoUrl }: { publicUrl: string; avisoUrl: string }) {
-  const [estilo, setEstilo] = useState<Estilo>("compacto");
+export function AvisoOpciones({
+  publicUrl,
+  avisoUrl,
+  avisoLocalUrl,
+}: {
+  publicUrl: string;
+  avisoUrl: string;
+  avisoLocalUrl: string;
+}) {
+  const [estilo, setEstilo] = useState<Estilo>("oficial");
 
   const codigo =
-    estilo === "compacto"
-      ? snippetCompacto(publicUrl)
-      : estilo === "completo"
-        ? snippetCompleto(publicUrl, avisoUrl)
+    estilo === "oficial"
+      ? snippetOficial(publicUrl, avisoUrl)
+      : estilo === "compacto"
+        ? snippetCompacto(publicUrl)
         : snippetTexto(publicUrl);
 
   const activo = OPCIONES.find((o) => o.id === estilo)!;
@@ -82,13 +106,19 @@ export function AvisoOpciones({ publicUrl, avisoUrl }: { publicUrl: string; avis
 
       <p className="text-sm text-slate-600">{activo.para}</p>
 
-      {/* Vista previa */}
+      {estilo !== "oficial" && (
+        <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+          Si te fiscalizan, el formato que respalda tu cumplimiento es el oficial. Usa este solo si el diseño de tu web
+          no admite el otro.
+        </p>
+      )}
+
       <div className="rounded-lg border border-dashed border-slate-300 p-4">
         <p className="mb-3 text-xs text-slate-500">Vista previa:</p>
 
-        {estilo === "completo" ? (
+        {estilo === "oficial" ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={avisoUrl} alt="Libro de Reclamaciones" width={240} height={90} />
+          <img src={avisoUrl} alt="Libro de Reclamaciones" width={220} height={144} />
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-lg bg-white p-4 text-center text-slate-700 ring-1 ring-slate-200">
@@ -115,13 +145,28 @@ export function AvisoOpciones({ publicUrl, avisoUrl }: { publicUrl: string; avis
         </pre>
         <div className="flex flex-wrap items-center gap-3">
           <CopyButton text={codigo} label="Copiar código" />
-          {estilo === "completo" && (
+          {estilo === "oficial" && (
             <a href={avisoUrl} download className="text-sm font-semibold text-teal-700 hover:underline">
-              Descargar aviso (SVG)
+              Descargar aviso web (SVG)
             </a>
           )}
           <span className="text-xs text-slate-500">Pégalo en el pie de página de tu sitio.</span>
         </div>
+      </div>
+
+      <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+        <h4 className="text-sm font-semibold text-slate-900">¿Tienes local físico?</h4>
+        <p className="mt-1 text-sm text-slate-600">
+          Ahí va otro aviso distinto, el del Anexo II: lleva además el párrafo del Código y el correo de INDECOPI, y la
+          norma exige que mida como mínimo una hoja A4. Este archivo ya viene en ese tamaño exacto, listo para imprimir.
+        </p>
+        <a
+          href={avisoLocalUrl}
+          download
+          className="mt-3 inline-flex text-sm font-semibold text-teal-700 hover:underline"
+        >
+          Descargar aviso para imprimir (A4)
+        </a>
       </div>
     </div>
   );

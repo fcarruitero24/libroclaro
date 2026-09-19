@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="595" height="842" viewBox="0 0 595 842" role="img" aria-label="Aviso del Libro de Reclamaciones">
+  <title>Aviso del Libro de Reclamaciones para el establecimiento</title>
+  <!--
+    Anexo II del D.S. 011-2011-PCM: aviso para exhibir en el establecimiento.
+    La norma exige tamaño mínimo de una hoja A4 (este archivo mide A4 exacta:
+    595x842 puntos), letras del título de al menos 1x1 cm y las del párrafo de
+    al menos 0.5x0.5 cm. A 72 puntos por pulgada, 1 cm son 28.35 puntos.
+    El paréntesis del texto oficial se completa con "virtual", porque el
+    proveedor debe indicar la naturaleza de su libro.
+    Fuente: https://consumidor.gob.pe/wp-content/uploads/2020/07/Aviso_LR-1.pdf
+  -->
+  <defs>
+    <linearGradient id="tituloAzulA4" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2f9bf5"/>
+      <stop offset="1" stop-color="#0d5ec4"/>
+    </linearGradient>
+    <linearGradient id="hojaIzqA4" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#e9edf2"/>
+      <stop offset="1" stop-color="#ffffff"/>
+    </linearGradient>
+    <linearGradient id="hojaDerA4" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#e9edf2"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="595" height="842" fill="#ffffff"/>
+  <rect x="28" y="28" width="539" height="786" fill="none" stroke="#1f2937" stroke-width="2"/>
+
+  <!-- Título: 62 pt de cuerpo deja mayúsculas de ~45 pt, muy por encima del mínimo de 28.35 -->
+  <text x="297" y="128" text-anchor="middle" font-family="Arial, Helvetica, sans-serif"
+        font-size="62" font-weight="700" fill="url(#tituloAzulA4)">Libro de</text>
+  <text x="297" y="196" text-anchor="middle" font-family="Arial, Helvetica, sans-serif"
+        font-size="62" font-weight="700" fill="url(#tituloAzulA4)">Reclamaciones</text>
+
+  <g transform="translate(0 40)">
+    <ellipse cx="297" cy="392" rx="170" ry="11" fill="#0f172a" opacity="0.10"/>
+    <path d="M297 256 C257 231 196 219 133 219 H98 V352 h35 c63 0 124 12 164 37 Z"
+          fill="url(#hojaIzqA4)" stroke="#8d97a3" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M297 256 c40 -25 101 -37 164 -37 h35 v133 h-35 c-63 0 -124 12 -164 37 Z"
+          fill="url(#hojaDerA4)" stroke="#8d97a3" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M297 256 V393" stroke="#8d97a3" stroke-width="3" stroke-linecap="round"/>
+    <g stroke="#c2cad4" stroke-width="2.5" stroke-linecap="round">
+      <path d="M140 258 h120"/><path d="M140 285 h120"/><path d="M140 312 h95"/>
+      <path d="M334 258 h120"/><path d="M334 285 h120"/><path d="M334 312 h95"/>
+    </g>
+  </g>
+
+  <!-- Párrafo: 27 pt de cuerpo deja mayúsculas de ~19 pt, sobre el mínimo de 14.17 -->
+  <g font-family="Arial, Helvetica, sans-serif" font-size="27" fill="#111827" text-anchor="middle">
+    <text x="297" y="590">Conforme a lo establecido en el Código de</text>
+    <text x="297" y="624">Protección y Defensa del Consumidor este</text>
+    <text x="297" y="658">establecimiento cuenta con un Libro de</text>
+    <text x="297" y="692">Reclamaciones (<tspan font-weight="700">virtual</tspan>) a tu disposición.</text>
+    <text x="297" y="726">Solicítalo para registrar una queja o reclamo</text>
+  </g>
+
+  <text x="297" y="782" text-anchor="middle" font-family="Arial, Helvetica, sans-serif"
+        font-size="12" fill="#374151">
+    En caso de negativa de entrega del libro escribe a libroreclamaciones@indecopi.gob.pe
+  </text>
+</svg>
