@@ -287,8 +287,8 @@ export default function HomePage() {
                         <span className={`text-sm ${highlight ? "text-teal-300" : "text-slate-500"}`}>/año</span>
                       </p>
                       <p className={`mt-1 text-sm ${highlight ? "text-teal-300" : "text-slate-500"}`}>
-                        Equivale a S/ {monthlyEquivalent(p)} al mes. También S/ {p.priceMonthly} mensuales sin
-                        compromiso, {yearlySavings(p)}% más caro.
+                        Equivale a S/ {monthlyEquivalent(p)} al mes. Ahorras {yearlySavings(p)}% frente a los S/{" "}
+                        {p.priceMonthly} mensuales sin compromiso.
                       </p>
                     </>
                   )}
