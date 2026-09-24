@@ -18,13 +18,21 @@ export async function SiteHeader() {
         <Link href="/#faq" className={enlace}>Preguntas</Link>
         <Link href="/r/demo" className={enlace}>Ver demo</Link>
       </nav>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 max-[360px]:gap-1">
         {user ? (
           <ButtonLink href="/app">Ir al panel</ButtonLink>
         ) : (
           <>
-            <ButtonLink href="/login" variant="ghost">Iniciar sesión</ButtonLink>
-            <ButtonLink href="/registro">Crear gratis</ButtonLink>
+            {/* En celular "Iniciar sesión" no entra al lado de "Crear gratis" y
+                ambos se partían en dos líneas. Por debajo de 360 px ni siquiera
+                "Entrar" entra con el relleno normal, así que ahí se reduce. */}
+            <ButtonLink href="/login" variant="ghost" className="whitespace-nowrap max-[360px]:px-2">
+              <span className="sm:hidden">Entrar</span>
+              <span className="hidden sm:inline">Iniciar sesión</span>
+            </ButtonLink>
+            <ButtonLink href="/registro" className="whitespace-nowrap max-[360px]:px-2">
+              Crear gratis
+            </ButtonLink>
           </>
         )}
       </div>

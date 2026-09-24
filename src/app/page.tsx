@@ -196,7 +196,7 @@ export default function HomePage() {
                 n: "1",
                 icon: "tienda" as IconName,
                 t: "Registra tu negocio",
-                d: "Nombre, RUC, dirección y correo de notificaciones. Elige el enlace de tu libro: libroclaro.app/r/tu-negocio.",
+                d: "Nombre, RUC, dirección y correo de notificaciones. Elige el enlace de tu libro: libroclaro.pe/r/tu-negocio.",
               },
               {
                 n: "2",
