@@ -64,7 +64,8 @@ export default async function PublicComplaintPage({
               </svg>
               <p className="anim-fade-rise">
                 <strong>
-                  Tu {KIND_LABEL[row.kind].toLowerCase()} fue registrado con el N.º {row.code}.
+                  Tu {KIND_LABEL[row.kind].toLowerCase()} fue {row.kind === "queja" ? "registrada" : "registrado"} con el N.º{" "}
+                  {row.code}.
                 </strong>{" "}
                 {sp.copia ? (
                   <>
