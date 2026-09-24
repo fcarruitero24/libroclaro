@@ -59,9 +59,17 @@ export default async function PlanPage({
           ¡Gracias! Estamos confirmando tu pago con Mercado Pago. Tu plan se activará automáticamente en unos minutos.
         </Alert>
       )}
-      {sp.error === "mp" && <Alert kind="error">No pudimos iniciar el pago con tarjeta. Intenta de nuevo o paga con Yape/Plin.</Alert>}
+      {sp.error === "mp" && (
+        <Alert kind="error">
+          No pudimos iniciar el pago con tarjeta. Intenta de nuevo{manualEnabled ? " o paga con Yape/Plin" : ""}.
+        </Alert>
+      )}
       {sp.manual && (
-        <Alert kind="info">El pago con tarjeta no está disponible por ahora. Puedes activar tu plan pagando con Yape o Plin (abajo).</Alert>
+        <Alert kind="info">
+          {manualEnabled
+            ? "El pago con tarjeta no está disponible por ahora. Puedes activar tu plan pagando con Yape o Plin (abajo)."
+            : "Los pagos se habilitarán muy pronto."}
+        </Alert>
       )}
 
       <div className="flex justify-center">
