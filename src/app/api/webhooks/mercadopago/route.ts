@@ -1,6 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { NextResponse, type NextRequest } from "next/server";
-import { isBillingPeriod, PLANS, type BillingPeriod, type PlanId } from "@/lib/plans";
+import { after, NextResponse, type NextRequest } from "next/server";
+import { notifyPlatform, tplPlatformSubscription } from "@/lib/email";
+import { isBillingPeriod, MARGEN_COBRO_MS, PLANS, type BillingPeriod, type PlanId } from "@/lib/plans";
 import { createAdminClient, hasAdminClient } from "@/lib/supabase/admin";
 
 interface Preapproval {
@@ -94,18 +95,45 @@ export async function POST(request: NextRequest) {
 
   if (!businessId) return NextResponse.json({ ok: true, ignored: "sin external_reference" });
 
+  const { data: antes } = await admin
+    .from("businesses")
+    .select("name, plan_expires_at, mp_subscription_status")
+    .eq("id", businessId)
+    .maybeSingle();
+
+  let hasta: string | null = antes?.plan_expires_at ?? null;
   if (pre.status === "authorized") {
     const cycleDays = period === "yearly" ? 365 : 30;
     const base = pre.next_payment_date
       ? new Date(pre.next_payment_date)
       : new Date(Date.now() + cycleDays * 86400000);
-    const expires = new Date(base.getTime() + 3 * 86400000); // margen para el cobro recurrente
+    hasta = new Date(base.getTime() + MARGEN_COBRO_MS).toISOString();
     await admin
       .from("businesses")
-      .update({ plan, plan_expires_at: expires.toISOString(), mp_preapproval_id: pre.id })
+      .update({ plan, plan_expires_at: hasta, mp_preapproval_id: pre.id, mp_subscription_status: pre.status })
+      .eq("id", businessId);
+  } else {
+    // cancelled / paused: el plan sigue vigente hasta plan_expires_at y luego baja a Gratis solo.
+    // Se guarda el estado para que el recordatorio de vencimiento no diga "se renueva solo".
+    await admin
+      .from("businesses")
+      .update({ mp_preapproval_id: pre.id, mp_subscription_status: pre.status })
       .eq("id", businessId);
   }
-  // cancelled / paused: el plan sigue vigente hasta plan_expires_at y luego baja a Gratis solo.
+
+  // Mercado Pago avisa varias veces por el mismo estado: solo se notifica el cambio.
+  const previo = antes?.mp_subscription_status ?? null;
+  if (antes && previo !== pre.status) {
+    const aviso = tplPlatformSubscription({
+      businessName: antes.name,
+      planName: PLANS[plan].name,
+      period,
+      status: pre.status,
+      previo,
+      hasta,
+    });
+    after(() => notifyPlatform(aviso));
+  }
 
   return NextResponse.json({ ok: true });
 }

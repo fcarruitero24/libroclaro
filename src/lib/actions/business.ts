@@ -2,6 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
+import { notifyPlatform, tplPlatformNewBusiness } from "@/lib/email";
+import { getAppUrl } from "@/lib/env";
 import { slugify } from "@/lib/format";
 import { PLANS, planFor } from "@/lib/plans";
 import { createClient, requireUser } from "@/lib/supabase/server";
@@ -66,7 +69,7 @@ export async function createBusiness(_prev: ActionState, formData: FormData): Pr
   const { data, error } = await supabase
     .from("businesses")
     .insert({ owner_id: user.id, ...values })
-    .select("id")
+    .select("id, slug")
     .single();
 
   if (error) {
@@ -79,6 +82,13 @@ export async function createBusiness(_prev: ActionState, formData: FormData): Pr
     }
     return { error: `No se pudo crear el negocio: ${error.message}` };
   }
+
+  const publicUrl = `${await getAppUrl()}/r/${data.slug}`;
+  after(() =>
+    notifyPlatform(
+      tplPlatformNewBusiness({ name: values.name, ruc: values.ruc, email: values.email, publicUrl, origen: "negocio adicional" }),
+    ),
+  );
 
   redirect(`/app/${data.id}?bienvenida=1`);
 }

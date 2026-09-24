@@ -98,7 +98,14 @@ export function isBillingPeriod(v: unknown): v is BillingPeriod {
   return v === "monthly" || v === "yearly";
 }
 
-const GRACE_MS = 3 * 24 * 60 * 60 * 1000; // 3 días de gracia tras vencer
+/** Días de gracia tras vencer, antes de bajar a Gratis. */
+export const GRACE_MS = 3 * 24 * 60 * 60 * 1000;
+/**
+ * En una suscripción, el plan vence este margen después de la fecha del
+ * próximo cobro, para que Mercado Pago tenga tiempo de cobrar. Por eso, si el
+ * plan llega a vencer con la suscripción activa, es que el cobro falló.
+ */
+export const MARGEN_COBRO_MS = 3 * 24 * 60 * 60 * 1000;
 
 /** Plan vigente considerando la fecha de vencimiento (con 3 días de gracia). */
 export function effectivePlan(b: { plan: string; plan_expires_at: string | null }): PlanId {

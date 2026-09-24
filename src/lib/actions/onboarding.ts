@@ -1,6 +1,9 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { after } from "next/server";
+import { notifyPlatform, tplPlatformNewBusiness } from "@/lib/email";
+import { getAppUrl } from "@/lib/env";
 import { slugify } from "@/lib/format";
 import { isValidRucFormat, lookupRuc } from "@/lib/ruc";
 import { createClient } from "@/lib/supabase/server";
@@ -105,7 +108,7 @@ export async function signUpWithBusiness(_prev: ActionState, formData: FormData)
   if (!userId) return { error: "No se pudo crear la cuenta. Intenta de nuevo." };
 
   // El enlace debe ser único: si está tomado, se prueba con un sufijo.
-  let creado: { id: string } | null = null;
+  let creado: { id: string; slug: string } | null = null;
   let ultimoError = "";
   for (let intento = 0; intento < 5 && !creado; intento++) {
     const candidato = intento === 0 ? slug : `${slug}-${intento + 1}`.slice(0, 50);
@@ -120,7 +123,7 @@ export async function signUpWithBusiness(_prev: ActionState, formData: FormData)
         email,
         phone: phone || null,
       })
-      .select("id")
+      .select("id, slug")
       .single();
 
     if (!error) {
@@ -142,6 +145,14 @@ export async function signUpWithBusiness(_prev: ActionState, formData: FormData)
     // La cuenta sí existe: se manda a crear el negocio por el camino normal.
     redirect("/app/nuevo?error=registro");
   }
+
+  // Aviso interno a PLATFORM_EMAIL. Va con after() para no demorar el registro.
+  const publicUrl = `${await getAppUrl()}/r/${creado.slug}`;
+  after(() =>
+    notifyPlatform(
+      tplPlatformNewBusiness({ name, ruc, email, publicUrl, origen: "registro", verificadoSunat: verificado }),
+    ),
+  );
 
   redirect(`/app/${creado.id}?bienvenida=1`);
 }

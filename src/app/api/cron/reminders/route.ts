@@ -1,8 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { businessDaysLeft } from "@/lib/business-days";
-import { sendEmail, tplReminder } from "@/lib/email";
+import { sendEmail, tplPlanReminder, tplReminder } from "@/lib/email";
 import { getAppUrl } from "@/lib/env";
-import { planFor } from "@/lib/plans";
+import { GRACE_MS, MARGEN_COBRO_MS, planFor, PLANS, type PlanId } from "@/lib/plans";
 import { createAdminClient, hasAdminClient } from "@/lib/supabase/admin";
 
 interface Row {
@@ -19,7 +19,11 @@ interface Row {
   } | null;
 }
 
-/** Cron diario (Vercel): recuerda a los negocios Pro los reclamos por vencer o vencidos. */
+/**
+ * Cron diario (Vercel, 8 a. m. de Lima): recuerda a los negocios Pro los
+ * reclamos por vencer o vencidos, y a todos los negocios con plan pagado que
+ * su plan está por vencer.
+ */
 export async function GET(request: NextRequest) {
   const cronSecret = process.env.CRON_SECRET;
   if (cronSecret && request.headers.get("authorization") !== `Bearer ${cronSecret}`) {
@@ -60,5 +64,75 @@ export async function GET(request: NextRequest) {
     if (r.ok) sent++;
   }
 
-  return NextResponse.json({ ok: true, businesses: byBusiness.size, sent });
+  const planes = await recordatoriosDePlan(admin, appUrl);
+
+  return NextResponse.json({ ok: true, businesses: byBusiness.size, sent, planes });
+}
+
+/** Días de calendario, en hora de Lima, de hoy a `fecha`. Negativo si ya pasó. */
+function diasHasta(fecha: string): number {
+  const dia = (d: Date) => {
+    const [y, m, dd] = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Lima" }).format(d).split("-").map(Number);
+    return Date.UTC(y, m - 1, dd);
+  };
+  return Math.round((dia(new Date(fecha)) - dia(new Date())) / 86400000);
+}
+
+/**
+ * Qué aviso toca. Son rangos y no días exactos: si el cron falla un día, el
+ * aviso sale al siguiente, y la tabla plan_reminders impide que se repita.
+ */
+function etapa(dias: number): "7d" | "1d" | "0d" | null {
+  if (dias >= 2 && dias <= 7) return "7d";
+  if (dias === 1) return "1d";
+  // Los 3 días de gracia: después el plan ya es Gratis y no hay nada que avisar.
+  if (dias <= 0 && dias >= -2) return "0d";
+  return null;
+}
+
+async function recordatoriosDePlan(admin: ReturnType<typeof createAdminClient>, appUrl: string) {
+  const { data, error } = await admin
+    .from("businesses")
+    .select("id, name, email, plan, plan_expires_at, mp_subscription_status")
+    .neq("plan", "free")
+    .is("archived_at", null)
+    .gte("plan_expires_at", new Date(Date.now() - 4 * 86400000).toISOString())
+    .lte("plan_expires_at", new Date(Date.now() + 8 * 86400000).toISOString());
+  if (error) {
+    console.error("[cron:planes]", error.message);
+    return { error: error.message };
+  }
+
+  let enviados = 0;
+  let repetidos = 0;
+  for (const b of data ?? []) {
+    if (!b.plan_expires_at) continue;
+    const st = etapa(diasHasta(b.plan_expires_at));
+    if (!st) continue;
+
+    // Se reserva el aviso antes de mandarlo: si la fila ya existía, ya salió.
+    const clave = { business_id: b.id, expires_at: b.plan_expires_at, stage: st };
+    const { error: yaSalio } = await admin.from("plan_reminders").insert(clave);
+    if (yaSalio) {
+      repetidos++;
+      continue;
+    }
+
+    const vence = new Date(b.plan_expires_at).getTime();
+    const tpl = tplPlanReminder({
+      businessName: b.name,
+      planName: PLANS[b.plan as PlanId]?.name ?? b.plan,
+      stage: st,
+      seRenuevaSolo: b.mp_subscription_status === "authorized",
+      venceEl: b.plan_expires_at,
+      cobroEl: new Date(vence - MARGEN_COBRO_MS).toISOString(),
+      graciaHasta: new Date(vence + GRACE_MS).toISOString(),
+      planUrl: `${appUrl}/app/${b.id}/plan`,
+    });
+    const r = await sendEmail({ to: b.email, ...tpl });
+    if (r.ok) enviados++;
+    // Si no salió, se libera para que el próximo intento lo vuelva a probar.
+    else await admin.from("plan_reminders").delete().match(clave);
+  }
+  return { enviados, repetidos };
 }
