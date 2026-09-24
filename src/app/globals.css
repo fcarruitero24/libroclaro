@@ -156,6 +156,151 @@ body {
   animation: draw-stroke 320ms 360ms ease-out forwards;
 }
 
+/* ---------------------------------------------------------------
+   Tarjeta animada del hero (HeroDemo).
+   --------------------------------------------------------------- */
+
+/* Entrada del aviso "Nuevo reclamo". Con `backwards` y no `both`: la
+   animación solo manda antes de empezar y mientras corre; al terminar
+   devuelve el control a las transiciones de la fase, que son las que
+   lo esconden y lo vuelven a mostrar en cada vuelta del bucle. */
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.96);
+  }
+}
+
+.anim-toast-in {
+  animation: toast-in 500ms 750ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+@keyframes ping-once {
+  from {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2.2);
+  }
+}
+
+.anim-ping-once {
+  animation: ping-once 900ms 300ms ease-out both;
+}
+
+.anim-check-mini {
+  stroke-dasharray: 12;
+  stroke-dashoffset: 12;
+  animation: draw-stroke 320ms 120ms ease-out forwards;
+}
+
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+.anim-caret {
+  animation: caret 900ms steps(1) infinite;
+}
+
+/* ---------------------------------------------------------------
+   Cinta de funciones bajo el hero. El contenido va duplicado y se
+   desplaza la mitad de su ancho: al terminar, la segunda copia está
+   exactamente donde empezó la primera y el salto no se ve.
+   --------------------------------------------------------------- */
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.anim-marquee {
+  animation: marquee 40s linear infinite;
+}
+
+.anim-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Bordes que se desvanecen para que los ítems no se corten en seco. */
+.mask-fade-x {
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+}
+
+/* ---------------------------------------------------------------
+   Brillo que cruza el botón principal al pasar el puntero.
+   `isolation` crea el contexto de apilamiento: así el ::after con
+   z-index negativo queda sobre el fondo del botón pero bajo el texto.
+   --------------------------------------------------------------- */
+.btn-brillo {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.btn-brillo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(110deg, transparent 30%, rgba(45, 212, 191, 0.35) 50%, transparent 70%);
+  transform: translateX(-110%);
+  transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.btn-brillo:hover::after {
+  transform: translateX(110%);
+}
+
+/* ---------------------------------------------------------------
+   Preguntas frecuentes: la respuesta se despliega en vez de aparecer
+   de golpe. Solo donde el navegador sabe interpolar hasta `auto`; en
+   los demás el <details> se comporta como siempre.
+   --------------------------------------------------------------- */
+@supports (interpolate-size: allow-keywords) {
+  details.faq {
+    interpolate-size: allow-keywords;
+  }
+
+  details.faq::details-content {
+    block-size: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition:
+      block-size 320ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 240ms ease-out,
+      content-visibility 320ms allow-discrete;
+  }
+
+  details.faq[open]::details-content {
+    block-size: auto;
+    opacity: 1;
+  }
+}
+
+/* ---------------------------------------------------------------
+   Botón flotante de WhatsApp: un anillo que late cada tanto, no sin
+   parar, para que se note sin volverse ruido.
+   --------------------------------------------------------------- */
+@keyframes wa-ring {
+  0% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  30%,
+  100% {
+    opacity: 0;
+    transform: scale(1.7);
+  }
+}
+
+.anim-wa-ring {
+  animation: wa-ring 4s 2s ease-out infinite;
+}
+
 @media print {
   .no-print {
     display: none !important;

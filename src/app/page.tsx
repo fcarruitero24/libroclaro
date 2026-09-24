@@ -1,10 +1,14 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import { BackToTop } from "@/components/back-to-top";
+import { HeroDemo } from "@/components/hero-demo";
+import { Icon, type IconName } from "@/components/icons";
 import { RevealOnScroll } from "@/components/reveal-on-scroll";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Badge, ButtonLink } from "@/components/ui";
+import { WhatsappFab } from "@/components/whatsapp-fab";
+import { WHATSAPP_NUMBER } from "@/lib/env";
 import { monthlyEquivalent, PLANS, yearlySavings } from "@/lib/plans";
 
 /** Índice para la cascada del reveal: lo lee `--i` en globals.css. */
@@ -18,31 +22,50 @@ const paso = (i: number) => ({ "--i": i }) as CSSProperties;
  */
 const tarjeta = "transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg";
 
-const FEATURES = [
+const FEATURES: { icon: IconName; title: string; text: string }[] = [
   {
+    icon: "numero",
     title: "Numeración correlativa automática",
     text: "Cada hoja recibe un código único por año (2026-000001…), tal como exige el reglamento.",
   },
   {
+    icon: "correo",
     title: "Copia al consumidor por correo",
     text: "El cliente recibe su hoja de reclamación al instante, con enlace para imprimir o guardar en PDF.",
   },
   {
+    icon: "plazo",
     title: "Control del plazo de 15 días hábiles",
     text: "Contamos los días hábiles con feriados de Perú y te avisamos antes de que venza cada reclamo.",
   },
   {
+    icon: "qr",
     title: "Aviso oficial y código QR",
     text: "Descarga el aviso para tu web y un QR para pegar en tu local o mostrador.",
   },
   {
+    icon: "respuesta",
     title: "Respuestas documentadas",
     text: "Responde desde el panel y queda registro fechado de tu respuesta, listo para INDECOPI.",
   },
   {
+    icon: "archivo",
     title: "Registro conservado",
     text: "Tus hojas quedan guardadas y exportables. Nunca más un cuaderno perdido.",
   },
+];
+
+/** Lo que corre en la cinta bajo el hero. */
+const CINTA = [
+  "Numeración correlativa",
+  "Feriados de Perú en el plazo",
+  "Copia al consumidor",
+  "Aviso oficial",
+  "QR para tu local",
+  "Reclamos ilimitados",
+  "Exportar a Excel",
+  "Enlace para web y redes",
+  "Hecho en Perú",
 ];
 
 const FAQ = [
@@ -90,62 +113,45 @@ export default function HomePage() {
                 con el plazo legal bajo control. Sin abogados, sin cuadernos.
               </p>
               <div className="flex flex-wrap gap-3">
-                <ButtonLink href="/registro" variant="white" className="px-6 py-3 text-base">
+                <ButtonLink href="/registro" variant="white" className="btn-brillo px-6 py-3 text-base">
                   Crear mi libro gratis
                 </ButtonLink>
                 <ButtonLink
                   href="/r/demo"
                   variant="ghost"
-                  className="px-6 py-3 text-base text-teal-100 hover:bg-white/10 hover:text-white"
+                  className="group px-6 py-3 text-base text-teal-100 hover:bg-white/10 hover:text-white"
                 >
-                  Ver un ejemplo →
+                  Ver un ejemplo
+                  <span aria-hidden="true" className="transition-transform duration-200 ease-out group-hover:translate-x-1">
+                    →
+                  </span>
                 </ButtonLink>
               </div>
               <p className="text-sm text-slate-400">Sin tarjeta · Reclamos ilimitados · Hecho en Perú 🇵🇪</p>
             </div>
 
-            <div className="relative">
-              <div className="anim-rise-in rounded-2xl border border-white/10 bg-white p-6 shadow-2xl shadow-black/40">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Hoja de reclamación</p>
-                    <p className="text-xl font-bold text-slate-900">N.º 2026-000012</p>
-                  </div>
-                  <Badge tone="amber">Pendiente</Badge>
-                </div>
-                <dl className="mt-5 grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <dt className="text-slate-500">Consumidor</dt>
-                    <dd className="font-medium text-slate-900">María Q.</dd>
-                  </div>
-                  <div>
-                    <dt className="text-slate-500">Tipo</dt>
-                    <dd className="font-medium text-slate-900">Reclamo · Producto</dd>
-                  </div>
-                  <div>
-                    <dt className="text-slate-500">Monto</dt>
-                    <dd className="font-medium text-slate-900">S/ 189.00</dd>
-                  </div>
-                  <div>
-                    <dt className="text-slate-500">Plazo</dt>
-                    <dd className="font-medium text-amber-700">Vence en 3 días hábiles</dd>
-                  </div>
-                </dl>
-                <div className="mt-5 rounded-lg bg-slate-50 p-3 text-sm text-slate-700">
-                  &ldquo;El producto llegó con la caja dañada y no encendía. Solicito el cambio o la devolución del dinero.&rdquo;
-                </div>
-                <div className="mt-5 flex gap-2">
-                  <span className="inline-flex flex-1 items-center justify-center rounded-lg bg-teal-700 px-4 py-2 text-sm font-semibold text-white">
-                    Responder
-                  </span>
-                  <span className="inline-flex items-center justify-center rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">
-                    Ver hoja
-                  </span>
-                </div>
-              </div>
-              <div className="anim-fade-rise absolute -bottom-4 -left-4 hidden rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-lg sm:block">
-                <p className="text-xs text-slate-500">Copia enviada a</p>
-                <p className="text-sm font-semibold text-slate-900">maria@correo.com ✓</p>
+            <HeroDemo />
+          </div>
+
+          {/* Cinta de funciones. La segunda copia es solo para que el
+              bucle empalme: el lector de pantalla lee la primera. */}
+          <div className="relative z-10 border-t border-white/10 py-4">
+            <div className="mask-fade-x overflow-hidden">
+              <div className="anim-marquee flex w-max">
+                {[0, 1].map((copia) => (
+                  <ul
+                    key={copia}
+                    aria-hidden={copia === 1 || undefined}
+                    className="flex shrink-0 items-center text-sm font-medium text-teal-100/70"
+                  >
+                    {CINTA.map((item) => (
+                      <li key={item} className="flex items-center gap-3 px-5">
+                        <span className="h-1 w-1 rounded-full bg-teal-400" aria-hidden="true" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                ))}
               </div>
             </div>
           </div>
@@ -155,18 +161,21 @@ export default function HomePage() {
         <section className="border-y border-stone-200 bg-[#faf7f2]">
           <div className="mx-auto grid max-w-6xl gap-6 px-4 py-10 sm:px-6 md:grid-cols-3">
             <div className="reveal" style={paso(0)}>
+              <Icon name="escudo" className="mb-3 h-7 w-7 text-teal-600" />
               <p className="text-3xl font-extrabold text-teal-700">Obligatorio</p>
               <p className="mt-1 text-sm text-slate-600">
                 Para todo negocio que vende a consumidores, en el local y en su web o redes sociales.
               </p>
             </div>
             <div className="reveal" style={paso(1)}>
+              <Icon name="reloj" className="mb-3 h-7 w-7 text-teal-600" />
               <p className="text-3xl font-extrabold text-teal-700">15 días hábiles</p>
               <p className="mt-1 text-sm text-slate-600">
                 Plazo máximo e improrrogable para responder cada reclamo o queja.
               </p>
             </div>
             <div className="reveal" style={paso(2)}>
+              <Icon name="balanza" className="mb-3 h-7 w-7 text-teal-600" />
               <p className="text-3xl font-extrabold text-teal-700">Multas</p>
               <p className="mt-1 text-sm text-slate-600">
                 INDECOPI sanciona no tener el libro, no exhibir el aviso o no responder a tiempo.
@@ -185,16 +194,19 @@ export default function HomePage() {
             {[
               {
                 n: "1",
+                icon: "tienda" as IconName,
                 t: "Registra tu negocio",
                 d: "Nombre, RUC, dirección y correo de notificaciones. Elige el enlace de tu libro: libroclaro.app/r/tu-negocio.",
               },
               {
                 n: "2",
+                icon: "aviso" as IconName,
                 t: "Instala el aviso",
                 d: "Copia el enlace con el aviso oficial en tu web, tu perfil de Instagram o tu catálogo de WhatsApp. Imprime el QR para tu local.",
               },
               {
                 n: "3",
+                icon: "bandeja" as IconName,
                 t: "Recibe y responde",
                 d: "Cada reclamo llega numerado a tu panel con la cuenta regresiva de días hábiles. Respondes y el cliente recibe la respuesta por correo.",
               },
@@ -202,8 +214,12 @@ export default function HomePage() {
               <li
                 key={s.n}
                 style={paso(i)}
-                className={`reveal rounded-2xl border border-slate-200 bg-white p-6 shadow-sm ${tarjeta}`}
+                className={`reveal group relative rounded-2xl border border-slate-200 bg-white p-6 shadow-sm ${tarjeta}`}
               >
+                <Icon
+                  name={s.icon}
+                  className="absolute right-6 top-6 h-10 w-10 text-teal-100 transition duration-300 ease-out group-hover:-rotate-6 group-hover:scale-110 group-hover:text-teal-600"
+                />
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-teal-700 text-lg font-bold text-white">
                   {s.n}
                 </span>
@@ -228,8 +244,11 @@ export default function HomePage() {
                 <div
                   key={f.title}
                   style={paso(i)}
-                  className={`reveal rounded-2xl border border-stone-200 border-l-[3px] border-l-teal-600 bg-white p-6 shadow-sm ${tarjeta}`}
+                  className={`reveal group rounded-2xl border border-stone-200 border-l-[3px] border-l-teal-600 bg-white p-6 shadow-sm ${tarjeta}`}
                 >
+                  <span className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-700 transition duration-300 ease-out group-hover:scale-110 group-hover:bg-teal-700 group-hover:text-white">
+                    <Icon name={f.icon} className="h-5 w-5" />
+                  </span>
                   <h3 className="font-semibold text-slate-900">{f.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-slate-600">{f.text}</p>
                 </div>
@@ -325,10 +344,15 @@ export default function HomePage() {
             </h2>
             <div className="mt-10 divide-y divide-slate-200">
               {FAQ.map((item, i) => (
-                <details key={item.q} style={paso(i)} className="reveal group py-5">
+                <details key={item.q} style={paso(i)} className="faq reveal group py-5">
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-left font-medium text-slate-900">
                     {item.q}
-                    <span className="shrink-0 text-teal-600 transition group-open:rotate-45">+</span>
+                    <span
+                      aria-hidden="true"
+                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-teal-200 text-teal-600 transition duration-300 ease-out group-hover:bg-teal-50 group-open:rotate-45 group-open:border-teal-600 group-open:bg-teal-600 group-open:text-white"
+                    >
+                      +
+                    </span>
                   </summary>
                   <p className="mt-3 text-sm leading-relaxed text-slate-600">{item.a}</p>
                 </details>
@@ -345,21 +369,25 @@ export default function HomePage() {
               Crea tu Libro de Reclamaciones Virtual gratis y recibe tu enlace y aviso oficial en menos de 5 minutos.
             </p>
             <div className="mt-8 flex justify-center gap-3">
-              <ButtonLink href="/registro" variant="white" className="px-6 py-3 text-base">
+              <ButtonLink href="/registro" variant="white" className="btn-brillo px-6 py-3 text-base">
                 Crear mi libro gratis
               </ButtonLink>
               <Link
                 href="/r/demo"
-                className="inline-flex items-center px-4 text-sm font-semibold text-teal-100 hover:text-white"
+                className="group inline-flex items-center gap-1.5 px-4 text-sm font-semibold text-teal-100 hover:text-white"
               >
-                Ver demo →
+                Ver demo
+                <span aria-hidden="true" className="transition-transform duration-200 ease-out group-hover:translate-x-1">
+                  →
+                </span>
               </Link>
             </div>
           </div>
         </section>
       </main>
       <SiteFooter />
-      <BackToTop />
+      <WhatsappFab />
+      <BackToTop encimaDeWhatsapp={Boolean(WHATSAPP_NUMBER)} />
     </>
   );
 }

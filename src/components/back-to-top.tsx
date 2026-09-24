@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
  * pantalla no anuncie un botón que no lleva a ninguna parte mientras
  * el visitante está leyendo el encabezado.
  */
-export function BackToTop() {
+export function BackToTop({ encimaDeWhatsapp = false }: { encimaDeWhatsapp?: boolean }) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -42,7 +42,11 @@ export function BackToTop() {
         window.scrollTo({ top: 0, behavior: brusco ? "auto" : "smooth" });
       }}
       aria-label="Volver al inicio"
-      className="anim-fade-up fixed bottom-5 right-5 z-40 flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white/90 text-slate-700 shadow-lg backdrop-blur transition duration-200 ease-out hover:-translate-y-0.5 hover:text-teal-700 hover:shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600/40"
+      // Con el botón de WhatsApp abajo, este sube y queda centrado sobre
+      // él: 20px de margen + 56px del botón verde + 12px de aire.
+      className={`anim-fade-up fixed z-40 flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white/90 text-slate-700 shadow-lg backdrop-blur transition duration-200 ease-out hover:-translate-y-0.5 hover:text-teal-700 hover:shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600/40 ${
+        encimaDeWhatsapp ? "bottom-[88px] right-[26px]" : "bottom-5 right-5"
+      }`}
     >
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
         <path
