@@ -72,10 +72,13 @@ export function AvisoOpciones({
   publicUrl,
   avisoUrl,
   avisoLocalUrl,
+  avisoA4Href,
 }: {
   publicUrl: string;
   avisoUrl: string;
   avisoLocalUrl: string;
+  /** Página con el A4 que lleva la razón social y el QR del negocio. */
+  avisoA4Href?: string;
 }) {
   const [estilo, setEstilo] = useState<Estilo>("oficial");
 
@@ -162,13 +165,19 @@ export function AvisoOpciones({
           Ahí va otro aviso distinto, el del Anexo II: lleva además el párrafo del Código y el correo de INDECOPI, y la
           norma exige que mida como mínimo una hoja A4. Este archivo usa la misma ilustración oficial y ya viene en ese tamaño exacto, listo para imprimir.
         </p>
-        <a
-          href={avisoLocalUrl}
-          download
-          className="mt-3 inline-flex text-sm font-semibold text-teal-700 hover:underline"
-        >
-          Descargar aviso para imprimir (A4)
-        </a>
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+          {avisoA4Href && (
+            <a
+              href={avisoA4Href}
+              className="inline-flex rounded-lg bg-teal-700 px-3 py-2 text-sm font-semibold text-white hover:bg-teal-800"
+            >
+              Aviso A4 con tu razón social y tu QR
+            </a>
+          )}
+          <a href={avisoLocalUrl} download className="text-sm font-semibold text-teal-700 hover:underline">
+            {avisoA4Href ? "o el genérico (SVG)" : "Descargar aviso para imprimir (A4)"}
+          </a>
+        </div>
       </div>
     </div>
   );

@@ -40,10 +40,32 @@ export interface Complaint {
   detail: string;
   request: string;
   status: string;
+  /** Categoría interna que pone el negocio (ver src/lib/categorias.ts). */
+  category: string | null;
   response: string | null;
   responded_at: string | null;
   due_at: string;
   created_at: string;
+}
+
+/** Una línea del historial del reclamo (tabla complaint_events). */
+export interface ComplaintEvent {
+  id: number;
+  complaint_id: string;
+  business_id: string;
+  type: "registrado" | "estado" | "categoria" | "respuesta" | "respuesta_editada" | "respuesta_enviada" | "nota";
+  data: { de?: string | null; a?: string | null; texto?: string; anterior?: string; correo?: string };
+  actor_id: string | null;
+  created_at: string;
+}
+
+export interface ResponseTemplate {
+  id: string;
+  owner_id: string;
+  title: string;
+  body: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface BusinessPublic {

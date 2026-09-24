@@ -16,6 +16,10 @@ export interface PlanDef {
   /** Logo y color personalizados en el formulario */
   customBranding: boolean;
   csvExport: boolean;
+  /** Gráficos del Resumen: evolución, categorías y tipo de bien */
+  analytics: boolean;
+  /** Plantillas de respuesta guardadas */
+  templates: boolean;
   features: string[];
 }
 
@@ -30,9 +34,12 @@ export const PLANS: Record<PlanId, PlanDef> = {
     businessAlerts: false,
     customBranding: false,
     csvExport: false,
+    analytics: false,
+    templates: false,
     features: [
       "1 negocio",
       "Reclamos y quejas ilimitados",
+      "Resumen con indicadores y plazos",
       "Hoja de reclamación con numeración correlativa",
       "Copia automática al correo del consumidor",
       "Panel para responder dentro del plazo",
@@ -49,12 +56,16 @@ export const PLANS: Record<PlanId, PlanDef> = {
     businessAlerts: true,
     customBranding: true,
     csvExport: true,
+    analytics: true,
+    templates: true,
     features: [
       "Hasta 3 negocios o sucursales",
       "Sin marca LibroClaro",
       "Tu logo y tu color",
       "Alerta por correo de cada reclamo nuevo",
       "Recordatorio antes de vencer los 15 días hábiles",
+      "Análisis con gráficos y categorías",
+      "Plantillas de respuesta",
       "Exportar a Excel (CSV)",
       "Soporte por WhatsApp",
     ],
@@ -69,6 +80,8 @@ export const PLANS: Record<PlanId, PlanDef> = {
     businessAlerts: true,
     customBranding: true,
     csvExport: true,
+    analytics: true,
+    templates: true,
     features: [
       "Hasta 25 sucursales",
       "Todo lo del plan Pro",

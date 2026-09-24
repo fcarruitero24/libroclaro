@@ -26,7 +26,7 @@ export default async function BusinessLayout({
 
   return (
     <div>
-      <div className="border-b border-slate-200 bg-white">
+      <div className="no-print border-b border-slate-200 bg-white">
         <div className="mx-auto max-w-6xl px-4 pt-6 sm:px-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div>
@@ -62,7 +62,7 @@ export default async function BusinessLayout({
           </div>
         </div>
       </div>
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">{children}</main>
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 print:max-w-none print:p-0">{children}</main>
     </div>
   );
 }

@@ -9,7 +9,7 @@ import type { ActionState } from "@/lib/types";
 const STATUSES = new Set(["pendiente", "en_proceso", "respondido", "cerrado"]);
 
 export async function respondComplaint(_prev: ActionState, formData: FormData): Promise<ActionState> {
-  await requireUser();
+  const user = await requireUser();
   const supabase = await createClient();
 
   const id = String(formData.get("id") ?? "");
@@ -53,6 +53,17 @@ export async function respondComplaint(_prev: ActionState, formData: FormData): 
       hojaUrl: `${appUrl}/h/${current.public_token}`,
     });
     const sent = await sendEmail({ to: current.consumer_email, replyTo: biz?.email, ...tpl });
+    // El cambio de estado y la respuesta los anota el trigger; que el correo
+    // salió solo lo sabe la aplicación.
+    if (sent.ok) {
+      await supabase.from("complaint_events").insert({
+        complaint_id: id,
+        business_id: businessId,
+        type: "respuesta_enviada",
+        data: { correo: current.consumer_email },
+        actor_id: user.id,
+      });
+    }
     note = sent.ok
       ? "Respuesta guardada y enviada al consumidor por correo."
       : sent.skipped

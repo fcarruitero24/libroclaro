@@ -60,7 +60,12 @@ export default async function SettingsPage({
               WordPress…). Los tres llevan al mismo formulario.
             </p>
             <div className="mt-4">
-              <AvisoOpciones publicUrl={publicUrl} avisoUrl={avisoUrl} avisoLocalUrl={avisoLocalUrl} />
+              <AvisoOpciones
+                publicUrl={publicUrl}
+                avisoUrl={avisoUrl}
+                avisoLocalUrl={avisoLocalUrl}
+                avisoA4Href={`/app/${bizId}/aviso`}
+              />
             </div>
           </Card>
 

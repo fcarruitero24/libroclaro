@@ -64,6 +64,22 @@ export function businessDaysLeft(dueAt: string | Date, now: Date = new Date()): 
   return count;
 }
 
+/**
+ * Días hábiles transcurridos entre dos fechas (Lima): los hábiles después
+ * del día de `desde` hasta el día de `hasta`, inclusive. Registrado y
+ * respondido el mismo día = 0.
+ */
+export function businessDaysBetween(desde: string | Date, hasta: string | Date): number {
+  let k = limaDateKey(new Date(desde));
+  const fin = limaDateKey(new Date(hasta));
+  let count = 0;
+  while (k < fin) {
+    k = addDaysKey(k, 1);
+    if (isBusinessDayKey(k)) count++;
+  }
+  return count;
+}
+
 export type Urgency = "vencido" | "urgente" | "pronto" | "normal" | "resuelto";
 
 export function urgencyFor(status: string, dueAt: string | Date): Urgency {
