@@ -4,5 +4,13 @@
       "path": "/api/cron/reminders",
       "schedule": "0 13 * * *"
     }
+  ],
+  "redirects": [
+    {
+      "source": "/:path((?!api/).*)",
+      "has": [{ "type": "host", "value": "libroclaro.vercel.app" }],
+      "destination": "https://libroclaro.pe/:path",
+      "permanent": true
+    }
   ]
 }
