@@ -19,7 +19,7 @@ export default async function PublicComplaintPage({
   searchParams,
 }: {
   params: Promise<{ token: string }>;
-  searchParams: Promise<{ registrado?: string }>;
+  searchParams: Promise<{ registrado?: string; copia?: string }>;
 }) {
   const { token } = await params;
   const sp = await searchParams;
@@ -66,7 +66,17 @@ export default async function PublicComplaintPage({
                 <strong>
                   Tu {KIND_LABEL[row.kind].toLowerCase()} fue registrado con el N.º {row.code}.
                 </strong>{" "}
-                Te enviamos una copia a <strong>{row.consumer_email}</strong>. Guarda este enlace: es tu constancia.
+                {sp.copia ? (
+                  <>
+                    Te enviamos una copia a <strong>{row.consumer_email}</strong>. Guarda este enlace: es tu
+                    constancia.
+                  </>
+                ) : (
+                  <>
+                    No pudimos enviarte la copia por correo. Guarda este enlace o imprime la hoja: es tu
+                    constancia.
+                  </>
+                )}
               </p>
             </div>
           </Alert>

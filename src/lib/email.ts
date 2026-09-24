@@ -1,7 +1,7 @@
 import { escapeHtml, fmtDate } from "@/lib/format";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const FROM = process.env.EMAIL_FROM ?? "LibroClaro <onboarding@resend.dev>";
+const FROM = process.env.EMAIL_FROM ?? "LibroClaro <no-responder@libroclaro.pe>";
 
 export interface SendEmailInput {
   to: string | string[];

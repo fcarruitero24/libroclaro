@@ -108,7 +108,8 @@ export async function submitComplaint(_prev: ActionState, formData: FormData): P
     dueAt: row.due_at,
   });
 
-  const jobs: Promise<unknown>[] = [sendEmail({ to: consumer_email, replyTo: row.business_email, ...consumerTpl })];
+  const copiaConsumidor = sendEmail({ to: consumer_email, replyTo: row.business_email, ...consumerTpl });
+  const jobs: Promise<unknown>[] = [copiaConsumidor];
 
   if (plan.businessAlerts) {
     const bizTpl = tplBusinessAlert({
@@ -125,5 +126,8 @@ export async function submitComplaint(_prev: ActionState, formData: FormData): P
 
   await Promise.allSettled(jobs);
 
-  redirect(`/h/${row.public_token}?registrado=1`);
+  // La hoja solo afirma "te enviamos una copia" si el correo salió de verdad;
+  // si no, le pide al consumidor guardar el enlace o imprimir la hoja.
+  const copia = await copiaConsumidor.then((r) => r.ok, () => false);
+  redirect(`/h/${row.public_token}?registrado=1${copia ? "&copia=1" : ""}`);
 }
