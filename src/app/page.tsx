@@ -1,15 +1,19 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
+import { AvisoLugares } from "@/components/aviso-lugares";
 import { BackToTop } from "@/components/back-to-top";
 import { HeroDemo } from "@/components/hero-demo";
+import { HeroFondo } from "@/components/hero-fondo";
 import { Icon, type IconName } from "@/components/icons";
+import { PanelDemo } from "@/components/panel-demo";
+import { IlusAviso, IlusRecibe, IlusRegistro } from "@/components/pasos-ilustraciones";
+import { PreciosPlanes } from "@/components/precios-planes";
 import { RevealOnScroll } from "@/components/reveal-on-scroll";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Badge, ButtonLink } from "@/components/ui";
 import { WhatsappFab } from "@/components/whatsapp-fab";
 import { WHATSAPP_NUMBER } from "@/lib/env";
-import { monthlyEquivalent, PLANS, yearlySavings } from "@/lib/plans";
 
 /** Índice para la cascada del reveal: lo lee `--i` en globals.css. */
 const paso = (i: number) => ({ "--i": i }) as CSSProperties;
@@ -99,9 +103,7 @@ export default function HomePage() {
       <main className="flex-1">
         {/* Hero */}
         <section className="relative overflow-hidden bg-[#0b1f1d]">
-          {/* z-0 sobre el fondo de la sección, y el contenido en z-10 encima.
-              Con -z-10 el degradado quedaba detrás del color sólido y no se veía. */}
-          <div className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(65%_55%_at_50%_0%,rgba(15,118,110,0.35)_0%,transparent_70%)]" />
+          <HeroFondo />
           <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 md:grid-cols-2 md:py-28">
             <div className="space-y-6">
               <Badge tone="teal">Cumple con INDECOPI · D.S. 011-2011-PCM</Badge>
@@ -194,19 +196,19 @@ export default function HomePage() {
             {[
               {
                 n: "1",
-                icon: "tienda" as IconName,
+                ilus: <IlusRegistro />,
                 t: "Registra tu negocio",
                 d: "Nombre, RUC, dirección y correo de notificaciones. Elige el enlace de tu libro: libroclaro.pe/r/tu-negocio.",
               },
               {
                 n: "2",
-                icon: "aviso" as IconName,
+                ilus: <IlusAviso />,
                 t: "Instala el aviso",
                 d: "Copia el enlace con el aviso oficial en tu web, tu perfil de Instagram o tu catálogo de WhatsApp. Imprime el QR para tu local.",
               },
               {
                 n: "3",
-                icon: "bandeja" as IconName,
+                ilus: <IlusRecibe />,
                 t: "Recibe y responde",
                 d: "Cada reclamo llega numerado a tu panel con la cuenta regresiva de días hábiles. Respondes y el cliente recibe la respuesta por correo.",
               },
@@ -214,20 +216,70 @@ export default function HomePage() {
               <li
                 key={s.n}
                 style={paso(i)}
-                className={`reveal group relative rounded-2xl border border-slate-200 bg-white p-6 shadow-sm ${tarjeta}`}
+                className={`reveal group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm ${tarjeta}`}
               >
-                <Icon
-                  name={s.icon}
-                  className="absolute right-6 top-6 h-10 w-10 text-teal-100 transition duration-300 ease-out group-hover:-rotate-6 group-hover:scale-110 group-hover:text-teal-600"
-                />
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-teal-700 text-lg font-bold text-white">
-                  {s.n}
-                </span>
-                <h3 className="mt-4 text-lg font-semibold text-slate-900">{s.t}</h3>
-                <p className="mt-2 text-sm text-slate-600">{s.d}</p>
+                {s.ilus}
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-700 text-sm font-bold text-white transition duration-300 ease-out group-hover:scale-110">
+                    {s.n}
+                  </span>
+                  <h3 className="text-lg font-semibold text-slate-900">{s.t}</h3>
+                </div>
+                <p className="mt-3 text-sm text-slate-600">{s.d}</p>
               </li>
             ))}
           </ol>
+        </section>
+
+        {/* Dónde va el aviso */}
+        <section className="border-y border-stone-200 bg-[#faf7f2]">
+          <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+            <div className="reveal max-w-2xl">
+              <h2 className="font-display text-3xl tracking-tight text-slate-900">
+                Tu aviso, donde tus clientes lo vean
+              </h2>
+              <p className="mt-3 text-slate-600">
+                INDECOPI te obliga a anunciar tu Libro de Reclamaciones donde atiendes. Te lo dejamos listo para los
+                tres lugares, con tu razón social y tu QR.
+              </p>
+            </div>
+            <AvisoLugares />
+          </div>
+        </section>
+
+        {/* Panel */}
+        <section className="relative overflow-hidden bg-[#0b1f1d]">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_60%_at_85%_50%,rgba(15,118,110,0.3)_0%,transparent_70%)]" />
+          <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 py-20 sm:px-6 md:grid-cols-5">
+            <div className="reveal md:col-span-2">
+              <h2 className="font-display text-3xl tracking-tight text-white sm:text-4xl">
+                Todos tus reclamos en un panel, con el plazo a la vista
+              </h2>
+              <p className="mt-4 leading-relaxed text-slate-300">
+                Cada reclamo llega con su número y su cuenta regresiva de días hábiles, feriados de Perú incluidos. Ves
+                de un vistazo qué vence primero y respondes desde ahí.
+              </p>
+              <ul className="mt-6 space-y-3 text-sm text-teal-100">
+                {[
+                  "Verde, ámbar o rojo según los días que quedan",
+                  "Aviso por correo antes de que venza cada plazo",
+                  "Historial completo, exportable si te fiscalizan",
+                ].map((t) => (
+                  <li key={t} className="flex gap-2.5">
+                    <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-teal-500/20 text-teal-300">
+                      <svg viewBox="0 0 12 12" className="h-2.5 w-2.5" fill="none" aria-hidden="true">
+                        <path d="m2.5 6.5 2.2 2.2 4.8-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </span>
+                    {t}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="reveal md:col-span-3" style={paso(1)}>
+              <PanelDemo />
+            </div>
+          </div>
         </section>
 
         {/* Features */}
@@ -262,74 +314,11 @@ export default function HomePage() {
           <div className="reveal mx-auto max-w-2xl text-center">
             <h2 className="font-display text-3xl tracking-tight text-slate-900">Precios simples</h2>
             <p className="mt-3 text-slate-600">
-              Empieza gratis y quédate gratis el tiempo que quieras. Los planes pagados se cobran por año, como cualquier
-              trámite de tu negocio, y también puedes pagarlos mes a mes.
+              Empieza gratis y quédate gratis el tiempo que quieras. Si necesitas más, pagas por año o mes a mes, como
+              te acomode.
             </p>
           </div>
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {(["free", "pro", "business"] as const).map((id, i) => {
-              const p = PLANS[id];
-              const highlight = id === "pro";
-              return (
-                <div
-                  key={id}
-                  style={paso(i)}
-                  className={
-                    highlight
-                      ? "reveal relative rounded-2xl bg-teal-900 p-6 shadow-xl transition duration-200 ease-out hover:-translate-y-1 hover:shadow-2xl"
-                      : "reveal rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition duration-200 ease-out hover:-translate-y-1 hover:shadow-lg"
-                  }
-                >
-                  {highlight && (
-                    <span className="absolute -top-3 left-6 rounded-full bg-teal-400 px-3 py-1 text-xs font-semibold text-teal-900">
-                      Más popular
-                    </span>
-                  )}
-                  <h3 className={`text-lg font-semibold ${highlight ? "text-white" : "text-slate-900"}`}>{p.name}</h3>
-                  {p.priceYearly === 0 ? (
-                    <>
-                      <p className="mt-2 flex items-baseline gap-1">
-                        <span className={`text-4xl font-extrabold ${highlight ? "text-white" : "text-slate-900"}`}>
-                          S/ 0
-                        </span>
-                      </p>
-                      <p className={`mt-1 text-sm ${highlight ? "text-teal-300" : "text-slate-500"}`}>
-                        Para siempre, sin tarjeta.
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="mt-2 flex items-baseline gap-1">
-                        <span className={`text-4xl font-extrabold ${highlight ? "text-white" : "text-slate-900"}`}>
-                          S/ {p.priceYearly}
-                        </span>
-                        <span className={`text-sm ${highlight ? "text-teal-300" : "text-slate-500"}`}>/año</span>
-                      </p>
-                      <p className={`mt-1 text-sm ${highlight ? "text-teal-300" : "text-slate-500"}`}>
-                        Equivale a S/ {monthlyEquivalent(p)} al mes. Ahorras {yearlySavings(p)}% frente a los S/{" "}
-                        {p.priceMonthly} mensuales sin compromiso.
-                      </p>
-                    </>
-                  )}
-                  <ul className={`mt-6 space-y-2 text-sm ${highlight ? "text-teal-100" : "text-slate-700"}`}>
-                    {p.features.map((f) => (
-                      <li key={f} className="flex gap-2">
-                        <span className={highlight ? "text-teal-400" : "text-teal-700"}>✓</span>
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                  <ButtonLink
-                    href="/registro"
-                    variant={highlight ? "white" : "secondary"}
-                    className="mt-8 w-full"
-                  >
-                    {id === "free" ? "Empezar gratis" : `Elegir ${p.name}`}
-                  </ButtonLink>
-                </div>
-              );
-            })}
-          </div>
+          <PreciosPlanes />
           <p className="mt-6 text-center text-sm text-slate-500">
             Pagos con Yape, Plin o tarjeta. Cancela cuando quieras. Todos los planes, incluido el gratuito, reciben
             reclamos ilimitados: nunca te cobramos por recibir más.

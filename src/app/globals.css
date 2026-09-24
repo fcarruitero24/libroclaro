@@ -301,6 +301,174 @@ body {
   animation: wa-ring 4s 2s ease-out infinite;
 }
 
+/* ---------------------------------------------------------------
+   Miniaturas de "Cómo funciona" y de los avisos.
+
+   Regla común: el estado base de cada pieza es el final (visible,
+   completa) y los fotogramas solo describen el camino. Por eso van con
+   `backwards` y nunca con `forwards`: con el movimiento reducido, la
+   regla de arriba corta la animación y la pieza queda en su estado
+   base, entera, en vez de congelarse invisible.
+   --------------------------------------------------------------- */
+@keyframes ciclo {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  6%,
+  86% {
+    opacity: 1;
+    transform: none;
+  }
+  93%,
+  100% {
+    opacity: 0;
+    transform: none;
+  }
+}
+
+/* Todas las piezas comparten el ciclo de 7s; cada una entra con su
+   propio retraso (`--d`). */
+.anim-ciclo {
+  animation: ciclo 7s var(--d, 0s) cubic-bezier(0.22, 1, 0.36, 1) infinite backwards;
+}
+
+/* El RUC tecleándose: 11 dígitos, un paso por dígito. */
+@keyframes teclear {
+  0% {
+    width: 0;
+    animation-timing-function: steps(11, end);
+  }
+  25% {
+    width: 11ch;
+  }
+  86% {
+    width: 11ch;
+    opacity: 1;
+  }
+  93%,
+  100% {
+    width: 11ch;
+    opacity: 0;
+  }
+}
+
+.anim-teclear {
+  animation: teclear 7s 0.3s linear infinite backwards;
+}
+
+/* El enlace de la bio se marca cuando el puntero le hace clic. */
+@keyframes enlace {
+  0%,
+  44% {
+    background-color: transparent;
+    color: #0f766e;
+  }
+  50%,
+  86% {
+    background-color: #0f766e;
+    color: #fff;
+  }
+  93%,
+  100% {
+    background-color: transparent;
+    color: #0f766e;
+  }
+}
+
+.anim-enlace {
+  animation: enlace 7s ease-out infinite backwards;
+}
+
+@keyframes puntero {
+  0% {
+    opacity: 0;
+    transform: translate(70px, 40px);
+  }
+  10% {
+    opacity: 1;
+  }
+  40% {
+    transform: none;
+  }
+  45% {
+    transform: scale(0.8);
+  }
+  50%,
+  86% {
+    opacity: 1;
+    transform: none;
+  }
+  93%,
+  100% {
+    opacity: 0;
+    transform: none;
+  }
+}
+
+.anim-puntero {
+  animation: puntero 7s cubic-bezier(0.22, 1, 0.36, 1) infinite backwards;
+}
+
+/* El aviso A4 colgado del clavo. */
+@keyframes balanceo {
+  from {
+    transform: rotate(-1.6deg);
+  }
+  to {
+    transform: rotate(1.6deg);
+  }
+}
+
+.anim-balanceo {
+  animation: balanceo 3.2s ease-in-out infinite alternate;
+}
+
+/* Halo que señala el aviso en el pie de la web de ejemplo. */
+@keyframes halo {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.15);
+  }
+}
+
+.anim-halo {
+  animation: halo 2.8s ease-out infinite;
+}
+
+/* Línea de escaneo recorriendo el QR de arriba abajo. */
+@keyframes escaneo {
+  from {
+    top: -2rem;
+  }
+  to {
+    top: 100%;
+  }
+}
+
+.anim-escaneo {
+  animation: escaneo 2.6s ease-in-out infinite;
+}
+
+/* El precio vuelve a entrar al cambiar de mensual a anual. */
+@keyframes precio {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+.anim-precio {
+  animation: precio 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 @media print {
   .no-print {
     display: none !important;
