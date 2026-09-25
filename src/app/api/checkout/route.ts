@@ -31,7 +31,9 @@ export async function POST(request: NextRequest) {
   const body = {
     reason: `LibroClaro ${PLANS[plan].name} · ${biz.name}`,
     external_reference: `${biz.id}|${plan}|${period}`,
-    payer_email: user.email,
+    // En modo prueba Mercado Pago exige que el comprador tambien sea una cuenta de prueba:
+    // MP_TEST_PAYER_EMAIL pone ese correo. Hay que borrarla al pasar a credenciales reales.
+    payer_email: process.env.MP_TEST_PAYER_EMAIL || user.email,
     back_url: `${appUrl}/app/${biz.id}/plan?status=success`,
     auto_recurring: {
       frequency: period === "yearly" ? 12 : 1,
