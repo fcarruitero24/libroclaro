@@ -20,7 +20,7 @@ interface Row {
 }
 
 /**
- * Cron diario (Vercel, 8 a. m. de Lima): recuerda a los negocios Pro los
+ * Cron diario (Cloudflare, 8 a. m. de Lima; ver cloudflare/worker.ts): recuerda a los negocios Pro los
  * reclamos por vencer o vencidos, y a todos los negocios con plan pagado que
  * su plan está por vencer.
  */

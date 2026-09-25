@@ -3,10 +3,16 @@ import { NextResponse, type NextRequest } from "next/server";
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/env";
 
 /**
- * Proxy de Next.js 16 (antes "middleware"): refresca la sesión de Supabase
- * y protege las rutas del panel (/app).
+ * Middleware: refresca la sesión de Supabase y protege las rutas del panel
+ * (/app).
+ *
+ * Next 16 lo renombró a "proxy" y lo corre en Node, pero en Cloudflare
+ * (OpenNext) ese modo es experimental, sin soporte oficial, y casi duplica el
+ * Worker (2,9 MB frente a 1,7 MB comprimido). Como middleware.ts corre en el
+ * runtime edge, que OpenNext sí soporta. Next avisa que está en desuso:
+ * revisar al actualizar Next.
  */
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -44,7 +50,7 @@ export async function proxy(request: NextRequest) {
   return response;
 }
 
-export default proxy;
+export default middleware;
 
 export const config = {
   matcher: ["/app/:path*", "/login", "/registro"],

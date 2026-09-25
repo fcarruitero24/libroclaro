@@ -36,9 +36,10 @@ export default function PrivacyPage() {
           </p>
           <h2>4. Dónde se almacenan</h2>
           <p>
-            Usamos Supabase (base de datos alojada en la región de São Paulo, Brasil) y Vercel para el alojamiento de la
-            aplicación. Los correos se envían mediante Resend. Estos proveedores aplican medidas de seguridad estándar de
-            la industria.
+            Usamos Supabase (base de datos alojada en la región de São Paulo, Brasil) y Cloudflare para el alojamiento de
+            la aplicación. Los correos se envían mediante Resend. Los pagos de los planes los procesa Mercado Pago en su
+            propia página: LibroClaro no recibe ni guarda los datos de tu tarjeta. Estos proveedores aplican medidas de
+            seguridad estándar de la industria.
           </p>
           <h2>5. Conservación</h2>
           <p>

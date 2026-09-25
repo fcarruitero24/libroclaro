@@ -42,3 +42,8 @@ next-env.d.ts
 
 .vercel
 .env*
+
+# cloudflare
+.open-next
+.wrangler
+.dev.vars*

@@ -23,20 +23,22 @@ export const YAPE_NAME = process.env.NEXT_PUBLIC_YAPE_NAME ?? "";
 
 /**
  * URL base de la app. Prioridad: NEXT_PUBLIC_APP_URL → host de la petición →
- * dominio de producción de Vercel → localhost.
+ * localhost. En producción NEXT_PUBLIC_APP_URL va fija en el build.
  */
 export async function getAppUrl(): Promise<string> {
   if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "");
   try {
     const h = await headers();
-    const host = h.get("x-forwarded-host") ?? h.get("host");
+    // Solo "host": Cloudflare enruta por él, así que no se puede falsear. Los
+    // x-forwarded-* en cambio los manda el cliente tal cual y servirían para
+    // meter otro dominio en los enlaces de los correos.
+    const host = h.get("host");
     if (host) {
-      const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+      const proto = /^(localhost|127\.0\.0\.1)(:|$)/.test(host) ? "http" : "https";
       return `${proto}://${host}`;
     }
   } catch {
     // fuera de un request (p. ej. cron)
   }
-  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
   return "http://localhost:3000";
 }

@@ -1,0 +1,27 @@
+// Configuración del Worker de Cloudflare que sirve LibroClaro (plan Free).
+// El build lo arma @opennextjs/cloudflare en .open-next/; cloudflare/worker.ts
+// lo envuelve para añadir el cron diario.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "libroclaro",
+  "main": "cloudflare/worker.ts",
+  "compatibility_date": "2026-09-20",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "libroclaro"
+    }
+  ],
+  // Mismo horario que tenía Vercel: 13:00 UTC = 8 a. m. de Lima.
+  "triggers": {
+    "crons": ["0 13 * * *"]
+  },
+  "observability": {
+    "enabled": true
+  }
+}
