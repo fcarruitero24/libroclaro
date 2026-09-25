@@ -13,6 +13,8 @@ export interface Business {
   plan: string;
   plan_expires_at: string | null;
   mp_preapproval_id: string | null;
+  /** Estado de la suscripción en Mercado Pago: authorized, cancelled, paused o pending. */
+  mp_subscription_status: string | null;
   complaint_seq: number;
   /** Si no es null, el libro está archivado: no acepta reclamos nuevos. */
   archived_at: string | null;

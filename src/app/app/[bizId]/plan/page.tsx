@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Alert, Badge, Button, Card } from "@/components/ui";
+import { cancelarSuscripcion } from "@/lib/actions/billing";
 import { WHATSAPP_NUMBER, YAPE_NAME, YAPE_NUMBER } from "@/lib/env";
 import { fmtDate } from "@/lib/format";
-import { monthlyEquivalent, PLANS, planFor, priceFor, yearlySavings, type BillingPeriod } from "@/lib/plans";
+import { MARGEN_COBRO_MS, monthlyEquivalent, PLANS, planFor, priceFor, yearlySavings, type BillingPeriod } from "@/lib/plans";
 import { createClient } from "@/lib/supabase/server";
 import type { Business } from "@/lib/types";
 
@@ -14,7 +15,15 @@ export default async function PlanPage({
   searchParams,
 }: {
   params: Promise<{ bizId: string }>;
-  searchParams: Promise<{ status?: string; manual?: string; plan?: string; error?: string; periodo?: string }>;
+  searchParams: Promise<{
+    status?: string;
+    manual?: string;
+    plan?: string;
+    error?: string;
+    periodo?: string;
+    cancelar?: string;
+    cancelada?: string;
+  }>;
 }) {
   const { bizId } = await params;
   const sp = await searchParams;
@@ -26,6 +35,13 @@ export default async function PlanPage({
   const period: BillingPeriod = sp.periodo === "mensual" ? "monthly" : "yearly";
   const mpEnabled = Boolean(process.env.MP_ACCESS_TOKEN);
   const manualEnabled = Boolean(YAPE_NUMBER);
+  // Con una suscripción activa no se ofrece pagar otro plan: se crearía una
+  // segunda suscripción y Mercado Pago cobraría las dos.
+  const suscripcionActiva = biz.mp_subscription_status === "authorized" && biz.plan !== "free";
+  const renuevaEl =
+    suscripcionActiva && biz.plan_expires_at
+      ? new Date(new Date(biz.plan_expires_at).getTime() - MARGEN_COBRO_MS).toISOString()
+      : null;
 
   const tab = (value: BillingPeriod, label: string, hint?: string) => {
     const active = period === value;
@@ -53,6 +69,58 @@ export default async function PlanPage({
           {biz.plan !== "free" && biz.plan_expires_at && <> · vigente hasta el {fmtDate(biz.plan_expires_at)}</>}.
         </p>
       </div>
+
+      {suscripcionActiva && (
+        <Card>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 className="font-semibold text-slate-900">Suscripción activa</h3>
+              <p className="text-sm text-slate-600">
+                Se renueva automáticamente
+                {renuevaEl && <> el {fmtDate(renuevaEl)}</>} con el medio de pago que registraste en Mercado Pago.
+              </p>
+            </div>
+            {!sp.cancelar && (
+              <Link href={`/app/${biz.id}/plan?cancelar=1`} className="text-sm font-semibold text-slate-600 underline hover:text-slate-900">
+                Cancelar suscripción
+              </Link>
+            )}
+          </div>
+          {sp.cancelar && (
+            <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+              <p className="font-semibold">¿Seguro que quieres cancelar?</p>
+              <p className="mt-1">
+                No se te volverá a cobrar. Mantienes el plan {current.name}
+                {biz.plan_expires_at && <> hasta el {fmtDate(biz.plan_expires_at)}</>}; después tu libro pasa a Gratis y
+                conserva todos sus reclamos.
+              </p>
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <form action={cancelarSuscripcion}>
+                  <input type="hidden" name="business_id" value={biz.id} />
+                  <Button type="submit" variant="danger">
+                    Sí, cancelar la suscripción
+                  </Button>
+                </form>
+                <Link href={`/app/${biz.id}/plan`} className="text-sm font-semibold text-slate-700 hover:text-slate-900">
+                  No, mantenerla
+                </Link>
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
+
+      {sp.cancelada && (
+        <Alert kind="success">
+          Cancelaste la suscripción: no se te volverá a cobrar. Mantienes el plan {current.name}
+          {biz.plan_expires_at && <> hasta el {fmtDate(biz.plan_expires_at)}</>}; después tu libro pasa a Gratis y conserva
+          todos sus reclamos.
+        </Alert>
+      )}
+      {sp.error === "cancelar" && (
+        <Alert kind="error">No pudimos cancelar la suscripción. Intenta de nuevo en unos minutos.</Alert>
+      )}
+      {sp.error === "sin-suscripcion" && <Alert kind="info">No tienes una suscripción activa que cancelar.</Alert>}
 
       {sp.status === "success" && (
         <Alert kind="success">
@@ -109,7 +177,12 @@ export default async function PlanPage({
                   </li>
                 ))}
               </ul>
-              {id !== "free" && !isCurrent && (
+              {id !== "free" && !isCurrent && suscripcionActiva && (
+                <p className="mt-6 text-xs text-slate-500">
+                  Para cambiar de plan, primero cancela tu suscripción actual.
+                </p>
+              )}
+              {id !== "free" && !isCurrent && !suscripcionActiva && (
                 <div className="mt-6 space-y-2">
                   {mpEnabled && (
                     <form action="/api/checkout" method="post">
