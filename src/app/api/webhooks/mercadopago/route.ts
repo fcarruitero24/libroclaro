@@ -12,9 +12,19 @@ interface Preapproval {
   payer_email?: string;
 }
 
+/**
+ * MP_WEBHOOK_SECRET admite varias claves separadas por coma. Hace falta porque
+ * las credenciales de prueba pertenecen a otra aplicacion (la que Mercado Pago
+ * crea dentro de la cuenta vendedor de prueba) y esa firma con su propia clave.
+ * Aceptar ambas es seguro: la firma solo filtra ruido, porque el estado real de
+ * la suscripcion siempre se vuelve a consultar a Mercado Pago con nuestro token.
+ */
 function verifySignature(request: NextRequest, dataId: string): boolean {
-  const secret = process.env.MP_WEBHOOK_SECRET;
-  if (!secret) return true; // sin secreto configurado no se valida (configúralo en producción)
+  const secrets = (process.env.MP_WEBHOOK_SECRET ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (!secrets.length) return true; // sin secreto configurado no se valida (configúralo en producción)
   const signature = request.headers.get("x-signature") ?? "";
   const requestId = request.headers.get("x-request-id") ?? "";
   const parts = Object.fromEntries(
@@ -27,12 +37,11 @@ function verifySignature(request: NextRequest, dataId: string): boolean {
   const v1 = parts.v1;
   if (!ts || !v1) return false;
   const manifest = `id:${dataId};request-id:${requestId};ts:${ts};`;
-  const expected = createHmac("sha256", secret).update(manifest).digest("hex");
-  try {
-    return timingSafeEqual(Buffer.from(expected, "hex"), Buffer.from(v1, "hex"));
-  } catch {
-    return false;
-  }
+  const recibida = Buffer.from(v1, "hex");
+  return secrets.some((secret) => {
+    const esperada = Buffer.from(createHmac("sha256", secret).update(manifest).digest("hex"), "hex");
+    return esperada.length === recibida.length && timingSafeEqual(esperada, recibida);
+  });
 }
 
 async function fetchPreapproval(id: string, token: string): Promise<Preapproval | null> {
