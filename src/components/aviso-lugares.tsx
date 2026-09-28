@@ -19,7 +19,7 @@ export async function AvisoLugares() {
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=0&color=0b1f1d&data=${encodeURIComponent(demoUrl)}`;
 
   const tarjeta =
-    "reveal group overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg";
+    "reveal group overflow-hidden rounded-2xl bg-white sombra-tarjeta transition duration-200 ease-out hover:-translate-y-0.5 hover:sombra-tarjeta-alta";
 
   return (
     <div className="mt-12 grid gap-5 md:grid-cols-3">
