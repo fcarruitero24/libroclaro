@@ -106,6 +106,62 @@ body {
   animation: fade-rise 300ms 380ms ease-out both;
 }
 
+/* Maqueta del panel (panel-demo.tsx): llegada de un reclamo nuevo.
+   Son de un solo disparo y solo existen con movimiento permitido; con
+   movimiento reducido la maqueta ni siquiera llega a animarse (se
+   queda en su estado final) y esto es una segunda red. */
+@media (prefers-reduced-motion: no-preference) {
+  /* La campana cuelga de arriba: gira desde su argolla y cada vaivén
+     es más corto que el anterior, como una de verdad. */
+  @keyframes panel-campana {
+    0% {
+      transform: rotate(0);
+    }
+    15% {
+      transform: rotate(16deg);
+    }
+    35% {
+      transform: rotate(-12deg);
+    }
+    55% {
+      transform: rotate(7deg);
+    }
+    75% {
+      transform: rotate(-3deg);
+    }
+    100% {
+      transform: rotate(0);
+    }
+  }
+
+  .panel-campana {
+    transform-origin: 50% 2px;
+    animation: panel-campana 700ms cubic-bezier(0.45, 0, 0.55, 1) both;
+  }
+
+  /* El contador que cambia (3 → 4) entra enfocándose con un leve
+     rebote: es el único número que cambia y así se nota por qué. */
+  @keyframes panel-pop {
+    0% {
+      opacity: 0;
+      transform: scale(0.8);
+      filter: blur(2px);
+    }
+    60% {
+      opacity: 1;
+      transform: scale(1.08);
+      filter: blur(0);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  .panel-pop {
+    animation: panel-pop 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
 /* Entrada de la tarjeta del hero. Deliberadamente NO se anima el
    titular: es el elemento más grande de la primera pantalla y
    retrasarlo empeoraría el LCP a cambio de nada. */
