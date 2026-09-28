@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
 
 /**
- * Íconos de trazo para la landing. Van en línea y no desde una
- * librería: son una docena, pesan menos que el import de cualquier
- * paquete de íconos y heredan el color con `currentColor`.
+ * Íconos de trazo para la landing y el menú del panel. Van en línea y no
+ * desde una librería: son un par de docenas, pesan menos que el import de
+ * cualquier paquete de íconos y heredan el color con `currentColor`.
  */
 const trazos = {
   // Numeración correlativa: almohadilla.
@@ -97,6 +97,58 @@ const trazos = {
     <>
       <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
       <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+    </>
+  ),
+
+  // --- Menú lateral del panel ---
+  // Inicio: cuadrícula de cuatro paneles.
+  inicio: (
+    <>
+      <rect x="3" y="3" width="7" height="9" rx="1.5" />
+      <rect x="14" y="3" width="7" height="5" rx="1.5" />
+      <rect x="14" y="12" width="7" height="9" rx="1.5" />
+      <rect x="3" y="16" width="7" height="5" rx="1.5" />
+    </>
+  ),
+  // Plantillas: hoja con líneas de texto.
+  plantilla: (
+    <>
+      <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+      <path d="M14 3v5h5M9 13h6M9 17h4" />
+    </>
+  ),
+  // Ajustes: controles deslizantes (más legible que un engranaje a 20px).
+  ajustes: (
+    <>
+      <path d="M4 7h10M18 7h2M4 17h2M10 17h10" />
+      <circle cx="16" cy="7" r="2" />
+      <circle cx="8" cy="17" r="2" />
+    </>
+  ),
+  // Plan: tarjeta.
+  tarjeta: (
+    <>
+      <rect x="2" y="5" width="20" height="14" rx="2" />
+      <path d="M2 10h20M6 15h4" />
+    </>
+  ),
+  salir: (
+    <>
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <path d="m16 17 5-5-5-5M21 12H9" />
+    </>
+  ),
+  ayuda: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5M12 17.5h.01" />
+    </>
+  ),
+  // IA: chispa de cuatro puntas.
+  chispa: (
+    <>
+      <path d="M12 3c.4 3.6 2.4 5.6 6 6-3.6.4-5.6 2.4-6 6-.4-3.6-2.4-5.6-6-6 3.6-.4 5.6-2.4 6-6z" />
+      <path d="M19 15c.2 1.6 1 2.4 2.5 2.5-1.5.2-2.3 1-2.5 2.5-.2-1.5-1-2.3-2.5-2.5 1.5-.1 2.3-.9 2.5-2.5z" />
     </>
   ),
 } satisfies Record<string, ReactNode>;
