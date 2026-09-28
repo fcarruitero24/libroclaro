@@ -66,9 +66,9 @@ export function RevealOnScroll() {
       // El respaldo cubre el caso en que la transición nunca llega a
       // correr (una pestaña en segundo plano, por ejemplo): sin él, el
       // elemento se quedaría con la transparencia puesta. Tiene que
-      // durar más que la aparición más lenta de la página —600ms de
-      // recorrido detrás de 130ms por puesto en la grilla—, o cortaría
-      // a media animación a las últimas tarjetas.
+      // durar más que la aparición más lenta de la página —400ms de
+      // recorrido detrás de hasta 240ms de cascada—, o cortaría a media
+      // animación a las últimas tarjetas.
       const respaldo = window.setTimeout(() => soltar(el), 2500);
       const alTerminar = () => {
         window.clearTimeout(respaldo);
@@ -90,11 +90,12 @@ export function RevealOnScroll() {
           observer.unobserve(entry.target);
         }
       },
-      // El 18% de margen inferior retrasa el disparo: el elemento tiene
-      // que estar bien dentro de la pantalla para animarse. Con un
-      // margen chico, quien baja a velocidad normal llega cuando la
-      // aparición ya terminó y no percibe nada.
-      { rootMargin: "0px 0px -18% 0px", threshold: 0.12 },
+      // El margen inferior retrasa el disparo para que el elemento ya
+      // esté dentro de la pantalla al animarse: sin margen, quien baja a
+      // velocidad normal llega cuando la aparición ya terminó. Con 18%
+      // se pasaba al otro extremo: el contenido quedaba un buen rato
+      // transparente a la vista antes de empezar. 8% es el punto medio.
+      { rootMargin: "0px 0px -8% 0px", threshold: 0.1 },
     );
 
     pendientes.forEach((el) => observer.observe(el));

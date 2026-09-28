@@ -45,22 +45,26 @@ body {
 @media (prefers-reduced-motion: no-preference) {
   .reveal.will-reveal {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(16px);
     /* La curva frena tarde y largo: es lo que hace que el movimiento
-       se lea como tal en vez de parecer un simple cambio de opacidad. */
+       se lea como tal en vez de parecer un simple cambio de opacidad.
+       Con 600ms y 30px se sentía lento al bajar: 400ms y 16px mantienen
+       el movimiento visible sin hacer esperar. */
     transition:
-      opacity 600ms cubic-bezier(0.22, 1, 0.36, 1),
-      transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+      opacity 400ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 400ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   /* Cascada dentro de una grilla. El índice lo pone el marcado con
      `--i`, no `:nth-child`: el elemento anterior dependía de la
      posición dentro del padre, así que un título suelto que cayera
      de segundo heredaba un retraso que nadie le pidió.
-     130ms es el paso: suficiente para que la cascada se lea como tal
-     mientras uno baja a velocidad normal. */
+     60ms es el paso, con tope en el quinto puesto: basta para que la
+     cascada se lea, y la sexta tarjeta de una grilla o la última
+     pregunta del FAQ ya no esperan más de 240ms para empezar (con
+     130ms sin tope esperaban 650ms o más). */
   .reveal.will-reveal {
-    transition-delay: calc(var(--i, 0) * 130ms);
+    transition-delay: calc(min(var(--i, 0), 4) * 60ms);
   }
 
   .reveal.is-revealed {
