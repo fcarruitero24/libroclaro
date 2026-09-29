@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Icon } from "@/components/icons";
+import { alTerminarEntrada, avisarEntradaTerminada, entradaTerminada } from "@/components/mascota/entrada";
 
 const RESPUESTA =
   "Hola María, lamentamos lo ocurrido. Te cambiamos el producto sin costo esta semana; te escribimos para coordinar el recojo.";
@@ -20,9 +21,9 @@ type Fase = 0 | 1 | 2;
 /**
  * Tarjeta del hero que cuenta el ciclo de un reclamo en bucle.
  *
- * El primer pintado (servidor y cliente) es la fase 0 completa, igual
- * a la tarjeta estática que había antes, así que no hay salto al
- * hidratar. Todo lo que cambia de contenido vive en celdas apiladas
+ * El primer pintado (servidor y cliente) es la fase 0 sin el aviso: el
+ * aviso aparece cuando LibIA termina de entrar (ver mascota/entrada.ts),
+ * así que no hay salto al hidratar. Todo lo que cambia de contenido vive en celdas apiladas
  * de una misma grilla: la tarjeta mide siempre lo mismo y el titular
  * de al lado no se mueve.
  *
@@ -34,6 +35,22 @@ export function HeroDemo() {
   const [activo, setActivo] = useState(false);
   const [fase, setFase] = useState<Fase>(0);
   const [letras, setLetras] = useState(0);
+  // El aviso "Nuevo reclamo recibido" y el ciclo esperan a que LibIA termine
+  // de entrar (se asoma justo por ese borde). En el servidor, oculto.
+  const avisoListo = useSyncExternalStore(alTerminarEntrada, entradaTerminada, () => false);
+
+  useEffect(() => {
+    // Sin LibIA (celular o movimiento reducido) no hay entrada que esperar.
+    const sinLibIA =
+      !window.matchMedia("(min-width: 768px)").matches || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (sinLibIA) {
+      avisarEntradaTerminada();
+      return;
+    }
+    // Red de seguridad: si LibIA no carga o se demora, el aviso sale igual.
+    const espera = window.setTimeout(avisarEntradaTerminada, 12000);
+    return () => window.clearTimeout(espera);
+  }, []);
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -55,7 +72,7 @@ export function HeroDemo() {
   }, []);
 
   useEffect(() => {
-    if (!activo) return;
+    if (!activo || !avisoListo) return;
 
     if (fase === 0) {
       const t = window.setTimeout(() => {
@@ -76,7 +93,7 @@ export function HeroDemo() {
 
     const t = window.setTimeout(() => setFase(0), 4200);
     return () => window.clearTimeout(t);
-  }, [activo, fase, letras]);
+  }, [activo, avisoListo, fase, letras]);
 
   const respondido = fase === 2;
   const escribiendo = fase >= 1;
@@ -87,17 +104,17 @@ export function HeroDemo() {
       <div
         aria-hidden="true"
         className={`anim-toast-in absolute -top-5 right-4 z-20 flex items-center gap-2 rounded-full border border-teal-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-800 shadow-lg transition duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-          fase === 0 ? "translate-y-0 opacity-100" : "-translate-y-3 opacity-0"
+          fase === 0 && avisoListo ? "translate-y-0 opacity-100" : "-translate-y-3 opacity-0"
         }`}
       >
         <span className="relative flex h-5 w-5 items-center justify-center rounded-full bg-teal-600 text-white">
-          <span className={`absolute inset-0 rounded-full bg-teal-500 ${fase === 0 && activo ? "anim-ping-once" : ""}`} />
+          <span className={`absolute inset-0 rounded-full bg-teal-500 ${fase === 0 && activo && avisoListo ? "anim-ping-once" : ""}`} />
           <Icon name="campana" className="relative h-3 w-3" />
         </span>
         Nuevo reclamo recibido
       </div>
 
-      <div className="anim-rise-in rounded-2xl border border-white/10 bg-white p-6 shadow-2xl shadow-black/40">
+      <div data-libia-hoja className="anim-rise-in rounded-2xl border border-white/10 bg-white p-6 shadow-2xl shadow-black/40">
         <div className="flex items-start justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Hoja de reclamación</p>

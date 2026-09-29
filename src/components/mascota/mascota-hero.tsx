@@ -2,70 +2,86 @@
 
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
+import { avisarEntradaTerminada, entradaTerminada } from "./entrada";
 import type { Mascota } from "./escena";
 
 /**
- * La mascota 3D en el hero. El lugar queda reservado desde el primer
- * pintado (el tamaño lo da `className`) y la escena se arma recién cuando
- * el navegador queda libre: Three.js viaja en su propio paquete y no
- * compite con el título ni los botones.
+ * LibIA en el hero. El lienzo cubre la hoja y sus márgenes (el tamaño lo da
+ * `className`), así LibIA puede asomarse por el borde de arriba y bajar a la
+ * esquina inferior derecha. No recibe clics: solo el "asa" que la sigue.
  *
- * - La mirada sigue al cursor en todo el hero; arrastrar sobre la mascota
- *   la gira sin bloquear el scroll vertical en celular (touch-action).
- * - Saluda una vez al aparecer y cada vez que se la toca.
- * - Botones accesibles para saludar y para pausar el movimiento.
- * - Si no hay WebGL o se pierde el contexto, se oculta: la página sigue
- *   completa, la mascota es decorativa.
+ * - Debe estar dentro de un `[data-libia-bloque]` junto a la hoja
+ *   (`[data-libia-hoja]`), que va en `z-10`: el lienzo pasa de z-index 0
+ *   (detrás) a 20 (delante) a mitad de la entrada. Por eso este contenedor
+ *   no puede crear su propio contexto de apilamiento (sin z-index,
+ *   transform ni opacity).
+ * - La escena se arma recién cuando el navegador queda libre y solo desde
+ *   768 px: en celular LibIA no se muestra y Three.js ni se descarga.
+ * - Avisa a la hoja cuando termina la entrada (entrada.ts), o enseguida si no
+ *   habrá entrada: ya vista, movimiento reducido, sin WebGL o pantalla chica.
  * - En Strict Mode el efecto corre dos veces: la bandera `cancelado` evita
- *   que un import que llega tarde arme una escena ya desmontada.
+ *   que un import que llega tarde arme una escena ya desmontada, y como ese
+ *   montaje de prueba no llega a avanzar la entrada, no la consume.
  */
 export function MascotaHero({ className }: { className?: string }) {
-  const escenario = useRef<HTMLDivElement>(null);
+  const raiz = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
+  const asa = useRef<HTMLDivElement>(null);
   const mascota = useRef<Mascota | null>(null);
   const [estado, setEstado] = useState<"cargando" | "lista" | "fallo">("cargando");
   const [pausada, setPausada] = useState(false);
 
   useEffect(() => {
-    const el = escenario.current;
+    const el = raiz.current;
     const cv = canvas.current;
-    if (!el || !cv) return;
+    const toque = asa.current;
+    const hoja = el?.closest("[data-libia-bloque]")?.querySelector<HTMLElement>("[data-libia-hoja]");
+    if (!el || !cv || !toque || !hoja) return;
     const zona = el.closest("section") ?? document.body;
     let cancelado = false;
-    let saludo = 0;
 
+    // Si sale de la portada a mitad de la entrada, cuenta como vista: al volver, LibIA ya está en su sitio.
+    const soltar = () => {
+      const m = mascota.current;
+      if (!m) return;
+      if (m.entradaEmpezada()) avisarEntradaTerminada();
+      m.destruir();
+      mascota.current = null;
+    };
+    const fallar = () => {
+      soltar();
+      avisarEntradaTerminada();
+      setEstado("fallo");
+    };
+
+    const pantalla = window.matchMedia("(min-width: 768px)");
     const arrancar = () => {
       import("./escena")
         .then(({ crearMascota }) => {
-          if (cancelado) return;
+          if (cancelado || !pantalla.matches || mascota.current) return;
           try {
             mascota.current = crearMascota({
               canvas: cv,
-              escenario: el,
+              hoja,
               zonaMirada: zona,
+              zonaToque: toque,
               // Sobre el verde oscuro del hero, la "sombra" es un brillo claro.
               sombra: "#5eead4",
+              entradaYaVista: entradaTerminada(),
               onPausa: setPausada,
-              onFallo: () => {
-                mascota.current?.destruir();
-                mascota.current = null;
-                setEstado("fallo");
-              },
+              onFallo: fallar,
+              onEntradaTerminada: avisarEntradaTerminada,
             });
             setEstado("lista");
-            saludo = window.setTimeout(() => mascota.current?.saludar(), 600);
           } catch {
-            setEstado("fallo");
+            fallar();
           }
         })
         .catch(() => {
-          if (!cancelado) setEstado("fallo");
+          if (!cancelado) fallar();
         });
     };
 
-    // Solo desde tablet (md) para arriba: en celular la mascota no se muestra
-    // y Three.js ni se descarga. Si la ventana crece hasta md, arranca ahí.
-    const pantalla = window.matchMedia("(min-width: 768px)");
     const idle = typeof window.requestIdleCallback === "function";
     let espera = 0;
     let programada = false;
@@ -74,44 +90,58 @@ export function MascotaHero({ className }: { className?: string }) {
       programada = true;
       espera = idle ? window.requestIdleCallback(arrancar, { timeout: 2000 }) : window.setTimeout(arrancar, 700);
     };
+    // Si la ventana baja de 768 px LibIA se oculta (CSS): se libera la escena y la hoja muestra su aviso.
+    const alCambiarPantalla = () => {
+      if (pantalla.matches) {
+        programar();
+        return;
+      }
+      soltar();
+      avisarEntradaTerminada();
+      programada = false;
+    };
     programar();
-    pantalla.addEventListener("change", programar);
+    pantalla.addEventListener("change", alCambiarPantalla);
 
     return () => {
       cancelado = true;
-      pantalla.removeEventListener("change", programar);
+      pantalla.removeEventListener("change", alCambiarPantalla);
       if (idle) window.cancelIdleCallback(espera);
       else window.clearTimeout(espera);
-      window.clearTimeout(saludo);
-      mascota.current?.destruir();
-      mascota.current = null;
+      soltar();
     };
   }, []);
 
   if (estado === "fallo") return null;
 
   return (
-    <div className={cn("no-print", className)}>
-      <div ref={escenario} className="h-full w-full cursor-grab touch-pan-y select-none active:cursor-grabbing">
-        <canvas
-          ref={canvas}
-          role="img"
-          aria-label="Mascota de LibroClaro: un libro verde con manos que te sigue con la mirada y saluda."
-          className="block h-full w-full touch-pan-y"
-        />
-      </div>
+    <div ref={raiz} className={cn("no-print pointer-events-none", className)}>
+      <canvas
+        ref={canvas}
+        role="img"
+        aria-label="LibIA, la mascota de LibroClaro: un libro verde con lentes que se asoma detrás de la hoja, saluda y te sigue con la mirada."
+        className="absolute inset-0 block h-full w-full"
+        style={{ zIndex: 0 }}
+      />
+      {/* Asa invisible sobre LibIA: tocarla la hace saludar y arrastrarla la
+          gira. La escena la coloca y la muestra al terminar la entrada. */}
+      <div
+        ref={asa}
+        aria-hidden="true"
+        className="pointer-events-auto absolute z-[21] hidden cursor-grab touch-pan-y select-none active:cursor-grabbing"
+      />
 
       {/* Controles ocultos a la vista (decisión de Fabrizio: no quiere
           botones sobre la mascota). Siguen en el orden de tabulación: quien
           navega con teclado los ve al llegar con Tab y puede pausar el
           movimiento, que es lo que exige la accesibilidad para animaciones
-          continuas. Con el mouse, tocar la mascota la hace saludar. */}
+          continuas. Con el mouse, tocar a LibIA la hace saludar. */}
       {estado === "lista" && (
-        <div className="sr-only flex gap-1 focus-within:not-sr-only focus-within:absolute focus-within:right-0 focus-within:bottom-0">
+        <div className="pointer-events-auto sr-only flex gap-1 focus-within:not-sr-only focus-within:absolute focus-within:right-0 focus-within:bottom-0 focus-within:z-[22]">
           <button
             type="button"
             onClick={() => mascota.current?.saludar()}
-            aria-label="Hacer que la mascota salude"
+            aria-label="Hacer que LibIA salude"
             title="Saludar"
             className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 text-teal-100 backdrop-blur transition hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-300"
           >
@@ -125,7 +155,7 @@ export function MascotaHero({ className }: { className?: string }) {
             type="button"
             onClick={() => mascota.current?.pausar(!pausada)}
             aria-pressed={pausada}
-            aria-label={pausada ? "Reanudar el movimiento de la mascota" : "Pausar el movimiento de la mascota"}
+            aria-label={pausada ? "Reanudar el movimiento de LibIA" : "Pausar el movimiento de LibIA"}
             title={pausada ? "Reanudar" : "Pausar"}
             className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 text-teal-100 backdrop-blur transition hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-300"
           >
