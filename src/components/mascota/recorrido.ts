@@ -107,7 +107,10 @@ export function lugarEnRecorrido(t: number, m: Medidas, g: Gesto): Lugar {
   const hiddenY = top + size * 0.72;
   const peekY = top + size * 0.025;
   const secondY = top - size * 0.06;
-  const clearY = top - size * 0.6 - 8;
+  // Sube lo justo para que toda la silueta (baja 0,463·size bajo el centro) despeje el borde
+  // antes de pasar al frente; la fuente subía 0,6·size + 8 y el hero la recortaba por arriba.
+  // Así la entrada entera cabe en 1,02·size sobre la hoja (page.tsx deja 160 px en md+).
+  const clearY = top - size * 0.49;
   const firstX = right - size * 0.83;
   const secondX = right - size * 0.73;
   const finalX = right + salida - FINAL.dentro * size;

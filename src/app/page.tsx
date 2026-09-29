@@ -114,7 +114,9 @@ export default function HomePage() {
         {/* Hero */}
         <section className="relative overflow-hidden bg-[#0b1f1d]">
           <HeroFondo />
-          <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 md:grid-cols-2 md:py-28">
+          {/* md+: 160 px arriba para que LibIA quepa entera al subir por encima de la hoja
+              (necesita 1,02·size; ver mascota/recorrido.ts) y 80 abajo: el hero crece solo 16 px. */}
+          <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 md:grid-cols-2 md:pt-40 md:pb-20">
             <div className="space-y-6">
               <Badge tone="teal">Cumple con INDECOPI · D.S. 011-2011-PCM</Badge>
               {/* En md la columna es angosta (dos columnas en pantallas medianas),

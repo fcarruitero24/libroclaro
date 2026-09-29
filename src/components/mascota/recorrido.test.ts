@@ -41,8 +41,21 @@ test("pasa al frente recién a los 3,85 s", () => {
   assert.equal(lugar(CAMBIO_DE_CAPA).delante, true);
 });
 
+// Silueta completa de LibIA durante la entrada, medida en el lienzo real (Task 5): sube hasta
+// 0,53·size por encima de su centro y baja hasta 0,463·size por debajo (los brazos cuelgan
+// un poco bajo el libro).
+const SOBRE_EL_CENTRO = 0.53;
+const BAJO_EL_CENTRO = 0.47;
+
 test("despeja el borde antes de pasar al frente", () => {
-  assert.ok(lugar(CAMBIO_DE_CAPA).y + 0.5 * 150 <= 260);
+  assert.ok(lugar(CAMBIO_DE_CAPA).y + BAJO_EL_CENTRO * 150 <= 260);
+});
+
+test("toda la entrada cabe en 1,02·size sobre la hoja (el espacio que deja el hero)", () => {
+  for (let t = 0; t <= DURACION_ENTRADA; t += 0.01) {
+    const arriba = lugar(t).y - SOBRE_EL_CENTRO * 150;
+    assert.ok(arriba >= 260 - 1.02 * 150, `a los ${t.toFixed(2)} s llega a ${arriba.toFixed(1)}`);
+  }
 });
 
 test("termina en la esquina inferior derecha, asentada", () => {
