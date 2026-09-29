@@ -15,7 +15,7 @@ Libro de Reclamaciones Virtual para negocios peruanos. Obligatorio por ley para 
 - **Plazo legal**: 15 días hábiles calculados con feriados de Perú; el panel muestra la cuenta regresiva y marca vencidos.
 - **Panel del negocio**: lista, filtros, detalle, respuesta con envío de correo al consumidor, exportación CSV (Pro).
 - **Instalación**: enlace, snippet HTML con el aviso y código QR para el local.
-- **Monetización**: prueba gratis de 30 días con todo Pro (sin tarjeta, una por cuenta y por RUC; al vencer el libro deja de recibir reclamos pero conserva sus hojas), Pro S/ 149/año o S/ 19/mes, Empresa S/ 499/año o S/ 59/mes. Pago con tarjeta vía Mercado Pago (suscripción) o manual por Yape/Plin con activación por API.
+- **Monetización**: prueba gratis de 30 días con todo Pro (sin tarjeta, una por cuenta y por RUC; al vencer el libro deja de recibir reclamos pero conserva sus hojas), Pro S/ 149/año o S/ 19/mes, Empresa S/ 499/año o S/ 59/mes. Pago solo con tarjeta de crédito o débito vía Mercado Pago (suscripción mensual o anual); las billeteras como Yape y Plin se descartaron el 2026-09-28. Activación manual por API para soporte o cortesías.
 - **Cron diario** (Vercel) que recuerda a los negocios Pro los reclamos por vencer.
 
 ## Stack
@@ -37,7 +37,7 @@ src/app/
   h/[token]/                  Hoja de reclamación pública (PDF)
   api/checkout                Crea suscripción en Mercado Pago
   api/webhooks/mercadopago    Activa el plan al autorizarse el pago
-  api/admin/activate          Activación manual (Yape/Plin)
+  api/admin/activate          Activación manual (soporte)
   api/cron/reminders          Recordatorios diarios (Pro)
 src/lib/                      supabase/, actions/, plans.ts, business-days.ts, email.ts
 supabase/migrations/          Esquema SQL. 0001 aplicado; aplicar cada nueva desde el SQL Editor de Supabase
@@ -65,13 +65,13 @@ La URL y la clave anon de Supabase ya vienen por defecto en `src/lib/env.ts` (so
    - `SUPABASE_SERVICE_ROLE_KEY` (Supabase → Project Settings → API)
    - `RESEND_API_KEY` y `EMAIL_FROM` (verifica tu dominio en Resend)
    - `ADMIN_SECRET`, `CRON_SECRET` (cadenas aleatorias largas)
-   - `NEXT_PUBLIC_YAPE_NUMBER`, `NEXT_PUBLIC_YAPE_NAME`, `NEXT_PUBLIC_WHATSAPP_NUMBER`
+   - `NEXT_PUBLIC_WHATSAPP_NUMBER` (cuando haya número de empresa)
    - `MP_ACCESS_TOKEN`, `MP_WEBHOOK_SECRET` cuando tengas cuenta de Mercado Pago
    - Redeploy después de guardarlas.
 4. **Mercado Pago** (opcional al inicio): crea la aplicación en *Tus integraciones*, copia el Access Token de producción y registra el webhook `https://TU-DOMINIO/api/webhooks/mercadopago` con el evento *Suscripciones (preapproval)*.
 5. **Dominio propio**: agrega `libroclaro.pe` (o el que compres) en Vercel y actualiza `NEXT_PUBLIC_APP_URL`, la Site URL de Supabase y la URL del webhook.
 
-## Activar un plan pagado por Yape/Plin
+## Activar un plan a mano
 
 ```bash
 curl -X POST https://TU-DOMINIO/api/admin/activate \

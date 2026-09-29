@@ -6,6 +6,8 @@ import { HeroDemo } from "@/components/hero-demo";
 import { MascotaHero } from "@/components/mascota/mascota-hero";
 import { HeroFondo } from "@/components/hero-fondo";
 import { Icon, type IconName } from "@/components/icons";
+import { LogosDeTarjetas, MarcaMercadoPago } from "@/components/logos-de-pago";
+import { NormativaPeruana } from "@/components/normativa";
 import { PanelDemo } from "@/components/panel-demo";
 import { IlusAviso, IlusRecibe, IlusRegistro } from "@/components/pasos-ilustraciones";
 import { PreciosPlanes } from "@/components/precios-planes";
@@ -337,6 +339,8 @@ export default function HomePage() {
           </div>
         </section>
 
+        <NormativaPeruana />
+
         {/* Precios */}
         <section id="precios" className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
           <div className="reveal mx-auto max-w-2xl text-center">
@@ -347,8 +351,14 @@ export default function HomePage() {
             </p>
           </div>
           <PreciosPlanes />
-          <p className="mt-6 text-center text-sm text-slate-500">
-            Pagos con Yape, Plin o tarjeta. Cancela cuando quieras. Todos los planes reciben reclamos ilimitados: nunca
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-3 text-sm text-slate-500">
+            <span className="inline-flex items-center gap-1.5">
+              Pagos procesados por <MarcaMercadoPago />
+            </span>
+            <LogosDeTarjetas />
+          </div>
+          <p className="mt-4 text-center text-sm text-slate-500">
+            Pagas con tarjeta de crédito o débito. Cancela cuando quieras. Todos los planes reciben reclamos ilimitados: nunca
             te cobramos por recibir más.
           </p>
         </section>

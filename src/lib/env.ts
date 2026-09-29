@@ -17,9 +17,6 @@ export const APP_NAME = "LibroClaro";
 
 /** WhatsApp de soporte/ventas (solo dígitos, con código de país). */
 export const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "";
-/** Número de Yape/Plin para pagos manuales. */
-export const YAPE_NUMBER = process.env.NEXT_PUBLIC_YAPE_NUMBER ?? "";
-export const YAPE_NAME = process.env.NEXT_PUBLIC_YAPE_NAME ?? "";
 
 /**
  * URL base de la app. Prioridad: NEXT_PUBLIC_APP_URL → host de la petición →

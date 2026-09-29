@@ -30,8 +30,8 @@ export default function TermsPage() {
             registrar un medio de pago; la prueba se otorga una sola vez por cuenta y por RUC. Si al terminar la prueba o
             el periodo pagado el Negocio no contrata un plan, su Libro de Reclamaciones Virtual deja de recibir reclamos
             nuevos, pero sus hojas se conservan y el Negocio puede consultarlas, responder las pendientes y descargarlas.
-            Los planes de pago se facturan mensualmente por adelantado en soles (PEN) a través
-            de Mercado Pago o por transferencia (Yape/Plin). El Negocio puede cancelar en cualquier momento; los beneficios
+            Los planes de pago se cobran por adelantado, mes a mes o por año, en soles (PEN) a
+            través de Mercado Pago, con tarjeta de crédito o débito. El Negocio puede cancelar en cualquier momento; los beneficios
             se mantienen hasta el fin del periodo pagado. No se realizan reembolsos por periodos parciales.
           </p>
           <h2>4. Disponibilidad y datos</h2>

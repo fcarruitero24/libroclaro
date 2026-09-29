@@ -3,7 +3,7 @@ import { PLANS, type PlanId } from "@/lib/plans";
 import { createAdminClient, hasAdminClient } from "@/lib/supabase/admin";
 
 /**
- * Activación manual de planes (pagos por Yape/Plin).
+ * Activación manual de planes (soporte, cortesías o pagos fuera de Mercado Pago).
  *
  * curl -X POST https://TU-DOMINIO/api/admin/activate \
  *   -H "x-admin-secret: $ADMIN_SECRET" -H "Content-Type: application/json" \
