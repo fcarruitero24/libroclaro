@@ -144,19 +144,20 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* La mascota flota en la esquina inferior derecha de la tarjeta,
-                casi toda por fuera y con aire arriba para la mano del saludo.
-                Cuánto sale a la derecha depende del margen que queda hasta el
-                borde de la pantalla (el hero recorta lo que sobra): 16px hasta
-                xl, 48px en xl y 112px desde 1400px. En celular no se muestra
-                (decisión de Fabrizio): el componente tampoco descarga Three.js.
-                El lienzo es más ancho que alto (~1,25:1) a propósito: al bajar la
-                mano tras el saludo, el brazo queda estirado a la derecha, y con
-                un lienzo angosto se cortaba contra el borde. El alto manda el
-                tamaño del libro, así que ensanchar apenas lo agranda (~5 %). */}
-            <div className="relative">
-              <MascotaHero className="absolute z-30 hidden md:-right-4 md:-bottom-16 md:block md:h-[200px] md:w-[250px] xl:-right-12 xl:-bottom-20 xl:h-[225px] xl:w-[285px] min-[87.5rem]:-right-28 min-[87.5rem]:h-[250px] min-[87.5rem]:w-[315px]" />
-              <HeroDemo />
+            {/* LibIA se asoma por detrás de la hoja y termina flotando en su
+                esquina inferior derecha. El lienzo cubre la hoja más el aire que
+                necesita la entrada (arriba, para asomarse y despejar el borde;
+                abajo, la sombra) y sale a la derecha lo que deja el borde de la
+                pantalla (el hero recorta lo que sobra): 16px hasta xl, 48px en
+                xl y 112px desde 1400px. `isolate` encierra las capas: la hoja
+                va en z-10 y el lienzo pasa de 0 (detrás) a 20 (delante) a
+                mitad de la entrada. En celular no se muestra (decisión de
+                Fabrizio): el componente tampoco descarga Three.js. */}
+            <div data-libia-bloque className="relative isolate">
+              <MascotaHero className="absolute -top-[210px] -bottom-[120px] left-0 hidden md:-right-4 md:block xl:-right-12 min-[87.5rem]:-right-28" />
+              <div className="relative z-10">
+                <HeroDemo />
+              </div>
             </div>
           </div>
 
