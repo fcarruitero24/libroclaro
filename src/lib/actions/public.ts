@@ -6,6 +6,7 @@ import { sendEmail, tplBusinessAlert, tplConsumerCopy } from "@/lib/email";
 import { getAppUrl } from "@/lib/env";
 import { planFor } from "@/lib/plans";
 import { createClient } from "@/lib/supabase/server";
+import { ipDelCliente, TEXTO_TURNSTILE, verificarTurnstile } from "@/lib/turnstile";
 import type { ActionState } from "@/lib/types";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -60,8 +61,11 @@ export async function submitComplaint(_prev: ActionState, formData: FormData): P
   if (Object.keys(fieldErrors).length) return { fieldErrors, error: "Revisa los campos marcados en rojo." };
 
   const h = await headers();
-  const ip = (h.get("x-forwarded-for") ?? "").split(",")[0].trim() || h.get("x-real-ip") || null;
+  const ip = ipDelCliente(h);
   const ua = (h.get("user-agent") ?? "").slice(0, 300) || null;
+
+  // Al final, después de validar los campos: el token sirve una sola vez.
+  if (!(await verificarTurnstile(formData, ip))) return { error: TEXTO_TURNSTILE };
 
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("submit_complaint", {

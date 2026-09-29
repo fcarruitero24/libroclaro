@@ -1,5 +1,6 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
 import { notifyPlatform, tplPlatformNewBusiness } from "@/lib/email";
@@ -8,6 +9,7 @@ import { slugify } from "@/lib/format";
 import { estadoDelPlan, insigniaDelPlan } from "@/lib/plans";
 import { isValidRucFormat, lookupRuc } from "@/lib/ruc";
 import { createClient } from "@/lib/supabase/server";
+import { ipDelCliente, TEXTO_TURNSTILE, verificarTurnstile } from "@/lib/turnstile";
 import type { ActionState } from "@/lib/types";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -45,6 +47,12 @@ export async function signUpWithBusiness(_prev: ActionState, formData: FormData)
   if (password.length < 8) fieldErrors.password = "La contraseña debe tener al menos 8 caracteres.";
   if (address.length < 5) fieldErrors.address = "Ingresa la dirección de tu establecimiento.";
   if (!acepta) fieldErrors.acepta = "Debes aceptar la declaración para continuar.";
+
+  // Los errores de formato vuelven sin gastar el token anti-bots, que sirve una
+  // sola vez. Recién después se confirma que no es un bot, antes de consultar
+  // SUNAT y de crear la cuenta.
+  if (Object.keys(fieldErrors).length) return { fieldErrors, error: "Revisa los campos marcados." };
+  if (!(await verificarTurnstile(formData, ipDelCliente(await headers())))) return { error: TEXTO_TURNSTILE };
 
   // Fuente de verdad del nombre: SUNAT, no el navegador.
   let verificado = false;

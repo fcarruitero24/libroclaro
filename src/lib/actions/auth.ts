@@ -1,8 +1,10 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getAppUrl } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
+import { ipDelCliente, TEXTO_TURNSTILE, verificarTurnstile } from "@/lib/turnstile";
 import type { ActionState } from "@/lib/types";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -25,6 +27,8 @@ export async function signIn(_prev: ActionState, formData: FormData): Promise<Ac
   if (!EMAIL_RE.test(email) || !password) {
     return { error: "Ingresa un correo válido y tu contraseña." };
   }
+  // Frena a los bots que prueban contraseñas.
+  if (!(await verificarTurnstile(formData, ipDelCliente(await headers())))) return { error: TEXTO_TURNSTILE };
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });

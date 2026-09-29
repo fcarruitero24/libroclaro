@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { SubmitButton } from "@/components/submit-button";
+import { Turnstile } from "@/components/turnstile";
 import { Alert, Field, Input } from "@/components/ui";
 import { signIn } from "@/lib/actions/auth";
 import type { ActionState } from "@/lib/types";
@@ -21,6 +22,7 @@ export function LoginForm({ next }: { next: string }) {
       <Field label="Contraseña" htmlFor="password" required>
         <Input id="password" name="password" type="password" autoComplete="current-password" required minLength={8} />
       </Field>
+      <Turnstile reinicio={state} />
       <SubmitButton className="w-full" pendingText="Ingresando…">
         Iniciar sesión
       </SubmitButton>

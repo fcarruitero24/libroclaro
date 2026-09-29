@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { SubmitButton } from "@/components/submit-button";
+import { Turnstile } from "@/components/turnstile";
 import { Alert, Field, Input } from "@/components/ui";
 import { signUpWithBusiness } from "@/lib/actions/onboarding";
 import { slugify } from "@/lib/format";
@@ -235,6 +236,7 @@ export function SignupForm({ appUrl }: { appUrl: string }) {
         {fe.acepta && <p className="text-xs text-red-600">{fe.acepta}</p>}
       </div>
 
+      <Turnstile reinicio={state} />
       <SubmitButton className="w-full py-3 text-base" pendingText="Creando tu libro…">
         Crear mi libro de reclamaciones
       </SubmitButton>
