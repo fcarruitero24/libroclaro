@@ -140,7 +140,6 @@ export default function HomePage() {
                   </span>
                 </ButtonLink>
               </div>
-              <p className="text-sm text-slate-400">Sin tarjeta · Reclamos ilimitados · Hecho en Perú 🇵🇪</p>
             </div>
 
             {/* La mascota flota en la esquina inferior derecha de la tarjeta,
