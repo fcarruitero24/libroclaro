@@ -1,10 +1,18 @@
-// Configuración del Worker de Cloudflare que sirve LibroClaro (plan Free).
+// Configuración del Worker de Cloudflare que sirve LibroClaro (Workers Paid:
+// el plan Free corta cada visita a los 10 ms de CPU y la web usa 13-60 ms).
 // El build lo arma @opennextjs/cloudflare en .open-next/; cloudflare/worker.ts
-// lo envuelve para añadir el cron diario.
+// lo envuelve para añadir el cron diario y la redirección a libroclaro.pe.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "libroclaro",
   "main": "cloudflare/worker.ts",
+  // Dominio propio. Al publicar, Cloudflare apunta los dos nombres al Worker
+  // y reemplaza los registros A que iban a Vercel. www y http redirigen a
+  // https://libroclaro.pe dentro del Worker.
+  "routes": [
+    { "pattern": "libroclaro.pe", "custom_domain": true },
+    { "pattern": "www.libroclaro.pe", "custom_domain": true }
+  ],
   "compatibility_date": "2026-09-20",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {
