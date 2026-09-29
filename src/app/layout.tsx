@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import { Geist, Geist_Mono, Sora } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -12,10 +12,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const instrumentSerif = Instrument_Serif({
-  variable: "--font-instrument-serif",
+/** Títulos. Es variable: un solo archivo trae todos los pesos. */
+const sora = Sora({
+  variable: "--font-sora",
   subsets: ["latin"],
-  weight: "400",
 });
 
 export const metadata: Metadata = {
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     template: "%s · LibroClaro",
   },
   description:
-    "Cumple con INDECOPI en 5 minutos. Libro de Reclamaciones Virtual con numeración correlativa, copia automática al consumidor y control del plazo de 15 días hábiles. Gratis para empezar.",
+    "Cumple con INDECOPI en 5 minutos. Libro de Reclamaciones Virtual con numeración correlativa, copia automática al consumidor y control del plazo de 15 días hábiles. Prueba 30 días gratis.",
   keywords: [
     "libro de reclamaciones virtual",
     "libro de reclamaciones digital",
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "LibroClaro · Libro de Reclamaciones Virtual",
     description:
-      "Libro de Reclamaciones Virtual para negocios peruanos. Gratis para empezar, listo en 5 minutos.",
+      "Libro de Reclamaciones Virtual para negocios peruanos. Prueba 30 días gratis, listo en 5 minutos.",
     locale: "es_PE",
     type: "website",
   },
@@ -48,7 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="es"
       data-scroll-behavior="smooth"
-      className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${sora.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

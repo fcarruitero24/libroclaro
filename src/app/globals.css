@@ -3,7 +3,7 @@
 @theme inline {
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
-  --font-display: var(--font-instrument-serif), Georgia, serif;
+  --font-display: var(--font-sora), ui-sans-serif, system-ui, sans-serif;
 }
 
 :root {
@@ -19,6 +19,50 @@ body {
   color: #0f172a;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+}
+
+/* Títulos sin palabras huérfanas en la última línea; párrafos con
+   cortes más parejos. Los navegadores que no lo soportan lo ignoran. */
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+/* Sombras de tarjeta en vez de borde gris: un anillo casi invisible
+   para el contorno y una sombra larga teñida de teal, del mismo tono
+   que la marca, en lugar del gris genérico. Se adaptan a fondo blanco
+   y crema por igual. */
+@utility sombra-tarjeta {
+  box-shadow:
+    0 0 0 1px rgb(28 25 23 / 0.06),
+    0 1px 2px rgb(28 25 23 / 0.05),
+    0 10px 28px -14px rgb(15 118 110 / 0.22);
+}
+
+@utility sombra-tarjeta-alta {
+  box-shadow:
+    0 0 0 1px rgb(28 25 23 / 0.07),
+    0 2px 4px rgb(28 25 23 / 0.05),
+    0 22px 44px -18px rgb(15 118 110 / 0.32);
+}
+
+/* Grano de papel sobre la landing: rompe la planitud de los fondos
+   crema sin que se note como textura. Es una imagen fija y repetida
+   (no se recalcula al bajar) y no recibe clics. Solo en la landing:
+   el panel y los formularios quedan limpios. */
+.grano::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
 }
 
 /* ---------------------------------------------------------------
@@ -45,22 +89,26 @@ body {
 @media (prefers-reduced-motion: no-preference) {
   .reveal.will-reveal {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(16px);
     /* La curva frena tarde y largo: es lo que hace que el movimiento
-       se lea como tal en vez de parecer un simple cambio de opacidad. */
+       se lea como tal en vez de parecer un simple cambio de opacidad.
+       Con 600ms y 30px se sentía lento al bajar: 400ms y 16px mantienen
+       el movimiento visible sin hacer esperar. */
     transition:
-      opacity 600ms cubic-bezier(0.22, 1, 0.36, 1),
-      transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+      opacity 400ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 400ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   /* Cascada dentro de una grilla. El índice lo pone el marcado con
      `--i`, no `:nth-child`: el elemento anterior dependía de la
      posición dentro del padre, así que un título suelto que cayera
      de segundo heredaba un retraso que nadie le pidió.
-     130ms es el paso: suficiente para que la cascada se lea como tal
-     mientras uno baja a velocidad normal. */
+     60ms es el paso, con tope en el quinto puesto: basta para que la
+     cascada se lea, y la sexta tarjeta de una grilla o la última
+     pregunta del FAQ ya no esperan más de 240ms para empezar (con
+     130ms sin tope esperaban 650ms o más). */
   .reveal.will-reveal {
-    transition-delay: calc(var(--i, 0) * 130ms);
+    transition-delay: calc(min(var(--i, 0), 4) * 60ms);
   }
 
   .reveal.is-revealed {
@@ -100,6 +148,62 @@ body {
 
 .anim-fade-rise {
   animation: fade-rise 300ms 380ms ease-out both;
+}
+
+/* Maqueta del panel (panel-demo.tsx): llegada de un reclamo nuevo.
+   Son de un solo disparo y solo existen con movimiento permitido; con
+   movimiento reducido la maqueta ni siquiera llega a animarse (se
+   queda en su estado final) y esto es una segunda red. */
+@media (prefers-reduced-motion: no-preference) {
+  /* La campana cuelga de arriba: gira desde su argolla y cada vaivén
+     es más corto que el anterior, como una de verdad. */
+  @keyframes panel-campana {
+    0% {
+      transform: rotate(0);
+    }
+    15% {
+      transform: rotate(16deg);
+    }
+    35% {
+      transform: rotate(-12deg);
+    }
+    55% {
+      transform: rotate(7deg);
+    }
+    75% {
+      transform: rotate(-3deg);
+    }
+    100% {
+      transform: rotate(0);
+    }
+  }
+
+  .panel-campana {
+    transform-origin: 50% 2px;
+    animation: panel-campana 700ms cubic-bezier(0.45, 0, 0.55, 1) both;
+  }
+
+  /* El contador que cambia (3 → 4) entra enfocándose con un leve
+     rebote: es el único número que cambia y así se nota por qué. */
+  @keyframes panel-pop {
+    0% {
+      opacity: 0;
+      transform: scale(0.8);
+      filter: blur(2px);
+    }
+    60% {
+      opacity: 1;
+      transform: scale(1.08);
+      filter: blur(0);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  .panel-pop {
+    animation: panel-pop 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
 }
 
 /* Entrada de la tarjeta del hero. Deliberadamente NO se anima el
@@ -467,6 +571,70 @@ body {
 
 .anim-precio {
   animation: precio 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ---------------------------------------------------------------
+   Panel del negocio. Es una herramienta de uso diario: el movimiento
+   es corto (≤ 220ms) y sutil, para que se sienta vivo sin hacer
+   esperar a quien entra veinte veces al día.
+   --------------------------------------------------------------- */
+
+/* Esqueleto de carga: un brillo que pasa, en vez de un spinner. */
+.esqueleto {
+  background: linear-gradient(90deg, rgb(226 232 240 / 0.7) 0%, rgb(241 245 249 / 0.95) 50%, rgb(226 232 240 / 0.7) 100%);
+  background-size: 200% 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .esqueleto {
+    animation: esqueleto-brillo 1.3s ease-in-out infinite;
+  }
+
+  @keyframes esqueleto-brillo {
+    from {
+      background-position: 100% 0;
+    }
+    to {
+      background-position: -100% 0;
+    }
+  }
+
+  /* Entrada de cada sección. Se aplica al hijo directo del <main>: al
+     navegar, React inserta un elemento nuevo (el esqueleto y luego el
+     contenido) y la animación corre sola al insertarse, sin JavaScript.
+     Un re-render que conserva el elemento no la repite. */
+  .panel-contenido > * {
+    animation: panel-entrada 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes panel-entrada {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Tutorial: la tarjeta entra enfocándose. */
+  .tutorial-tarjeta {
+    animation: tutorial-entrada 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes tutorial-entrada {
+    from {
+      opacity: 0;
+      transform: translateY(6px) scale(0.97);
+      filter: blur(2px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+      filter: none;
+    }
+  }
 }
 
 @media print {

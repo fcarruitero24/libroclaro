@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { cache } from "react";
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/env";
 
 /** Cliente de Supabase para Server Components, Server Actions y Route Handlers. */
@@ -22,13 +23,18 @@ export async function createClient() {
   });
 }
 
-export async function getUser() {
+/**
+ * Usuario de la sesión. Con `cache`, los layouts y páginas que lo piden en
+ * una misma carga comparten una sola consulta a Supabase en vez de una
+ * por componente. Fuera de un render (Server Actions) no guarda nada.
+ */
+export const getUser = cache(async () => {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   return user;
-}
+});
 
 export async function requireUser() {
   const user = await getUser();

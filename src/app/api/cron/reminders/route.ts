@@ -20,9 +20,9 @@ interface Row {
 }
 
 /**
- * Cron diario (Cloudflare, 8 a. m. de Lima; ver cloudflare/worker.ts): recuerda a los negocios Pro los
- * reclamos por vencer o vencidos, y a todos los negocios con plan pagado que
- * su plan está por vencer.
+ * Cron diario (Cloudflare, 8 a. m. de Lima; ver cloudflare/worker.ts): recuerda
+ * a los negocios Pro los reclamos por vencer o vencidos, y a todos los negocios
+ * con plan pagado o en prueba que su plan o su prueba está por terminar.
  */
 export async function GET(request: NextRequest) {
   const cronSecret = process.env.CRON_SECRET;
@@ -82,10 +82,11 @@ function diasHasta(fecha: string): number {
  * Qué aviso toca. Son rangos y no días exactos: si el cron falla un día, el
  * aviso sale al siguiente, y la tabla plan_reminders impide que se repita.
  */
-function etapa(dias: number): "7d" | "1d" | "0d" | null {
-  if (dias >= 2 && dias <= 7) return "7d";
+function etapa(dias: number): "7d" | "3d" | "1d" | "0d" | null {
+  if (dias >= 4 && dias <= 7) return "7d";
+  if (dias >= 2 && dias <= 3) return "3d";
   if (dias === 1) return "1d";
-  // Los 3 días de gracia: después el plan ya es Gratis y no hay nada que avisar.
+  // Los 3 días de gracia: después el libro ya está inactivo y no hay nada que avisar.
   if (dias <= 0 && dias >= -2) return "0d";
   return null;
 }
@@ -93,15 +94,20 @@ function etapa(dias: number): "7d" | "1d" | "0d" | null {
 async function recordatoriosDePlan(admin: ReturnType<typeof createAdminClient>, appUrl: string) {
   const { data, error } = await admin
     .from("businesses")
-    .select("id, name, email, plan, plan_expires_at, mp_subscription_status")
+    .select("id, owner_id, name, email, plan, plan_expires_at, en_prueba, mp_subscription_status")
     .neq("plan", "free")
     .is("archived_at", null)
     .gte("plan_expires_at", new Date(Date.now() - 4 * 86400000).toISOString())
-    .lte("plan_expires_at", new Date(Date.now() + 8 * 86400000).toISOString());
+    .lte("plan_expires_at", new Date(Date.now() + 8 * 86400000).toISOString())
+    .order("created_at", { ascending: true });
   if (error) {
     console.error("[cron:planes]", error.message);
     return { error: error.message };
   }
+
+  // Los negocios de una misma cuenta comparten el plan (migración 0008): un
+  // solo aviso por dueño y vencimiento, al negocio más antiguo.
+  const avisados = new Set<string>();
 
   let enviados = 0;
   let repetidos = 0;
@@ -109,6 +115,13 @@ async function recordatoriosDePlan(admin: ReturnType<typeof createAdminClient>, 
     if (!b.plan_expires_at) continue;
     const st = etapa(diasHasta(b.plan_expires_at));
     if (!st) continue;
+    const seRenuevaSolo = b.mp_subscription_status === "authorized";
+    // Con suscripción activa, a 3 días del vencimiento el cobro recién toca
+    // (vence = cobro + MARGEN_COBRO_MS): avisar ahí diría que falló sin saberlo.
+    if (seRenuevaSolo && st === "3d") continue;
+    const cuenta = `${b.owner_id}|${b.plan_expires_at}`;
+    if (avisados.has(cuenta)) continue;
+    avisados.add(cuenta);
 
     // Se reserva el aviso antes de mandarlo: si la fila ya existía, ya salió.
     const clave = { business_id: b.id, expires_at: b.plan_expires_at, stage: st };
@@ -123,7 +136,8 @@ async function recordatoriosDePlan(admin: ReturnType<typeof createAdminClient>, 
       businessName: b.name,
       planName: PLANS[b.plan as PlanId]?.name ?? b.plan,
       stage: st,
-      seRenuevaSolo: b.mp_subscription_status === "authorized",
+      prueba: b.en_prueba,
+      seRenuevaSolo,
       venceEl: b.plan_expires_at,
       cobroEl: new Date(vence - MARGEN_COBRO_MS).toISOString(),
       graciaHasta: new Date(vence + GRACE_MS).toISOString(),

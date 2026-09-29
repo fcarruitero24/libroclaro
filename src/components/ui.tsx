@@ -4,8 +4,10 @@ import { cn } from "@/lib/cn";
 
 type Variant = "primary" | "secondary" | "ghost" | "danger" | "white";
 
+// active: un leve hundimiento al presionar, para que el clic se sienta.
+// focus-visible: anillo solo al navegar con teclado, nunca con el mouse.
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600 disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100";
 
 const variants: Record<Variant, string> = {
   primary: "bg-teal-700 text-white shadow-sm hover:bg-teal-800",
@@ -81,7 +83,8 @@ export function Field({
 
 export function Card({ className, children, id }: { className?: string; children: ReactNode; id?: string }) {
   return (
-    <div id={id} className={cn("rounded-xl border border-slate-200 bg-white p-6 shadow-sm", className)}>
+    // Mismo lenguaje que la portada: sin borde gris, contorno por sombra teñida.
+    <div id={id} className={cn("rounded-2xl bg-white p-6 sombra-tarjeta", className)}>
       {children}
     </div>
   );

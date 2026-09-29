@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { CategoriaSelector, NotaForm } from "@/components/reclamo-controles";
 import { ResponseForm } from "@/components/response-form";
 import { StatusBadge } from "@/components/status-badge";
-import { Badge, Card } from "@/components/ui";
+import { Badge } from "@/components/ui";
 import { businessDaysBetween, businessDaysLeft } from "@/lib/business-days";
 import { categoriaLabel } from "@/lib/categorias";
 import { fmtDate, fmtDateTime, fmtMoney, ITEM_LABEL, KIND_LABEL, STATUS_LABEL } from "@/lib/format";
@@ -21,6 +21,18 @@ function numeroWhatsapp(tel: string | null): string | null {
   return d.length >= 10 ? d : null;
 }
 
+/** Tarjeta del panel: sin borde gris, el contorno lo da la sombra teñida. */
+const tarjeta = "rounded-2xl bg-white sombra-tarjeta";
+
+/**
+ * Detalle de una hoja de reclamación.
+ *
+ * Dos columnas: a la izquierda, en una sola tarjeta, lo que el dueño
+ * tiene que leer (qué pasó, qué pide, quién es); a la derecha, fija al
+ * bajar, lo que tiene que hacer (responder) y el estado del plazo. El
+ * historial completo sigue ahí, plegado: es la constancia ante una
+ * fiscalización, pero no hace falta verlo para responder.
+ */
 export default async function ComplaintDetailPage({ params }: { params: Promise<{ bizId: string; id: string }> }) {
   const { bizId, id } = await params;
   const supabase = await createClient();
@@ -36,25 +48,29 @@ export default async function ComplaintDetailPage({ params }: { params: Promise<
   const plan = planFor(biz);
   const historial = (eventos ?? []) as ComplaintEvent[];
 
-  const abierto = c.status === "pendiente" || c.status === "en_proceso";
+  const tipo = KIND_LABEL[c.kind].toLowerCase();
   const wa = numeroWhatsapp(c.consumer_phone);
   const waTexto = encodeURIComponent(
-    `Hola ${c.consumer_name.split(" ")[0]}, te escribimos de ${biz.name} sobre tu ${KIND_LABEL[c.kind].toLowerCase()} N.º ${c.code}.`,
+    `Hola ${c.consumer_name.split(" ")[0]}, te escribimos de ${biz.name} sobre tu ${tipo} N.º ${c.code}.`,
   );
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      {/* Encabezado: el código y el plazo, que es lo primero que importa. */}
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <Link href={`/app/${bizId}/reclamos`} className="text-sm text-slate-500 hover:text-slate-900">
             ← Volver a reclamos
           </Link>
-          <h2 className="mt-1 flex flex-wrap items-center gap-3 text-2xl font-bold text-slate-900">
-            Hoja N.º {c.code}
-            <StatusBadge status={c.status} />
+          <div className="mt-2 flex flex-wrap items-center gap-3">
+            <h2 className="font-mono text-2xl font-bold tracking-tight text-slate-900">{c.code}</h2>
+            <ChipPlazo complaint={c} />
+          </div>
+          <p className="mt-1.5 flex flex-wrap items-center gap-2 text-sm text-slate-500">
             <Badge tone={c.kind === "queja" ? "violet" : "slate"}>{KIND_LABEL[c.kind]}</Badge>
-          </h2>
-          <p className="mt-1 text-sm text-slate-500">Registrado el {fmtDateTime(c.created_at)}</p>
+            <StatusBadge status={c.status} />
+            <span>Entró el {fmtDateTime(c.created_at)}</span>
+          </p>
         </div>
         <div className="flex flex-wrap gap-2">
           {wa && (
@@ -73,149 +89,187 @@ export default async function ComplaintDetailPage({ params }: { params: Promise<
           <Link
             href={`/h/${c.public_token}`}
             target="_blank"
-            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
           >
-            Ver hoja pública / PDF
+            Ver hoja / PDF
           </Link>
         </div>
       </div>
 
-      <Plazo complaint={c} />
-
-      <div className="grid gap-6 lg:grid-cols-5">
-        <div className="space-y-6 lg:col-span-3">
-          <Card>
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">1. Identificación del consumidor</h3>
-            <dl className="mt-4 grid gap-4 text-sm sm:grid-cols-2">
-              <Item label="Nombre" value={c.consumer_name} />
-              <Item label="Documento" value={`${c.consumer_doc_type} ${c.consumer_doc_number}`} />
-              <Item label="Domicilio" value={c.consumer_address} />
-              <Item label="Teléfono" value={c.consumer_phone ?? "—"} />
-              <Item label="Correo" value={c.consumer_email} />
-              {c.is_minor && <Item label="Padre / madre / apoderado" value={c.guardian_name ?? "—"} />}
-            </dl>
-          </Card>
-          <Card>
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">2. Identificación del bien contratado</h3>
-            <dl className="mt-4 grid gap-4 text-sm sm:grid-cols-2">
-              <Item label="Tipo" value={ITEM_LABEL[c.item_type]} />
-              <Item label="Monto reclamado" value={fmtMoney(c.amount)} />
-              <div className="sm:col-span-2">
-                <Item label="Descripción" value={c.item_description} />
+      <div className="grid items-start gap-6 lg:grid-cols-3">
+        {/* Lo que hay que leer. */}
+        <div className={`${tarjeta} divide-y divide-slate-100 lg:col-span-2`}>
+          <section className="space-y-5 p-6">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Qué motivó {c.kind === "queja" ? "la queja" : "el reclamo"}
+            </h3>
+            <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-1">
+              <div className="min-w-0 flex-1">
+                <p className="text-sm text-slate-500">{ITEM_LABEL[c.item_type]}</p>
+                <p className="mt-0.5 font-medium text-slate-900">{c.item_description}</p>
               </div>
-            </dl>
-          </Card>
-          <Card>
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">3. Detalle de la reclamación</h3>
-            <dl className="mt-4 space-y-4 text-sm">
-              <Item label={`Detalle del ${KIND_LABEL[c.kind].toLowerCase()}`} value={c.detail} pre />
-              <Item label="Pedido del consumidor" value={c.request} pre />
-            </dl>
-          </Card>
-
-          <Card>
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Historial</h3>
-            <p className="mt-1 text-xs text-slate-500">
-              Cada cambio queda registrado con su fecha y no se puede borrar. Si te fiscalizan, es tu constancia.
-            </p>
-            <Historial eventos={historial} />
-            <div className="mt-5 border-t border-slate-100 pt-5">
-              <NotaForm complaintId={c.id} businessId={bizId} />
+              {c.amount !== null && (
+                <div className="text-right">
+                  <p className="text-sm text-slate-500">Monto reclamado</p>
+                  <p className="mt-0.5 font-semibold tabular-nums text-slate-900">{fmtMoney(c.amount)}</p>
+                </div>
+              )}
             </div>
-          </Card>
+            <Bloque titulo={`Detalle ${c.kind === "queja" ? "de la queja" : "del reclamo"}`} texto={c.detail} />
+            <Bloque titulo="Lo que pide" texto={c.request} />
+          </section>
+
+          <section className="p-6">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Quién reclama</h3>
+            <dl className="mt-4 grid gap-x-6 gap-y-4 text-sm sm:grid-cols-2">
+              <Dato label="Nombre" value={c.consumer_name} />
+              <Dato label={c.consumer_doc_type} value={c.consumer_doc_number} />
+              <Dato label="Correo" value={c.consumer_email} />
+              <Dato label="Teléfono" value={c.consumer_phone ?? "—"} />
+              <div className="sm:col-span-2">
+                <Dato label="Domicilio" value={c.consumer_address} />
+              </div>
+              {c.is_minor && <Dato label="Padre, madre o apoderado" value={c.guardian_name ?? "—"} />}
+            </dl>
+          </section>
+
+          <section className="p-6">
+            <div className="max-w-sm">
+              <CategoriaSelector id={c.id} businessId={bizId} actual={c.category} />
+            </div>
+          </section>
         </div>
 
-        <div className="lg:col-span-2">
-          <div className="space-y-4 lg:sticky lg:top-4">
-            <Card>
-              <CategoriaSelector id={c.id} businessId={bizId} actual={c.category} />
-            </Card>
-            <Card>
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">4. Respuesta del proveedor</h3>
-              {c.responded_at && (
-                <p className="mt-2 text-xs text-slate-500">Respondido el {fmtDateTime(c.responded_at)}</p>
-              )}
-              <div className="mt-4">
-                {/* La clave es solo el reclamo: el texto ya vive en el estado del
-                    formulario, y así el aviso de "guardado" no se pierde cuando
-                    la página se refresca con la respuesta nueva. */}
-                <ResponseForm
-                  key={c.id}
-                  complaint={c}
-                  businessName={biz.name}
-                  bizId={bizId}
-                  templates={plan.templates ? ((plantillas ?? []) as ResponseTemplate[]) : null}
-                />
+        {/* Lo que hay que hacer. Fija al bajar en pantallas grandes. */}
+        <div className="space-y-4 lg:sticky lg:top-4">
+          <div className={`${tarjeta} p-5`}>
+            {/* La clave es solo el reclamo: el texto ya vive en el estado del
+                formulario, y así el aviso de "guardado" no se pierde cuando
+                la página se refresca con la respuesta nueva. */}
+            <ResponseForm
+              key={c.id}
+              complaint={c}
+              businessName={biz.name}
+              bizId={bizId}
+              templates={plan.templates ? ((plantillas ?? []) as ResponseTemplate[]) : null}
+            />
+            <details className="group mt-4 border-t border-slate-100 pt-4">
+              <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-medium text-slate-700 hover:text-slate-900">
+                <svg viewBox="0 0 20 20" className="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+                  <path d="M5 3h10v14H5zM8 7h4M8 10h4M8 13h2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                Agregar nota interna
+              </summary>
+              <div className="mt-3">
+                <NotaForm complaintId={c.id} businessId={bizId} />
               </div>
-            </Card>
-            {abierto && (
-              <p className="px-1 text-xs text-slate-500">
-                Al marcarlo como respondido, el consumidor recibe la respuesta por correo y la hoja pública se actualiza.
-              </p>
-            )}
+            </details>
           </div>
+
+          <Estado complaint={c} eventos={historial} />
         </div>
       </div>
     </div>
   );
 }
 
-/** Cuenta regresiva del plazo legal, o cuánto se tardó si ya se respondió. */
-function Plazo({ complaint: c }: { complaint: Complaint }) {
+/** Etiqueta del plazo junto al código: lo que queda, o cómo se respondió. */
+function ChipPlazo({ complaint: c }: { complaint: Complaint }) {
   const abierto = c.status === "pendiente" || c.status === "en_proceso";
   if (!abierto) {
-    const tardo = c.responded_at ? businessDaysBetween(c.created_at, c.responded_at) : null;
     const aTiempo = c.responded_at ? new Date(c.responded_at) <= new Date(c.due_at) : true;
     return (
-      <div className="flex flex-wrap items-center gap-4 rounded-xl border border-green-200 bg-green-50 px-5 py-4">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-600 text-white">
-          <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" aria-hidden="true">
-            <path d="m5 10.5 3.2 3.2L15 7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </span>
-        <div>
-          <p className="font-semibold text-green-900">
-            {aTiempo ? "Respondido dentro del plazo" : "Respondido fuera del plazo"}
-            {tardo !== null && ` · ${tardo} ${tardo === 1 ? "día hábil" : "días hábiles"}`}
-          </p>
-          <p className="text-sm text-green-800">
-            El plazo vencía el {fmtDate(c.due_at)}.{c.responded_at ? ` Respuesta del ${fmtDate(c.responded_at)}.` : ""}
-          </p>
-        </div>
-      </div>
+      <span className={`rounded-full px-3 py-1 text-sm font-semibold ${aTiempo ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
+        {aTiempo ? "Respondido a tiempo" : "Respondido fuera de plazo"}
+      </span>
     );
   }
+  const quedan = businessDaysLeft(c.due_at);
+  const tono = quedan < 0 || quedan === 0 ? "bg-red-100 text-red-800" : quedan <= 3 ? "bg-amber-100 text-amber-900" : "bg-teal-50 text-teal-800";
+  const texto =
+    quedan < 0
+      ? `Vencido hace ${-quedan} ${-quedan === 1 ? "día hábil" : "días hábiles"}`
+      : quedan === 0
+        ? "Vence hoy"
+        : `Quedan ${quedan} ${quedan === 1 ? "día hábil" : "días hábiles"}`;
+  return <span className={`rounded-full px-3 py-1 text-sm font-semibold ${tono}`}>{texto}</span>;
+}
 
+/**
+ * Estado del reclamo como línea de tiempo corta: recibido, respuesta y
+ * envío. Debajo, plegado, el historial completo con notas y versiones.
+ */
+function Estado({ complaint: c, eventos }: { complaint: Complaint; eventos: ComplaintEvent[] }) {
+  const abierto = c.status === "pendiente" || c.status === "en_proceso";
   const quedan = businessDaysLeft(c.due_at);
   const usados = Math.min(15, Math.max(0, 15 - quedan));
-  const tono =
-    quedan < 0
-      ? { caja: "border-red-200 bg-red-50", num: "text-red-700", barra: "bg-red-500", txt: "text-red-900" }
-      : quedan <= 3
-        ? { caja: "border-amber-200 bg-amber-50", num: "text-amber-700", barra: "bg-amber-400", txt: "text-amber-900" }
-        : { caja: "border-teal-200 bg-teal-50", num: "text-teal-700", barra: "bg-teal-600", txt: "text-teal-900" };
+  const enviado = [...eventos].reverse().find((e) => e.type === "respuesta_enviada");
+  const tardo = c.responded_at ? businessDaysBetween(c.created_at, c.responded_at) : null;
+  const barra = quedan <= 0 ? "bg-red-500" : quedan <= 3 ? "bg-amber-400" : "bg-teal-600";
+
+  const pasos: { titulo: string; detalle: string; punto: string }[] = [
+    {
+      titulo: c.kind === "queja" ? "Queja recibida" : "Reclamo recibido",
+      detalle: fmtDateTime(c.created_at),
+      punto: "bg-teal-600",
+    },
+  ];
+  if (abierto) {
+    pasos.push({
+      titulo: c.status === "en_proceso" ? "En proceso, falta enviar la respuesta" : "Pendiente de respuesta",
+      detalle: `Vence el ${fmtDate(c.due_at)} · 15 días hábiles sin contar feriados`,
+      punto: quedan <= 0 ? "bg-red-500" : quedan <= 3 ? "bg-amber-400" : "bg-slate-300",
+    });
+  } else {
+    pasos.push({
+      titulo: STATUS_LABEL[c.status] ?? "Respondido",
+      detalle: c.responded_at
+        ? `${fmtDateTime(c.responded_at)}${tardo !== null ? ` · ${tardo} ${tardo === 1 ? "día hábil" : "días hábiles"}` : ""}`
+        : "",
+      punto: "bg-green-600",
+    });
+    if (enviado) {
+      pasos.push({
+        titulo: "Respuesta enviada por correo",
+        detalle: `${fmtDateTime(enviado.created_at)}${enviado.data.correo ? ` · ${enviado.data.correo}` : ""}`,
+        punto: "bg-green-600",
+      });
+    }
+  }
 
   return (
-    <div className={`flex flex-wrap items-center gap-x-6 gap-y-3 rounded-xl border px-5 py-4 ${tono.caja}`}>
-      <p className={`text-4xl font-extrabold ${tono.num}`}>{quedan < 0 ? -quedan : quedan}</p>
-      <div className="min-w-48 flex-1">
-        <p className={`font-semibold ${tono.txt}`}>
-          {quedan < 0
-            ? `${-quedan === 1 ? "día hábil" : "días hábiles"} de retraso`
-            : quedan === 0
-              ? "Vence hoy"
-              : `${quedan === 1 ? "día hábil" : "días hábiles"} para responder`}
-        </p>
-        <p className={`text-sm ${tono.txt} opacity-80`}>
-          Vence el {fmtDate(c.due_at)} · 15 días hábiles desde el registro, sin contar feriados.
-        </p>
-      </div>
-      <div className="w-full sm:w-56">
-        <div className="h-2 overflow-hidden rounded-full bg-white/70">
-          <div className={`h-full rounded-full ${tono.barra}`} style={{ width: `${(usados / 15) * 100}%` }} />
+    <div className={`${tarjeta} p-5`}>
+      <h3 className="text-sm font-semibold text-slate-900">Estado</h3>
+      <ol className="relative mt-4 space-y-4 before:absolute before:bottom-1.5 before:left-[5px] before:top-1.5 before:w-px before:bg-slate-200">
+        {pasos.map((p) => (
+          <li key={p.titulo} className="relative flex gap-3">
+            <span className={`relative z-10 mt-1.5 h-[11px] w-[11px] shrink-0 rounded-full ring-4 ring-white ${p.punto}`} />
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-slate-900">{p.titulo}</p>
+              {p.detalle && <p className="text-xs text-slate-500">{p.detalle}</p>}
+            </div>
+          </li>
+        ))}
+      </ol>
+
+      {abierto && (
+        <div className="mt-4">
+          <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
+            <div className={`h-full rounded-full ${barra}`} style={{ width: `${(usados / 15) * 100}%` }} />
+          </div>
+          <p className="mt-1 text-right text-xs text-slate-500">{usados} de 15 días hábiles usados</p>
         </div>
-        <p className={`mt-1 text-right text-xs ${tono.txt} opacity-80`}>{usados} de 15 días hábiles usados</p>
-      </div>
+      )}
+
+      <details className="group mt-4 border-t border-slate-100 pt-4">
+        <summary className="cursor-pointer list-none text-sm font-medium text-teal-700 hover:underline">
+          Ver historial completo ({eventos.length})
+        </summary>
+        <p className="mt-2 text-xs text-slate-500">
+          Cada cambio queda registrado con su fecha y no se puede borrar. Si te fiscalizan, es tu constancia.
+        </p>
+        <Historial eventos={eventos} />
+      </details>
     </div>
   );
 }
@@ -252,17 +306,17 @@ function describir(e: ComplaintEvent): string {
 function Historial({ eventos }: { eventos: ComplaintEvent[] }) {
   if (eventos.length === 0) return <p className="mt-4 text-sm text-slate-500">Sin movimientos todavía.</p>;
   return (
-    <ol className="relative mt-5 space-y-5 before:absolute before:bottom-2 before:left-[15px] before:top-2 before:w-px before:bg-slate-200">
+    <ol className="relative mt-4 space-y-4 before:absolute before:bottom-2 before:left-[13px] before:top-2 before:w-px before:bg-slate-200">
       {eventos.map((e) => {
         const ic = ICONO[e.type];
         return (
           <li key={e.id} className="relative flex gap-3">
-            <span className={`relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ring-4 ring-white ${ic.fondo}`}>
-              <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <span className={`relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ring-4 ring-white ${ic.fondo}`}>
+              <svg viewBox="0 0 20 20" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d={ic.trazo} />
               </svg>
             </span>
-            <div className="min-w-0 flex-1 pt-1">
+            <div className="min-w-0 flex-1 pt-0.5">
               <p className="text-sm font-medium text-slate-900">{describir(e)}</p>
               <p className="text-xs text-slate-500">
                 {fmtDateTime(e.created_at)} · {e.actor_id ? "Tú" : e.type === "registrado" ? "Consumidor" : "Sistema"}
@@ -294,11 +348,21 @@ function Historial({ eventos }: { eventos: ComplaintEvent[] }) {
   );
 }
 
-function Item({ label, value, pre }: { label: string; value: string; pre?: boolean }) {
+/** Texto largo del consumidor en un recuadro gris, con sus saltos de línea. */
+function Bloque({ titulo, texto }: { titulo: string; texto: string }) {
   return (
     <div>
+      <p className="text-sm text-slate-500">{titulo}</p>
+      <p className="mt-1.5 whitespace-pre-wrap rounded-xl bg-slate-50 px-4 py-3.5 leading-relaxed text-slate-800">{texto}</p>
+    </div>
+  );
+}
+
+function Dato({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="min-w-0">
       <dt className="text-xs text-slate-500">{label}</dt>
-      <dd className={pre ? "mt-0.5 whitespace-pre-wrap text-slate-900" : "mt-0.5 font-medium text-slate-900"}>{value}</dd>
+      <dd className="mt-0.5 break-words font-medium text-slate-900">{value}</dd>
     </div>
   );
 }

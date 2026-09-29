@@ -5,6 +5,7 @@ import { after } from "next/server";
 import { notifyPlatform, tplPlatformNewBusiness } from "@/lib/email";
 import { getAppUrl } from "@/lib/env";
 import { slugify } from "@/lib/format";
+import { estadoDelPlan, insigniaDelPlan } from "@/lib/plans";
 import { isValidRucFormat, lookupRuc } from "@/lib/ruc";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionState } from "@/lib/types";
@@ -107,8 +108,10 @@ export async function signUpWithBusiness(_prev: ActionState, formData: FormData)
   const userId = signUpData.user?.id;
   if (!userId) return { error: "No se pudo crear la cuenta. Intenta de nuevo." };
 
-  // El enlace debe ser único: si está tomado, se prueba con un sufijo.
-  let creado: { id: string; slug: string } | null = null;
+  // El enlace debe ser único: si está tomado, se prueba con un sufijo. El plan
+  // (la prueba de 30 días) lo pone la base al insertar.
+  let creado: { id: string; slug: string; plan: string; plan_expires_at: string | null; en_prueba: boolean } | null =
+    null;
   let ultimoError = "";
   for (let intento = 0; intento < 5 && !creado; intento++) {
     const candidato = intento === 0 ? slug : `${slug}-${intento + 1}`.slice(0, 50);
@@ -123,7 +126,7 @@ export async function signUpWithBusiness(_prev: ActionState, formData: FormData)
         email,
         phone: phone || null,
       })
-      .select("id, slug")
+      .select("id, slug, plan, plan_expires_at, en_prueba")
       .single();
 
     if (!error) {
@@ -148,9 +151,18 @@ export async function signUpWithBusiness(_prev: ActionState, formData: FormData)
 
   // Aviso interno a PLATFORM_EMAIL. Va con after() para no demorar el registro.
   const publicUrl = `${await getAppUrl()}/r/${creado.slug}`;
+  const planInicial = insigniaDelPlan(estadoDelPlan(creado)).texto;
   after(() =>
     notifyPlatform(
-      tplPlatformNewBusiness({ name, ruc, email, publicUrl, origen: "registro", verificadoSunat: verificado }),
+      tplPlatformNewBusiness({
+        name,
+        ruc,
+        email,
+        publicUrl,
+        origen: "registro",
+        verificadoSunat: verificado,
+        plan: planInicial,
+      }),
     ),
   );
 

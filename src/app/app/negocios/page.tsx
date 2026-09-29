@@ -2,7 +2,7 @@ import Link from "next/link";
 import { restoreBusiness } from "@/lib/actions/business";
 import { Alert, Badge, Button, ButtonLink, Card } from "@/components/ui";
 import { fmtDate } from "@/lib/format";
-import { PLANS, planFor } from "@/lib/plans";
+import { estadoDelPlan, insigniaDelPlan, PLANS, planFor } from "@/lib/plans";
 import { createClient } from "@/lib/supabase/server";
 import type { Business } from "@/lib/types";
 
@@ -58,7 +58,7 @@ export default async function BusinessesPage({
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
         {active.map((b) => {
-          const plan = planFor(b);
+          const insignia = insigniaDelPlan(estadoDelPlan(b));
           return (
             <Link key={b.id} href={`/app/${b.id}`} className="block">
               <Card className="h-full transition hover:border-teal-300 hover:shadow-md">
@@ -67,7 +67,7 @@ export default async function BusinessesPage({
                     <p className="font-semibold text-slate-900">{b.name}</p>
                     <p className="text-xs text-slate-500">RUC {b.ruc}</p>
                   </div>
-                  <Badge tone={plan.id === "free" ? "slate" : "teal"}>{plan.name}</Badge>
+                  <Badge tone={insignia.tono}>{insignia.texto}</Badge>
                 </div>
                 <p className="mt-3 text-sm text-slate-600">/r/{b.slug}</p>
                 <p className="mt-1 text-xs text-slate-500">{b.complaint_seq} reclamo(s) registrados</p>

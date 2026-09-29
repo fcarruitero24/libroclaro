@@ -12,6 +12,8 @@ export interface Business {
   primary_color: string;
   plan: string;
   plan_expires_at: string | null;
+  /** El plan vigente es la prueba gratis: plan pro que vence en plan_expires_at. */
+  en_prueba: boolean;
   mp_preapproval_id: string | null;
   /** Estado de la suscripción en Mercado Pago: authorized, cancelled, paused o pending. */
   mp_subscription_status: string | null;

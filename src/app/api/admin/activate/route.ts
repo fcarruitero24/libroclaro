@@ -3,7 +3,7 @@ import { PLANS, type PlanId } from "@/lib/plans";
 import { createAdminClient, hasAdminClient } from "@/lib/supabase/admin";
 
 /**
- * Activación manual de planes (pagos por Yape/Plin).
+ * Activación manual de planes (soporte, cortesías o pagos fuera de Mercado Pago).
  *
  * curl -X POST https://TU-DOMINIO/api/admin/activate \
  *   -H "x-admin-secret: $ADMIN_SECRET" -H "Content-Type: application/json" \
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
 
   const { error: upErr } = await admin
     .from("businesses")
-    .update({ plan, plan_expires_at: expires })
+    .update({ plan, plan_expires_at: expires, en_prueba: false })
     .eq("id", biz.id);
   if (upErr) return NextResponse.json({ error: upErr.message }, { status: 500 });
 

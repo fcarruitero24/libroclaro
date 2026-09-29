@@ -26,14 +26,18 @@ export default function TermsPage() {
           </p>
           <h2>3. Planes y pagos</h2>
           <p>
-            El plan Gratis no tiene costo. Los planes de pago se facturan mensualmente por adelantado en soles (PEN) a través
-            de Mercado Pago o por transferencia (Yape/Plin). El Negocio puede cancelar en cualquier momento; los beneficios
+            Todo Negocio nuevo recibe una prueba gratuita de 30 días con las funciones del plan Pro, sin necesidad de
+            registrar un medio de pago; la prueba se otorga una sola vez por cuenta y por RUC. Si al terminar la prueba o
+            el periodo pagado el Negocio no contrata un plan, su Libro de Reclamaciones Virtual deja de recibir reclamos
+            nuevos, pero sus hojas se conservan y el Negocio puede consultarlas, responder las pendientes y descargarlas.
+            Los planes de pago se cobran por adelantado, mes a mes o por año, en soles (PEN) a
+            través de Mercado Pago, con tarjeta de crédito o débito. El Negocio puede cancelar en cualquier momento; los beneficios
             se mantienen hasta el fin del periodo pagado. No se realizan reembolsos por periodos parciales.
           </p>
           <h2>4. Disponibilidad y datos</h2>
           <p>
             Hacemos esfuerzos razonables para mantener el servicio disponible y respaldado, pero no garantizamos
-            disponibilidad ininterrumpida. El Negocio puede exportar sus registros en cualquier momento (plan Pro) y es
+            disponibilidad ininterrumpida. El Negocio puede exportar sus registros en cualquier momento y es
             responsable de mantener sus propias copias. Si el Negocio elimina su cuenta, sus datos se eliminan de forma
             permanente.
           </p>

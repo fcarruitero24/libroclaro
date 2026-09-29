@@ -119,10 +119,12 @@ export async function POST(request: NextRequest) {
     hasta = new Date(base.getTime() + MARGEN_COBRO_MS).toISOString();
     await admin
       .from("businesses")
-      .update({ plan, plan_expires_at: hasta, mp_preapproval_id: pre.id, mp_subscription_status: pre.status })
+      // Pagar durante la prueba la termina: el periodo pagado empieza con el cobro.
+      // La base copia el plan a los demás negocios del dueño (migración 0008).
+      .update({ plan, plan_expires_at: hasta, en_prueba: false, mp_preapproval_id: pre.id, mp_subscription_status: pre.status })
       .eq("id", businessId);
   } else {
-    // cancelled / paused: el plan sigue vigente hasta plan_expires_at y luego baja a Gratis solo.
+    // cancelled / paused: el plan sigue vigente hasta plan_expires_at y luego el libro queda inactivo solo.
     // Se guarda el estado para que el recordatorio de vencimiento no diga "se renueva solo".
     await admin
       .from("businesses")

@@ -27,7 +27,7 @@ export function LoginForm({ next }: { next: string }) {
       <p className="text-center text-sm text-slate-600">
         ¿No tienes cuenta?{" "}
         <Link href="/registro" className="font-semibold text-teal-700 hover:underline">
-          Crea tu libro gratis
+          Prueba 30 días gratis
         </Link>
       </p>
     </form>
