@@ -23,5 +23,14 @@
   },
   "observability": {
     "enabled": true
+  },
+  // El Worker corre junto a Supabase (AWS sa-east-1, São Paulo), no cerca
+  // del visitante: cada página hace varias consultas a la base y así cada
+  // una tarda milisegundos en vez de cruzar el continente. Es lo mismo que
+  // "regions": ["gru1"] en vercel.json. Los archivos estáticos (imágenes,
+  // CSS, JS) se siguen sirviendo desde el punto más cercano al visitante.
+  // Gratis en todos los planes.
+  "placement": {
+    "region": "aws:sa-east-1"
   }
 }
