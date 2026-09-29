@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { SubmitButton } from "@/components/submit-button";
+import { Turnstile } from "@/components/turnstile";
 import { Alert, Field, Input, Select, Textarea } from "@/components/ui";
 import { submitComplaint } from "@/lib/actions/public";
 import type { ActionState } from "@/lib/types";
@@ -156,6 +157,7 @@ export function ComplaintForm({ slug, color }: { slug: string; color: string }) 
         </label>
         {fe.accept && <p className="text-xs text-red-600">{fe.accept}</p>}
 
+        <Turnstile reinicio={state} />
         <SubmitButton pendingText="Registrando…" className="w-full py-3 text-base" style={{ backgroundColor: color }}>
           Registrar {kind}
         </SubmitButton>
