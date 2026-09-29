@@ -23,28 +23,27 @@ export interface PlanDef {
   features: string[];
 }
 
+/** Días de la prueba gratis. La fecha la pone la base al crear el negocio (migración 0008). */
+export const DIAS_DE_PRUEBA = 30;
+
 export const PLANS: Record<PlanId, PlanDef> = {
+  // Ya no es un plan que se ofrezca: es el estado de un libro cuya prueba o
+  // plan venció. No recibe reclamos nuevos (lo frena submit_complaint), pero
+  // el dueño conserva sus hojas: puede verlas, responder las pendientes y
+  // descargarlas, porque la norma le obliga a guardarlas dos años.
   free: {
     id: "free",
-    name: "Gratis",
+    name: "Inactivo",
     priceMonthly: 0,
     priceYearly: 0,
     maxBusinesses: 1,
     branding: true,
     businessAlerts: false,
     customBranding: false,
-    csvExport: false,
+    csvExport: true,
     analytics: false,
     templates: false,
-    features: [
-      "1 negocio",
-      "Reclamos y quejas ilimitados",
-      "Resumen con indicadores y plazos",
-      "Hoja de reclamación con numeración correlativa",
-      "Copia automática al correo del consumidor",
-      "Panel para responder dentro del plazo",
-      "Con marca «LibroClaro» en el formulario",
-    ],
+    features: [],
   },
   pro: {
     id: "pro",
@@ -114,7 +113,7 @@ export function isBillingPeriod(v: unknown): v is BillingPeriod {
   return v === "monthly" || v === "yearly";
 }
 
-/** Días de gracia tras vencer, antes de bajar a Gratis. */
+/** Días de gracia tras vencer, antes de que el libro quede inactivo. Igual en plan_vigente() de la base. */
 export const GRACE_MS = 3 * 24 * 60 * 60 * 1000;
 /**
  * En una suscripción, el plan vence este margen después de la fecha del
@@ -132,4 +131,46 @@ export function effectivePlan(b: { plan: string; plan_expires_at: string | null 
 
 export function planFor(b: { plan: string; plan_expires_at: string | null }): PlanDef {
   return PLANS[effectivePlan(b)];
+}
+
+export type EstadoPlan =
+  /** Plan pagado vigente, o activado a mano sin vencimiento. */
+  | { tipo: "pagado"; plan: PlanDef; hasta: string | null }
+  /** En la prueba gratis, antes de que termine. */
+  | { tipo: "prueba"; termina: string; diasRestantes: number }
+  /** La prueba o el plan ya venció, pero siguen los 3 días de gracia. */
+  | { tipo: "gracia"; prueba: boolean; vencio: string; hasta: string }
+  /** Sin plan: el libro no recibe reclamos nuevos. */
+  | { tipo: "inactivo"; prueba: boolean };
+
+/** En qué situación está el plan de un negocio, para mostrárselo al dueño. */
+export function estadoDelPlan(
+  b: { plan: string; plan_expires_at: string | null; en_prueba: boolean },
+  ahora = Date.now(),
+): EstadoPlan {
+  const id = effectivePlan(b);
+  if (id === "free") return { tipo: "inactivo", prueba: b.en_prueba };
+  if (!b.plan_expires_at) return { tipo: "pagado", plan: PLANS[id], hasta: null };
+  const vence = new Date(b.plan_expires_at).getTime();
+  if (vence <= ahora) {
+    return { tipo: "gracia", prueba: b.en_prueba, vencio: b.plan_expires_at, hasta: new Date(vence + GRACE_MS).toISOString() };
+  }
+  if (b.en_prueba) {
+    return { tipo: "prueba", termina: b.plan_expires_at, diasRestantes: Math.ceil((vence - ahora) / 86400000) };
+  }
+  return { tipo: "pagado", plan: PLANS[id], hasta: b.plan_expires_at };
+}
+
+/** Texto y color de la insignia del plan en el panel. */
+export function insigniaDelPlan(e: EstadoPlan): { texto: string; tono: "teal" | "amber" | "red" } {
+  switch (e.tipo) {
+    case "pagado":
+      return { texto: `Plan ${e.plan.name}`, tono: "teal" };
+    case "prueba":
+      return { texto: "Prueba gratis", tono: e.diasRestantes <= 7 ? "amber" : "teal" };
+    case "gracia":
+      return { texto: e.prueba ? "Prueba terminada" : "Plan vencido", tono: "amber" };
+    case "inactivo":
+      return { texto: "Inactivo", tono: "red" };
+  }
 }

@@ -95,6 +95,19 @@ export default async function PublicBookPage({ params }: { params: Promise<{ slu
               INDECOPI a través de su servicio Reclama Virtual.
             </p>
           </section>
+        ) : plan.id === "free" ? (
+          // Sin plan vigente: la base rechaza reclamos nuevos (submit_complaint).
+          <section className="mt-8 rounded-xl border border-amber-200 bg-amber-50 p-6">
+            <h2 className="text-base font-semibold text-amber-900">Este libro no está recibiendo reclamos</h2>
+            <p className="mt-2 text-sm text-amber-900">
+              El Libro de Reclamaciones Virtual de {biz.name} no está activo en este momento. Si ya registraste un
+              reclamo, el enlace que recibiste por correo sigue funcionando y tu hoja sigue disponible.
+            </p>
+            <p className="mt-3 text-sm text-amber-900">
+              Para presentar un nuevo reclamo, comunícate directamente con el proveedor. También puedes acudir al
+              INDECOPI a través de su servicio Reclama Virtual.
+            </p>
+          </section>
         ) : (
           <div className="mt-8">
             <ComplaintForm slug={biz.slug} color={color} />

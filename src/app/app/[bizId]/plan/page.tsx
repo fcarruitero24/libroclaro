@@ -5,7 +5,16 @@ import { Alert, Badge, Button, Card } from "@/components/ui";
 import { cancelarSuscripcion } from "@/lib/actions/billing";
 import { WHATSAPP_NUMBER, YAPE_NAME, YAPE_NUMBER } from "@/lib/env";
 import { fmtDate } from "@/lib/format";
-import { MARGEN_COBRO_MS, monthlyEquivalent, PLANS, planFor, priceFor, yearlySavings, type BillingPeriod } from "@/lib/plans";
+import {
+  estadoDelPlan,
+  MARGEN_COBRO_MS,
+  monthlyEquivalent,
+  PLANS,
+  planFor,
+  priceFor,
+  yearlySavings,
+  type BillingPeriod,
+} from "@/lib/plans";
 import { createClient } from "@/lib/supabase/server";
 import type { Business } from "@/lib/types";
 
@@ -33,6 +42,7 @@ export default async function PlanPage({
   if (!data) notFound();
   const biz = data as Business;
   const current = planFor(biz);
+  const estado = estadoDelPlan(biz);
   const period: BillingPeriod = sp.periodo === "mensual" ? "monthly" : "yearly";
   const mpEnabled = Boolean(process.env.MP_ACCESS_TOKEN);
   const manualEnabled = Boolean(YAPE_NUMBER);
@@ -49,8 +59,31 @@ export default async function PlanPage({
       <div>
         <h2 className="text-lg font-bold text-slate-900">Tu plan</h2>
         <p className="text-sm text-slate-600">
-          Estás en el plan <strong>{current.name}</strong>
-          {biz.plan !== "free" && biz.plan_expires_at && <> · vigente hasta el {fmtDate(biz.plan_expires_at)}</>}.
+          {estado.tipo === "pagado" && (
+            <>
+              Estás en el plan <strong>{estado.plan.name}</strong>
+              {estado.hasta && <> · vigente hasta el {fmtDate(estado.hasta)}</>}.
+            </>
+          )}
+          {estado.tipo === "prueba" && (
+            <>
+              Estás en tu <strong>prueba gratis</strong> con todo lo del plan Pro. Termina el {fmtDate(estado.termina)}:
+              elige un plan antes para que tu libro siga recibiendo reclamos.
+            </>
+          )}
+          {estado.tipo === "gracia" && (
+            <>
+              {estado.prueba ? "Tu prueba gratis terminó" : `Tu plan ${current.name} venció`} el {fmtDate(estado.vencio)}.
+              Tienes hasta el <strong>{fmtDate(estado.hasta)}</strong> para elegir un plan; después tu libro deja de
+              recibir reclamos nuevos.
+            </>
+          )}
+          {estado.tipo === "inactivo" && (
+            <>
+              Tu libro <strong>no está recibiendo reclamos nuevos</strong>. Elige un plan y se reactiva al instante, con
+              el mismo enlace y el mismo QR.
+            </>
+          )}
         </p>
       </div>
 
@@ -75,8 +108,8 @@ export default async function PlanPage({
               <p className="font-semibold">¿Seguro que quieres cancelar?</p>
               <p className="mt-1">
                 No se te volverá a cobrar. Mantienes el plan {current.name}
-                {biz.plan_expires_at && <> hasta el {fmtDate(biz.plan_expires_at)}</>}; después tu libro pasa a Gratis y
-                conserva todos sus reclamos.
+                {biz.plan_expires_at && <> hasta el {fmtDate(biz.plan_expires_at)}</>}; después tu libro deja de recibir
+                reclamos nuevos, pero conserva todos los que ya tiene.
               </p>
               <div className="mt-3 flex flex-wrap items-center gap-3">
                 <form action={cancelarSuscripcion}>
@@ -97,8 +130,8 @@ export default async function PlanPage({
       {sp.cancelada && (
         <Alert kind="success">
           Cancelaste la suscripción: no se te volverá a cobrar. Mantienes el plan {current.name}
-          {biz.plan_expires_at && <> hasta el {fmtDate(biz.plan_expires_at)}</>}; después tu libro pasa a Gratis y conserva
-          todos sus reclamos.
+          {biz.plan_expires_at && <> hasta el {fmtDate(biz.plan_expires_at)}</>}; después tu libro deja de recibir
+          reclamos nuevos, pero conserva todos los que ya tiene.
         </Alert>
       )}
       {sp.error === "cancelar" && (
@@ -145,28 +178,28 @@ export default async function PlanPage({
         />
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
-        {(["free", "pro", "business"] as const).map((id) => {
+      <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2">
+        {(["pro", "business"] as const).map((id) => {
           const p = PLANS[id];
-          const isCurrent = current.id === id;
+          // La prueba también es Pro, pero no está pagada: ahí sí se ofrece pagar.
+          const isCurrent = estado.tipo === "pagado" && estado.plan.id === id;
           const price = priceFor(p, period);
           return (
             <Card key={id} className={id === "pro" ? "border-2 border-teal-700" : ""}>
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-slate-900">{p.name}</h3>
                 {isCurrent && <Badge tone="green">Actual</Badge>}
+                {estado.tipo === "prueba" && id === "pro" && <Badge tone="teal">En prueba</Badge>}
               </div>
               {/* La clave con el periodo hace que el precio vuelva a entrar al cambiarlo. */}
               <p key={`${id}-${period}`} className="anim-precio mt-2 flex items-baseline gap-1">
                 <span className="text-3xl font-extrabold tabular-nums text-slate-900">S/ {price}</span>
-                <span className="text-sm text-slate-500">{price === 0 ? "" : period === "yearly" ? "/año" : "/mes"}</span>
+                <span className="text-sm text-slate-500">{period === "yearly" ? "/año" : "/mes"}</span>
               </p>
               <p key={`${id}-${period}-nota`} className="anim-precio mt-1 min-h-5 text-xs text-slate-500">
-                {price === 0
-                  ? "Para siempre, sin tarjeta."
-                  : period === "yearly"
-                    ? `Equivale a S/ ${monthlyEquivalent(p)} al mes.`
-                    : `Pagando el año completo: S/ ${p.priceYearly}.`}
+                {period === "yearly"
+                  ? `Equivale a S/ ${monthlyEquivalent(p)} al mes.`
+                  : `Pagando el año completo: S/ ${p.priceYearly}.`}
               </p>
               <ul className="mt-4 space-y-1.5 text-sm text-slate-700">
                 {p.features.map((f) => (
@@ -176,12 +209,12 @@ export default async function PlanPage({
                   </li>
                 ))}
               </ul>
-              {id !== "free" && !isCurrent && suscripcionActiva && (
+              {!isCurrent && suscripcionActiva && (
                 <p className="mt-6 text-xs text-slate-500">
                   Para cambiar de plan, primero cancela tu suscripción actual.
                 </p>
               )}
-              {id !== "free" && !isCurrent && !suscripcionActiva && (
+              {!isCurrent && !suscripcionActiva && (
                 <div className="mt-6 space-y-2">
                   {mpEnabled && (
                     <form action="/api/checkout" method="post">
@@ -246,8 +279,9 @@ export default async function PlanPage({
       )}
 
       <p className="text-xs text-slate-500">
-        Puedes cancelar en cualquier momento; mantendrás los beneficios hasta el fin del periodo pagado. Con el plan
-        Gratis tu libro sigue funcionando y tus reclamos siguen guardados: solo dejan de aplicarse los beneficios Pro.
+        Puedes cancelar en cualquier momento; mantendrás los beneficios hasta el fin del periodo pagado. Si tu plan
+        vence, tu libro deja de recibir reclamos nuevos, pero tus reclamos siguen guardados: puedes verlos, responder los
+        pendientes y descargarlos.
       </p>
     </div>
   );

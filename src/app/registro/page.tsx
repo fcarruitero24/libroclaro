@@ -15,7 +15,7 @@ export default async function RegisterPage() {
           <Logo className="justify-center" />
           <h1 className="mt-6 text-2xl font-bold text-slate-900">Crea tu Libro de Reclamaciones</h1>
           <p className="mt-1 text-sm text-slate-600">
-            Gratis, sin tarjeta. Al terminar tu libro queda publicado y listo para recibir reclamos.
+            30 días gratis con todo lo del plan Pro, sin tarjeta. Al terminar tu libro queda publicado y listo para recibir reclamos.
           </p>
         </div>
         <Card>

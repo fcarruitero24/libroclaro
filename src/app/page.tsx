@@ -98,8 +98,8 @@ const FAQ = [
     a: "El reclamo expresa disconformidad con el producto o servicio contratado. La queja expresa malestar por la atención al público, no relacionado directamente con el producto o servicio.",
   },
   {
-    q: "¿Puedo empezar gratis de verdad?",
-    a: "Sí. El plan Gratis incluye reclamos ilimitados, numeración legal y copia al consumidor. Solo muestra una pequeña marca «LibroClaro» en tu formulario. Cuando quieras quitarla, agregar tu logo o recibir alertas, pasas a Pro.",
+    q: "¿Cómo funciona la prueba gratis?",
+    a: "Tienes 30 días con todo lo del plan Pro, sin tarjeta y con reclamos ilimitados. Te avisamos por correo antes de que termine. Si no eliges un plan, tu libro deja de recibir reclamos nuevos, pero no se borra nada: puedes ver tus reclamos, responder los pendientes y descargarlos, y al pagar se reactiva con el mismo enlace y QR.",
   },
 ];
 
@@ -127,7 +127,7 @@ export default function HomePage() {
               </p>
               <div className="flex flex-wrap gap-3">
                 <ButtonLink href="/registro" variant="white" className="btn-brillo px-6 py-3 text-base">
-                  Crear mi libro gratis
+                  Probar 30 días gratis
                 </ButtonLink>
                 <ButtonLink
                   href="/r/demo"
@@ -342,14 +342,14 @@ export default function HomePage() {
           <div className="reveal mx-auto max-w-2xl text-center">
             <h2 className={tituloSeccion}>Precios simples</h2>
             <p className="mt-4 text-lg text-slate-600">
-              Empieza gratis y quédate gratis el tiempo que quieras. Si necesitas más, pagas por año o mes a mes, como
-              te acomode.
+              Pruébalo 30 días gratis, con todo lo del plan Pro y sin tarjeta. Después eliges: pagas por año o mes a mes,
+              como te acomode.
             </p>
           </div>
           <PreciosPlanes />
           <p className="mt-6 text-center text-sm text-slate-500">
-            Pagos con Yape, Plin o tarjeta. Cancela cuando quieras. Todos los planes, incluido el gratuito, reciben
-            reclamos ilimitados: nunca te cobramos por recibir más.
+            Pagos con Yape, Plin o tarjeta. Cancela cuando quieras. Todos los planes reciben reclamos ilimitados: nunca
+            te cobramos por recibir más.
           </p>
         </section>
 
@@ -387,11 +387,12 @@ export default function HomePage() {
               Pon tu negocio en regla hoy
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-teal-100">
-              Crea tu Libro de Reclamaciones Virtual gratis y recibe tu enlace y aviso oficial en menos de 5 minutos.
+              Prueba tu Libro de Reclamaciones Virtual 30 días gratis y recibe tu enlace y aviso oficial en menos de 5
+              minutos. Sin tarjeta.
             </p>
             <div className="mt-8 flex justify-center gap-3">
               <ButtonLink href="/registro" variant="white" className="btn-brillo px-6 py-3 text-base">
-                Crear mi libro gratis
+                Probar 30 días gratis
               </ButtonLink>
               <Link
                 href="/r/demo"

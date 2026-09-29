@@ -12,7 +12,7 @@ import { marcarTutorialVisto } from "@/lib/actions/tutorial";
 import { cn } from "@/lib/cn";
 import { COOKIE_MENU } from "@/lib/panel-prefs";
 
-type Negocio = { id: string; name: string; plan: string; gratis: boolean };
+type Negocio = { id: string; name: string; insignia: { texto: string; tono: "teal" | "amber" | "red" } };
 
 /**
  * Armazón del panel de un negocio.
@@ -219,7 +219,7 @@ function TarjetaNegocio({ negocio, className }: { negocio: Negocio; className?: 
         {negocio.name}
       </p>
       <div className="mt-1 flex items-center justify-between gap-2">
-        <Badge tone={negocio.gratis ? "slate" : "teal"}>Plan {negocio.plan}</Badge>
+        <Badge tone={negocio.insignia.tono}>{negocio.insignia.texto}</Badge>
         <Link href="/app/negocios" className="text-xs font-medium text-teal-700 hover:underline">
           Cambiar
         </Link>

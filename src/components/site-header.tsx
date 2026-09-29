@@ -23,7 +23,7 @@ export async function SiteHeader() {
           <ButtonLink href="/app">Ir al panel</ButtonLink>
         ) : (
           <>
-            {/* En celular "Iniciar sesión" no entra al lado de "Crear gratis" y
+            {/* En celular "Iniciar sesión" no entra al lado de "Probar gratis" y
                 ambos se partían en dos líneas. Por debajo de 360 px ni siquiera
                 "Entrar" entra con el relleno normal, así que ahí se reduce. */}
             <ButtonLink href="/login" variant="ghost" className="whitespace-nowrap max-[360px]:px-2">
@@ -31,7 +31,7 @@ export async function SiteHeader() {
               <span className="hidden sm:inline">Iniciar sesión</span>
             </ButtonLink>
             <ButtonLink href="/registro" className="whitespace-nowrap max-[360px]:px-2">
-              Crear gratis
+              Probar gratis
             </ButtonLink>
           </>
         )}

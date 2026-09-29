@@ -6,7 +6,7 @@ import { after } from "next/server";
 import { notifyPlatform, tplPlatformNewBusiness } from "@/lib/email";
 import { getAppUrl } from "@/lib/env";
 import { slugify } from "@/lib/format";
-import { PLANS, planFor } from "@/lib/plans";
+import { estadoDelPlan, insigniaDelPlan, PLANS, planFor } from "@/lib/plans";
 import { createClient, requireUser } from "@/lib/supabase/server";
 import type { ActionState } from "@/lib/types";
 
@@ -69,7 +69,8 @@ export async function createBusiness(_prev: ActionState, formData: FormData): Pr
   const { data, error } = await supabase
     .from("businesses")
     .insert({ owner_id: user.id, ...values })
-    .select("id, slug")
+    // El plan lo pone la base: hereda el de la cuenta (migración 0008).
+    .select("id, slug, plan, plan_expires_at, en_prueba")
     .single();
 
   if (error) {
@@ -84,9 +85,17 @@ export async function createBusiness(_prev: ActionState, formData: FormData): Pr
   }
 
   const publicUrl = `${await getAppUrl()}/r/${data.slug}`;
+  const planInicial = insigniaDelPlan(estadoDelPlan(data)).texto;
   after(() =>
     notifyPlatform(
-      tplPlatformNewBusiness({ name: values.name, ruc: values.ruc, email: values.email, publicUrl, origen: "negocio adicional" }),
+      tplPlatformNewBusiness({
+        name: values.name,
+        ruc: values.ruc,
+        email: values.email,
+        publicUrl,
+        origen: "negocio adicional",
+        plan: planInicial,
+      }),
     ),
   );
 

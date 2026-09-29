@@ -352,7 +352,7 @@ function Cifra({ label, valor, nota }: { label: string; valor: string; nota: str
 }
 
 /**
- * Lo que ve el plan Gratis en lugar de un gráfico. El botón va solo en el
+ * Lo que ve un libro sin plan activo en lugar de un gráfico. El botón va solo en el
  * gráfico grande (`compacto` = sin botón), para no repetirlo tres veces.
  */
 function Bloqueado({ bizId, compacto = false }: { bizId: string; compacto?: boolean }) {

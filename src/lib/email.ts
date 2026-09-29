@@ -1,4 +1,5 @@
 import { escapeHtml, fmtDate } from "@/lib/format";
+import { PLANS } from "@/lib/plans";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const FROM = process.env.EMAIL_FROM ?? "LibroClaro <no-responder@libroclaro.pe>";
@@ -164,6 +165,8 @@ export function tplPlatformNewBusiness(p: {
   publicUrl: string;
   origen: "registro" | "negocio adicional";
   verificadoSunat?: boolean;
+  /** Cómo quedó el plan del negocio nuevo: prueba, heredado de la cuenta o inactivo. */
+  plan: string;
 }) {
   const sunat =
     p.verificadoSunat === undefined ? "" : p.verificadoSunat ? " · verificado en SUNAT" : " · SUNAT no respondió";
@@ -175,7 +178,7 @@ export function tplPlatformNewBusiness(p: {
        <ul>
          <li>RUC: <strong>${escapeHtml(p.ruc)}</strong>${sunat}</li>
          <li>Correo: ${escapeHtml(p.email)}</li>
-         <li>Plan: Gratis</li>
+         <li>Plan: ${escapeHtml(p.plan)}</li>
        </ul>
        ${button(p.publicUrl, "Ver su libro")}`,
       "Aviso interno de LibroClaro",
@@ -232,19 +235,48 @@ export function tplPlatformSubscription(p: {
 export function tplPlanReminder(p: {
   businessName: string;
   planName: string;
-  stage: "7d" | "1d" | "0d";
+  stage: "7d" | "3d" | "1d" | "0d";
+  /** Lo que termina es la prueba gratis, no un plan pagado. */
+  prueba: boolean;
   /** La suscripción de Mercado Pago está activa: el plan se cobra solo. */
   seRenuevaSolo: boolean;
   venceEl: string;
   /** Fecha del cobro automático (solo con suscripción activa). */
   cobroEl: string;
-  /** Último día antes de bajar a Gratis. */
+  /** Último día antes de que el libro quede inactivo. */
   graciaHasta: string;
   planUrl: string;
 }) {
   const negocio = escapeHtml(p.businessName);
   const plan = escapeHtml(p.planName);
-  const queSePierde = `vuelve la marca LibroClaro a tu formulario y se apagan las alertas por correo y los recordatorios de plazo. Tu libro <strong>sigue recibiendo reclamos</strong>: el plan Gratis también los recibe sin límite.`;
+  const queSePierde = `tu libro <strong>deja de recibir reclamos nuevos</strong>. Tus reclamos no se borran: podrás verlos, responder los pendientes y descargarlos, y al elegir un plan se reactiva con el mismo enlace y el mismo QR.`;
+
+  if (p.prueba) {
+    const precios = `El plan Pro cuesta S/ ${PLANS.pro.priceMonthly} al mes o S/ ${PLANS.pro.priceYearly} al año.`;
+    if (p.stage === "0d") {
+      const yaTermino = new Date(p.venceEl).getTime() <= Date.now();
+      const estado = yaTermino ? "terminó" : "termina hoy";
+      return {
+        subject: `Tu prueba gratis ${estado} · tienes hasta el ${fmtDate(p.graciaHasta)} · ${p.businessName}`,
+        html: layout(
+          `Tu prueba gratis ${estado}`,
+          `<p>La prueba gratis de LibroClaro de <strong>${negocio}</strong> ${yaTermino ? "terminó" : "<strong>termina hoy</strong>"}.</p>
+           <p>Te damos hasta el <strong>${fmtDate(p.graciaHasta)}</strong> para elegir un plan. ${precios} Después ${queSePierde}</p>
+           ${button(p.planUrl, "Elegir mi plan")}`,
+        ),
+      };
+    }
+    const cuando = p.stage === "1d" ? "mañana" : `el ${fmtDate(p.venceEl)}`;
+    return {
+      subject: `Tu prueba gratis termina ${cuando} · ${p.businessName}`,
+      html: layout(
+        `Tu prueba gratis termina ${cuando}`,
+        `<p>La prueba gratis de LibroClaro de <strong>${negocio}</strong> termina <strong>${cuando}</strong>.</p>
+         <p>Elige un plan para que tu libro siga recibiendo reclamos. ${precios} Si no eliges uno, ${queSePierde}</p>
+         ${button(p.planUrl, "Elegir mi plan")}`,
+      ),
+    };
+  }
 
   if (p.seRenuevaSolo && p.stage === "7d") {
     return {

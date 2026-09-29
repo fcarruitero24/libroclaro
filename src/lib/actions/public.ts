@@ -89,6 +89,12 @@ export async function submitComplaint(_prev: ActionState, formData: FormData): P
     if (error.message.includes("NEGOCIO_ARCHIVADO")) {
       return { error: "Este libro de reclamaciones fue cerrado por el proveedor y ya no acepta reclamos nuevos." };
     }
+    if (error.message.includes("LIBRO_INACTIVO")) {
+      return {
+        error:
+          "Este libro de reclamaciones no está activo en este momento. Comunícate directamente con el proveedor o acude al INDECOPI.",
+      };
+    }
     console.error("[submit_complaint]", error);
     return { error: "No se pudo registrar tu reclamo. Intenta nuevamente en unos minutos." };
   }

@@ -2,7 +2,7 @@
 
 import { useState, type CSSProperties } from "react";
 import { ButtonLink } from "@/components/ui";
-import { type BillingPeriod, monthlyEquivalent, PLANS, yearlySavings } from "@/lib/plans";
+import { type BillingPeriod, DIAS_DE_PRUEBA, monthlyEquivalent, PLANS, yearlySavings } from "@/lib/plans";
 
 /** Índice para la cascada del reveal: lo lee `--i` en globals.css. */
 const paso = (i: number) => ({ "--i": i }) as CSSProperties;
@@ -53,8 +53,8 @@ export function PreciosPlanes() {
         </div>
       </div>
 
-      <div className="mt-10 grid gap-6 md:grid-cols-3">
-        {(["free", "pro", "business"] as const).map((id, i) => {
+      <div className="mx-auto mt-10 grid max-w-4xl gap-6 md:grid-cols-2">
+        {(["pro", "business"] as const).map((id, i) => {
           const p = PLANS[id];
           const highlight = id === "pro";
           const precio = anual ? p.priceYearly : p.priceMonthly;
@@ -63,7 +63,7 @@ export function PreciosPlanes() {
             <div
               key={id}
               style={paso(i)}
-              // Columna flexible: el botón se ancla abajo (mt-auto) y los tres
+              // Columna flexible: el botón se ancla abajo (mt-auto) y los dos
               // quedan en la misma línea aunque las listas midan distinto.
               className={
                 highlight
@@ -78,28 +78,17 @@ export function PreciosPlanes() {
               )}
               <h3 className={`text-lg font-semibold ${highlight ? "text-white" : "text-slate-900"}`}>{p.name}</h3>
 
-              {p.priceYearly === 0 ? (
-                <>
-                  <p className="mt-2 flex items-baseline gap-1">
-                    <span className={`text-4xl font-extrabold ${highlight ? "text-white" : "text-slate-900"}`}>S/ 0</span>
-                  </p>
-                  <p className={`mt-1 text-sm ${tenue}`}>Para siempre, sin tarjeta.</p>
-                </>
-              ) : (
-                <>
-                  <p key={periodo} className="anim-precio mt-2 flex items-baseline gap-1">
-                    <span className={`text-4xl font-extrabold tabular-nums ${highlight ? "text-white" : "text-slate-900"}`}>
-                      S/ {precio}
-                    </span>
-                    <span className={`text-sm ${tenue}`}>{anual ? "/año" : "/mes"}</span>
-                  </p>
-                  <p className={`mt-1 text-sm ${tenue}`}>
-                    {anual
-                      ? `Equivale a S/ ${monthlyEquivalent(p)} al mes. Ahorras ${yearlySavings(p)}%.`
-                      : "Sin compromiso. Cancela cuando quieras."}
-                  </p>
-                </>
-              )}
+              <p key={periodo} className="anim-precio mt-2 flex items-baseline gap-1">
+                <span className={`text-4xl font-extrabold tabular-nums ${highlight ? "text-white" : "text-slate-900"}`}>
+                  S/ {precio}
+                </span>
+                <span className={`text-sm ${tenue}`}>{anual ? "/año" : "/mes"}</span>
+              </p>
+              <p className={`mt-1 text-sm ${tenue}`}>
+                {anual
+                  ? `Equivale a S/ ${monthlyEquivalent(p)} al mes. Ahorras ${yearlySavings(p)}%.`
+                  : "Sin compromiso. Cancela cuando quieras."}
+              </p>
 
               {/* mb-8: el espacio mínimo hasta el botón cuando la lista es la más larga. */}
               <ul className={`mt-6 mb-8 space-y-2 text-sm ${highlight ? "text-teal-100" : "text-slate-700"}`}>
@@ -111,7 +100,7 @@ export function PreciosPlanes() {
                 ))}
               </ul>
               <ButtonLink href="/registro" variant={highlight ? "white" : "secondary"} className="mt-auto w-full">
-                {id === "free" ? "Empezar gratis" : `Elegir ${p.name}`}
+                Probar {DIAS_DE_PRUEBA} días gratis
               </ButtonLink>
             </div>
           );

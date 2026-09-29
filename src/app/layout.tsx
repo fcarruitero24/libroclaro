@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     template: "%s · LibroClaro",
   },
   description:
-    "Cumple con INDECOPI en 5 minutos. Libro de Reclamaciones Virtual con numeración correlativa, copia automática al consumidor y control del plazo de 15 días hábiles. Gratis para empezar.",
+    "Cumple con INDECOPI en 5 minutos. Libro de Reclamaciones Virtual con numeración correlativa, copia automática al consumidor y control del plazo de 15 días hábiles. Prueba 30 días gratis.",
   keywords: [
     "libro de reclamaciones virtual",
     "libro de reclamaciones digital",
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "LibroClaro · Libro de Reclamaciones Virtual",
     description:
-      "Libro de Reclamaciones Virtual para negocios peruanos. Gratis para empezar, listo en 5 minutos.",
+      "Libro de Reclamaciones Virtual para negocios peruanos. Prueba 30 días gratis, listo en 5 minutos.",
     locale: "es_PE",
     type: "website",
   },

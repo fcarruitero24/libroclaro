@@ -5,8 +5,9 @@ import { CopyButton } from "@/components/copy-button";
 import { PanelShell } from "@/components/panel-shell";
 import { Badge } from "@/components/ui";
 import { getAppUrl } from "@/lib/env";
+import { fmtDate } from "@/lib/format";
 import { COOKIE_MENU } from "@/lib/panel-prefs";
-import { planFor } from "@/lib/plans";
+import { estadoDelPlan, insigniaDelPlan, type EstadoPlan } from "@/lib/plans";
 import { createClient, requireUser } from "@/lib/supabase/server";
 import type { Business } from "@/lib/types";
 
@@ -36,13 +37,14 @@ export default async function BusinessLayout({
   ]);
   if (!data) notFound();
   const biz = data as Business;
-  const plan = planFor(biz);
+  const estado = estadoDelPlan(biz);
+  const insignia = insigniaDelPlan(estado);
   const appUrl = await getAppUrl();
   const publicUrl = `${appUrl}/r/${biz.slug}`;
 
   return (
     <PanelShell
-      negocio={{ id: biz.id, name: biz.name, plan: plan.name, gratis: plan.id === "free" }}
+      negocio={{ id: biz.id, name: biz.name, insignia }}
       abiertos={count ?? 0}
       email={user.email ?? ""}
       publicUrl={publicUrl}
@@ -56,7 +58,7 @@ export default async function BusinessLayout({
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="truncate text-lg font-bold text-slate-900">{biz.name}</h1>
               <span className="lg:hidden">
-                <Badge tone={plan.id === "free" ? "slate" : "teal"}>Plan {plan.name}</Badge>
+                <Badge tone={insignia.tono}>{insignia.texto}</Badge>
               </span>
               {biz.archived_at && <Badge tone="amber">Archivado</Badge>}
             </div>
@@ -76,17 +78,81 @@ export default async function BusinessLayout({
             <CopyButton text={publicUrl} label="Copiar enlace" />
           </div>
         </div>
-        {biz.archived_at && (
+        {biz.archived_at ? (
           <div className="mx-auto max-w-6xl px-4 pb-4 sm:px-6">
             <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
               Este libro está archivado y no acepta reclamos nuevos. Sus hojas siguen guardadas. Puedes reactivarlo en
               Ajustes.
             </p>
           </div>
+        ) : (
+          <AvisoDelPlan estado={estado} bizId={biz.id} />
         )}
       </div>
 
       <main className="panel-contenido mx-auto max-w-6xl px-4 py-8 sm:px-6 print:max-w-none print:p-0">{children}</main>
     </PanelShell>
+  );
+}
+
+const TONO_AVISO = {
+  teal: "border-teal-200 bg-teal-50 text-teal-900",
+  amber: "border-amber-200 bg-amber-50 text-amber-900",
+  red: "border-red-200 bg-red-50 text-red-900",
+};
+
+/**
+ * Franja bajo la cabecera mientras el libro no tiene un plan pagado: cuánto
+ * le queda de prueba, hasta cuándo tiene para pagar, o que ya no recibe
+ * reclamos. Con un plan pagado no se muestra nada.
+ */
+function AvisoDelPlan({ estado, bizId }: { estado: EstadoPlan; bizId: string }) {
+  if (estado.tipo === "pagado") return null;
+
+  let tono: keyof typeof TONO_AVISO;
+  let texto: React.ReactNode;
+  let accion: string;
+  if (estado.tipo === "prueba") {
+    const dias = estado.diasRestantes === 1 ? "1 día" : `${estado.diasRestantes} días`;
+    tono = estado.diasRestantes <= 7 ? "amber" : "teal";
+    texto = (
+      <>
+        Estás en tu prueba gratis con todo lo del plan Pro: te {estado.diasRestantes === 1 ? "queda" : "quedan"}{" "}
+        <strong>{dias}</strong> (termina el {fmtDate(estado.termina)}).
+      </>
+    );
+    accion = "Elegir mi plan";
+  } else if (estado.tipo === "gracia") {
+    tono = "amber";
+    texto = (
+      <>
+        {estado.prueba ? "Tu prueba gratis terminó" : "Tu plan venció"} el {fmtDate(estado.vencio)}. Elige un plan antes
+        del <strong>{fmtDate(estado.hasta)}</strong> para que tu libro siga recibiendo reclamos.
+      </>
+    );
+    accion = "Ver planes";
+  } else {
+    tono = "red";
+    texto = (
+      <>
+        <strong>Tu libro no está recibiendo reclamos nuevos</strong> porque{" "}
+        {estado.prueba ? "tu prueba gratis terminó" : "tu plan venció"}. Tus reclamos siguen guardados: puedes verlos,
+        responder los pendientes y descargarlos.
+      </>
+    );
+    accion = "Activar un plan";
+  }
+
+  return (
+    <div className="mx-auto max-w-6xl px-4 pb-4 sm:px-6">
+      <div
+        className={`flex flex-col gap-2 rounded-lg border px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between sm:gap-4 ${TONO_AVISO[tono]}`}
+      >
+        <p>{texto}</p>
+        <Link href={`/app/${bizId}/plan`} className="shrink-0 font-semibold underline underline-offset-2 hover:no-underline">
+          {accion}
+        </Link>
+      </div>
+    </div>
   );
 }

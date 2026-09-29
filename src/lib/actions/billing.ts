@@ -10,8 +10,8 @@ import { createClient, requireUser } from "@/lib/supabase/server";
 /**
  * Cancela el cobro automático de la suscripción de Mercado Pago del negocio.
  *
- * No toca el plan: sigue vigente hasta plan_expires_at y después baja a Gratis
- * solo, con todos sus reclamos. Cancelar tiene que ser tan fácil como contratar,
+ * No toca el plan: sigue vigente hasta plan_expires_at y después el libro
+ * queda inactivo solo, con todos sus reclamos. Cancelar tiene que ser tan fácil como contratar,
  * así que se hace desde el panel y no mandando al cliente a Mercado Pago (quien
  * pagó como invitado ni siquiera tiene cuenta ahí).
  */

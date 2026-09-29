@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
 
   const { error: upErr } = await admin
     .from("businesses")
-    .update({ plan, plan_expires_at: expires })
+    .update({ plan, plan_expires_at: expires, en_prueba: false })
     .eq("id", biz.id);
   if (upErr) return NextResponse.json({ error: upErr.message }, { status: 500 });
 
