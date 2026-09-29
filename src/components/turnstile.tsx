@@ -77,5 +77,7 @@ export function Turnstile({ reinicio }: { reinicio: unknown }) {
   }, [reinicio]);
 
   if (!SITE_KEY) return null;
-  return <div ref={caja} />;
+  // Centrada: la casilla de Cloudflare mide 300 px y pegada a la izquierda
+  // se veía descuadrada bajo campos que ocupan todo el ancho.
+  return <div ref={caja} className="flex justify-center" />;
 }
