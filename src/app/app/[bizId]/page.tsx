@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BarrasHorizontales, ColumnasPorPeriodo, type Barra, type Columna } from "@/components/graficos-resumen";
+import { SelectorSegmentado } from "@/components/selector-segmentado";
 import { DeadlineBadge } from "@/components/status-badge";
 import { Alert, ButtonLink, Card } from "@/components/ui";
 import { businessDaysBetween, businessDaysLeft, limaDateKey } from "@/lib/business-days";
@@ -183,25 +184,16 @@ export default async function ResumenPage({
           {/* Filtro del periodo: una fila, arriba de todo lo que afecta. */}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-sm font-semibold text-slate-900">Desempeño en {nombrePeriodo}</h2>
-            <div className="inline-flex rounded-lg bg-slate-100 p-1">
-              {PERIODOS.map((p) => (
-                <Link
-                  key={p.dias}
-                  href={`/app/${bizId}?p=${p.dias}`}
-                  scroll={false}
-                  className={
-                    p.dias === dias
-                      ? "rounded-md bg-white px-3 py-1 text-xs font-semibold text-slate-900 shadow-sm"
-                      : "rounded-md px-3 py-1 text-xs font-semibold text-slate-500 hover:text-slate-900"
-                  }
-                >
-                  {p.label}
-                </Link>
-              ))}
-            </div>
+            <SelectorSegmentado
+              etiqueta="Periodo del desempeño"
+              activa={Math.max(0, PERIODOS.findIndex((p) => p.dias === dias))}
+              opciones={PERIODOS.map((p) => ({ clave: String(p.dias), href: `/app/${bizId}?p=${p.dias}`, contenido: p.label }))}
+            />
           </div>
 
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+          {/* La clave del periodo vuelve a montar las cifras al cambiarlo:
+              entran de nuevo en vez de cambiar de golpe. */}
+          <div key={dias} className="anim-precio grid grid-cols-2 gap-4 md:grid-cols-4">
             <Cifra
               label="Recibidos"
               valor={String(recibidos.length)}
@@ -334,7 +326,7 @@ function Estado({
   return (
     <Link
       href={href}
-      className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md"
+      className="group relative overflow-hidden rounded-2xl bg-white p-5 sombra-tarjeta transition duration-200 ease-out hover:-translate-y-0.5 hover:sombra-tarjeta-alta active:translate-y-0"
     >
       <span className={`absolute inset-y-0 left-0 w-1 ${t.barra}`} aria-hidden="true" />
       <p className="text-sm font-medium text-slate-600">{label}</p>

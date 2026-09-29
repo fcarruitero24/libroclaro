@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { SelectorSegmentado } from "@/components/selector-segmentado";
 import { Alert, Badge, Button, Card } from "@/components/ui";
 import { cancelarSuscripcion } from "@/lib/actions/billing";
 import { WHATSAPP_NUMBER, YAPE_NAME, YAPE_NUMBER } from "@/lib/env";
@@ -42,23 +43,6 @@ export default async function PlanPage({
     suscripcionActiva && biz.plan_expires_at
       ? new Date(new Date(biz.plan_expires_at).getTime() - MARGEN_COBRO_MS).toISOString()
       : null;
-
-  const tab = (value: BillingPeriod, label: string, hint?: string) => {
-    const active = period === value;
-    return (
-      <Link
-        href={`/app/${bizId}/plan?periodo=${value === "yearly" ? "anual" : "mensual"}`}
-        className={
-          active
-            ? "rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition duration-200 ease-out"
-            : "rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 transition duration-200 ease-out hover:text-slate-900"
-        }
-      >
-        {label}
-        {hint && <span className="ml-1.5 text-xs font-bold text-green-700">{hint}</span>}
-      </Link>
-    );
-  };
 
   return (
     <div className="space-y-8">
@@ -141,10 +125,24 @@ export default async function PlanPage({
       )}
 
       <div className="flex justify-center">
-        <div className="inline-flex items-center gap-1 rounded-xl bg-slate-100 p-1">
-          {tab("yearly", "Pago anual", `ahorra ${yearlySavings(PLANS.pro)}%`)}
-          {tab("monthly", "Mes a mes")}
-        </div>
+        <SelectorSegmentado
+          etiqueta="Periodo de pago"
+          tamano="md"
+          activa={period === "yearly" ? 0 : 1}
+          opciones={[
+            {
+              clave: "anual",
+              href: `/app/${bizId}/plan?periodo=anual`,
+              contenido: (
+                <>
+                  Pago anual
+                  <span className="ml-1.5 text-xs font-bold text-green-700">ahorra {yearlySavings(PLANS.pro)}%</span>
+                </>
+              ),
+            },
+            { clave: "mensual", href: `/app/${bizId}/plan?periodo=mensual`, contenido: "Mes a mes" },
+          ]}
+        />
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
@@ -158,11 +156,12 @@ export default async function PlanPage({
                 <h3 className="text-lg font-semibold text-slate-900">{p.name}</h3>
                 {isCurrent && <Badge tone="green">Actual</Badge>}
               </div>
-              <p className="mt-2 flex items-baseline gap-1">
-                <span className="text-3xl font-extrabold text-slate-900">S/ {price}</span>
+              {/* La clave con el periodo hace que el precio vuelva a entrar al cambiarlo. */}
+              <p key={`${id}-${period}`} className="anim-precio mt-2 flex items-baseline gap-1">
+                <span className="text-3xl font-extrabold tabular-nums text-slate-900">S/ {price}</span>
                 <span className="text-sm text-slate-500">{price === 0 ? "" : period === "yearly" ? "/año" : "/mes"}</span>
               </p>
-              <p className="mt-1 min-h-5 text-xs text-slate-500">
+              <p key={`${id}-${period}-nota`} className="anim-precio mt-1 min-h-5 text-xs text-slate-500">
                 {price === 0
                   ? "Para siempre, sin tarjeta."
                   : period === "yearly"

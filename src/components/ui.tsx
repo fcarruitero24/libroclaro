@@ -83,7 +83,8 @@ export function Field({
 
 export function Card({ className, children, id }: { className?: string; children: ReactNode; id?: string }) {
   return (
-    <div id={id} className={cn("rounded-xl border border-slate-200 bg-white p-6 shadow-sm", className)}>
+    // Mismo lenguaje que la portada: sin borde gris, contorno por sombra teñida.
+    <div id={id} className={cn("rounded-2xl bg-white p-6 sombra-tarjeta", className)}>
       {children}
     </div>
   );

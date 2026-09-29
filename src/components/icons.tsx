@@ -144,6 +144,23 @@ const trazos = {
       <path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5M12 17.5h.01" />
     </>
   ),
+  // Plegar el menú: doble flecha a la izquierda (girada, despliega).
+  plegar: (
+    <>
+      <path d="m11 17-5-5 5-5M18 17l-5-5 5-5" />
+    </>
+  ),
+  // Abrir el menú en celular.
+  menu: (
+    <>
+      <path d="M4 6h16M4 12h16M4 18h16" />
+    </>
+  ),
+  cerrar: (
+    <>
+      <path d="M18 6 6 18M6 6l12 12" />
+    </>
+  ),
   // IA: chispa de cuatro puntas.
   chispa: (
     <>

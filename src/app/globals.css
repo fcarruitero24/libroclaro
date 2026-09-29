@@ -573,6 +573,70 @@ p {
   animation: precio 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* ---------------------------------------------------------------
+   Panel del negocio. Es una herramienta de uso diario: el movimiento
+   es corto (≤ 220ms) y sutil, para que se sienta vivo sin hacer
+   esperar a quien entra veinte veces al día.
+   --------------------------------------------------------------- */
+
+/* Esqueleto de carga: un brillo que pasa, en vez de un spinner. */
+.esqueleto {
+  background: linear-gradient(90deg, rgb(226 232 240 / 0.7) 0%, rgb(241 245 249 / 0.95) 50%, rgb(226 232 240 / 0.7) 100%);
+  background-size: 200% 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .esqueleto {
+    animation: esqueleto-brillo 1.3s ease-in-out infinite;
+  }
+
+  @keyframes esqueleto-brillo {
+    from {
+      background-position: 100% 0;
+    }
+    to {
+      background-position: -100% 0;
+    }
+  }
+
+  /* Entrada de cada sección. Se aplica al hijo directo del <main>: al
+     navegar, React inserta un elemento nuevo (el esqueleto y luego el
+     contenido) y la animación corre sola al insertarse, sin JavaScript.
+     Un re-render que conserva el elemento no la repite. */
+  .panel-contenido > * {
+    animation: panel-entrada 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes panel-entrada {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Tutorial: la tarjeta entra enfocándose. */
+  .tutorial-tarjeta {
+    animation: tutorial-entrada 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes tutorial-entrada {
+    from {
+      opacity: 0;
+      transform: translateY(6px) scale(0.97);
+      filter: blur(2px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+      filter: none;
+    }
+  }
+}
+
 @media print {
   .no-print {
     display: none !important;
