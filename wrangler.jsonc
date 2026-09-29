@@ -6,13 +6,18 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "libroclaro",
   "main": "cloudflare/worker.ts",
-  // Dominio propio. Al publicar, Cloudflare apunta los dos nombres al Worker
-  // y reemplaza los registros A que iban a Vercel. www y http redirigen a
-  // https://libroclaro.pe dentro del Worker.
+  // Dominio propio. Cloudflare crea y administra los registros DNS de los dos
+  // nombres; si ya existe un registro A o CNAME hecho a mano para alguno, la
+  // conexión falla (código 100117) y hay que borrarlo antes. www y http
+  // redirigen a https://libroclaro.pe dentro del Worker.
   "routes": [
     { "pattern": "libroclaro.pe", "custom_domain": true },
     { "pattern": "www.libroclaro.pe", "custom_domain": true }
   ],
+  // Sin dirección de prueba (*.workers.dev) ni URLs de vista previa: la web
+  // solo se sirve en libroclaro.pe.
+  "workers_dev": false,
+  "preview_urls": false,
   "compatibility_date": "2026-09-20",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {
