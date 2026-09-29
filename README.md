@@ -15,7 +15,7 @@ Libro de Reclamaciones Virtual para negocios peruanos. Obligatorio por ley para 
 - **Plazo legal**: 15 días hábiles calculados con feriados de Perú; el panel muestra la cuenta regresiva y marca vencidos.
 - **Panel del negocio**: lista, filtros, detalle, respuesta con envío de correo al consumidor, exportación CSV (Pro).
 - **Instalación**: enlace, snippet HTML con el aviso y código QR para el local.
-- **Monetización**: plan Gratis permanente (con marca «LibroClaro»), Pro S/ 99/año o S/ 12/mes, Empresa S/ 299/año o S/ 35/mes. Pago con tarjeta vía Mercado Pago (suscripción) o manual por Yape/Plin con activación por API.
+- **Monetización**: plan Gratis permanente (con marca «LibroClaro»), Pro S/ 149/año o S/ 19/mes, Empresa S/ 499/año o S/ 59/mes. Pago con tarjeta vía Mercado Pago (suscripción) o manual por Yape/Plin con activación por API.
 - **Cron diario** (Vercel) que recuerda a los negocios Pro los reclamos por vencer.
 
 ## Stack
@@ -102,7 +102,7 @@ update public.businesses set plan = 'pro', plan_expires_at = now() + interval '3
 
 Precios verificados en setiembre de 2026: librovirtual.pe S/ 100/año, reclamavirtual.com S/ 125/año más S/ 55 de activación, respondo.pe S/ 179.90/año, reclamovirtual.pe S/ 189/año o S/ 35/mes. Ninguno ofrece plan gratuito permanente, solo pruebas de 7 días, y varios topean la cantidad de reclamos al año.
 
-Por eso LibroClaro se posiciona con Pro a S/ 99/año, por debajo de todos en el precio de entrada, con reclamos ilimitados en todos los planes y un plan gratuito permanente que funciona como canal de adquisición vía la marca «Powered by».
+Por eso LibroClaro se posiciona con Pro a S/ 149/año (S/ 19/mes), por debajo de respondo.pe y reclamovirtual.pe e incluyendo 3 negocios, con reclamos ilimitados en todos los planes y un plan gratuito permanente que funciona como canal de adquisición vía la marca «Powered by».
 
 Funciones que la competencia ya vende y aquí faltan: avisos por WhatsApp, varios usuarios por cuenta, exportación a SIREC, verificación automática de RUC y adjuntar fotos o boletas al reclamo.
 

@@ -49,8 +49,10 @@ export const PLANS: Record<PlanId, PlanDef> = {
   pro: {
     id: "pro",
     name: "Pro",
-    priceMonthly: 12,
-    priceYearly: 99,
+    // Antes S/ 12 y S/ 99 (subidos el 2026-09-28): con S/ 12 la comisión de
+    // Mercado Pago (3,49 % + S/ 1 + IGV) se llevaba ~14 % de cada cobro.
+    priceMonthly: 19,
+    priceYearly: 149,
     maxBusinesses: 3,
     branding: false,
     businessAlerts: true,
@@ -73,8 +75,9 @@ export const PLANS: Record<PlanId, PlanDef> = {
   business: {
     id: "business",
     name: "Empresa",
-    priceMonthly: 35,
-    priceYearly: 299,
+    // Antes S/ 35 y S/ 299 (subidos el 2026-09-28).
+    priceMonthly: 59,
+    priceYearly: 499,
     maxBusinesses: 25,
     branding: false,
     businessAlerts: true,
