@@ -42,6 +42,8 @@ next-env.d.ts
 
 .vercel
 .env*
+# La plantilla sin valores sí se versiona.
+!.env.example
 
 # cloudflare
 .open-next

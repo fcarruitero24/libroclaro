@@ -1,113 +1,87 @@
-# LibroClaro · Libro de Reclamaciones Virtual (micro SaaS)
+# LibroClaro
 
-Libro de Reclamaciones Virtual para negocios peruanos. Obligatorio por ley para todo proveedor que vende a consumidores (Ley 29571, D.S. 011-2011-PCM y modificatorias). Modelo freemium B2B con suscripción mensual.
+Libro de Reclamaciones Virtual para negocios en Perú. Cada negocio obtiene en minutos su formulario público de reclamos, con numeración correlativa, copia automática al consumidor y control del plazo legal de 15 días hábiles, según la Ley 29571 y el D.S. 011-2011-PCM.
 
-- **Producción:** https://libroclaro.vercel.app (Vercel, proyecto `libroclaro`, auto-deploy desde `main`)
-- **Demo pública:** https://libroclaro.vercel.app/r/demo
-- **Base de datos:** Supabase, proyecto `libroclaro` (`rcjgprzmvtspviwyyrhy`, São Paulo)
-- **Repo:** https://github.com/fcarruitero24/libroclaro (privado)
+- **En producción:** https://libroclaro.pe
+- **Libro de ejemplo:** https://libroclaro.pe/r/demo
 
 ## Qué hace
 
-- **Formulario público** `/r/{slug}` con el formato oficial de la hoja de reclamación (consumidor, bien contratado, detalle, pedido), aviso oficial y definiciones de reclamo/queja.
-- **Numeración correlativa** por negocio y año (`2026-000001`), generada en la base de datos.
-- **Copia al consumidor** por correo con enlace a su hoja `/h/{token}` (imprimible / PDF).
-- **Plazo legal**: 15 días hábiles calculados con feriados de Perú; el panel muestra la cuenta regresiva y marca vencidos.
-- **Panel del negocio**: lista, filtros, detalle, respuesta con envío de correo al consumidor, exportación CSV (Pro).
-- **Instalación**: enlace, snippet HTML con el aviso y código QR para el local.
-- **Monetización**: prueba gratis de 30 días con todo Pro (sin tarjeta, una por cuenta y por RUC; al vencer el libro deja de recibir reclamos pero conserva sus hojas), Pro S/ 149/año o S/ 19/mes, Empresa S/ 499/año o S/ 59/mes. Pago solo con tarjeta de crédito o débito vía Mercado Pago (suscripción mensual o anual); las billeteras como Yape y Plin se descartaron el 2026-09-28. Activación manual por API para soporte o cortesías.
-- **Cron diario** (Vercel) que recuerda a los negocios Pro los reclamos por vencer.
+- **Formulario público** `/r/{slug}` con el formato oficial de la hoja de reclamación (reclamo o queja), protegido con Cloudflare Turnstile.
+- **Numeración correlativa** por negocio y año (`2026-000001`), generada dentro de la base de datos.
+- **Copia al consumidor** por correo y hoja pública `/h/{token}`, imprimible o en PDF.
+- **Plazo legal** de 15 días hábiles con feriados de Perú: el panel muestra la cuenta regresiva y avisa por correo los reclamos por vencer.
+- **Panel del negocio**: reclamos con filtros, detalle con historial y notas, respuesta por correo, plantillas de respuesta, gráficos y exportación CSV. Una cuenta puede tener varias sucursales.
+- **Instalación**: enlace propio, aviso oficial para la web y para el local (A4) y código QR.
+- **Registro en un paso** con consulta del RUC en SUNAT: la razón social se toma del padrón oficial y un RUC no puede quedar registrado a nombre de otra cuenta.
+- **Suscripciones** con tarjeta vía Mercado Pago (mensual o anual) y prueba gratis de 30 días del plan Pro.
+- **LibIA**, la mascota 3D del inicio, hecha con Three.js: se asoma detrás de la hoja del ejemplo, saluda y sigue el cursor. Se carga solo en escritorio.
 
 ## Stack
 
-Next.js 16 (App Router, Server Actions) · TypeScript · Tailwind v4 · Supabase (Postgres + Auth + RLS) · Resend (correo) · Mercado Pago (suscripciones) · Vercel (hosting + cron).
+- **Next.js 16** (App Router, Server Actions) · React 19 · TypeScript · Tailwind CSS v4
+- **Supabase**: Postgres con Row Level Security, Auth y triggers
+- **Cloudflare Workers** con OpenNext · Turnstile · reglas de límite de pedidos
+- **Resend** (correo transaccional) · **Mercado Pago** (suscripciones) · **Three.js**
+- Pruebas con `node:test`
+
+## Decisiones técnicas
+
+- **La seguridad vive en la base.** Las políticas RLS limitan cada fila a su dueño, y un trigger impide que un cliente cambie su plan o su vencimiento desde el navegador: solo el servidor, con su llave de servicio, puede hacerlo. El plan es de la cuenta y otro trigger lo propaga a sus sucursales.
+- **Pagos verificados dos veces.** El webhook de Mercado Pago comprueba la firma HMAC del aviso y, antes de activar un plan, vuelve a consultar la suscripción con el token del servidor.
+- **Formularios públicos protegidos.** Turnstile se verifica en el servidor en los reclamos, el registro y el login, y la IP real se toma de la cabecera de Cloudflare.
+- **Avisos sin duplicados.** Cada recordatorio de plan se registra con una clave única antes de enviarse, así que el cron puede reintentar sin mandar el mismo correo dos veces.
+- **Cerca de los datos.** El Worker corre en São Paulo (`aws:sa-east-1`), junto a la base, porque cada página hace varias consultas; los archivos estáticos se sirven desde el punto más cercano al visitante.
+- **Animación medida, no estimada.** La entrada de la mascota se calibró leyendo su silueta real en el lienzo WebGL cuadro a cuadro, y su trayectoria vive en funciones puras con pruebas.
 
 ## Estructura
 
 ```
 src/app/
-  page.tsx                    Landing (precios, FAQ)
-  login/ registro/            Autenticación (email + contraseña)
-  auth/callback/route.ts      Confirmación de correo
-  app/                        Panel (protegido por src/proxy.ts)
-    nuevo/                    Registrar negocio
-    negocios/                 Lista de negocios/sucursales
-    [bizId]/                  Reclamos · reclamo/[id] · ajustes · plan · exportar (CSV)
-  r/[slug]/                   Formulario público del consumidor
-  h/[token]/                  Hoja de reclamación pública (PDF)
-  api/checkout                Crea suscripción en Mercado Pago
-  api/webhooks/mercadopago    Activa el plan al autorizarse el pago
-  api/admin/activate          Activación manual (soporte)
-  api/cron/reminders          Recordatorios diarios (Pro)
-src/lib/                      supabase/, actions/, plans.ts, business-days.ts, email.ts
-supabase/migrations/          Esquema SQL. 0001 aplicado; aplicar cada nueva desde el SQL Editor de Supabase
+  page.tsx                   Portada: demo animada, precios y preguntas frecuentes
+  registro/  login/          Alta en un paso (RUC + cuenta + negocio) e inicio de sesión
+  app/                       Panel privado (protegido por src/middleware.ts)
+    [bizId]/                 Resumen, reclamos, reclamo/[id], plantillas, aviso, ajustes, plan, exportar
+  r/[slug]/                  Formulario público del consumidor (y reporte de titularidad)
+  h/[token]/                 Hoja de reclamación pública
+  api/checkout               Crea la suscripción en Mercado Pago
+  api/webhooks/mercadopago   Activa o actualiza el plan al llegar el aviso firmado
+  api/cron/reminders         Recordatorios diarios
+  api/ruc                    Consulta de RUC
+src/components/              Interfaz; mascota/ tiene la escena 3D y su lógica con pruebas
+src/lib/                     supabase/, actions/, plans.ts, business-days.ts, email.ts, turnstile.ts
+supabase/migrations/         Esquema SQL, en orden (0001 a 0008)
+cloudflare/worker.ts         Punto de entrada del Worker: cron y redirección al dominio
+wrangler.jsonc               Configuración de Cloudflare
 ```
 
 ## Desarrollo local
 
 ```bash
 npm install
-cp .env.example .env.local   # completa lo que necesites
-npm run dev
+cp .env.example .env.local   # completa solo lo que necesites
+npm run dev                  # http://localhost:3000
+npm test                     # pruebas (Node 22.6 o más)
+npm run lint
 ```
 
-La URL y la clave anon de Supabase ya vienen por defecto en `src/lib/env.ts` (son públicas por diseño). Sin ninguna variable extra la app funciona: registro, panel, formulario público y hoja. Los correos se registran en consola hasta que configures Resend.
+Sin variables extra la app funciona: registro, panel, formulario público y hoja. Los correos se escriben en la consola hasta configurar Resend. Las migraciones de `supabase/migrations/` se aplican en orden desde el SQL Editor de Supabase.
 
-## Checklist de lanzamiento (≈30 minutos)
-
-1. **Supabase → Authentication → URL Configuration**
-   - Site URL: `https://TU-DOMINIO`
-   - Redirect URLs: `https://TU-DOMINIO/auth/callback`
-2. **Supabase → Authentication → Providers → Email**
-   - Opción A (rápida): desactiva *Confirm email* para que el registro entre directo.
-   - Opción B (recomendada): configura SMTP personalizado (Resend tiene SMTP gratis) para que lleguen los correos de confirmación a cualquier usuario.
-3. **Vercel → Settings → Environment Variables** (ver `.env.example`):
-   - `SUPABASE_SERVICE_ROLE_KEY` (Supabase → Project Settings → API)
-   - `RESEND_API_KEY` y `EMAIL_FROM` (verifica tu dominio en Resend)
-   - `ADMIN_SECRET`, `CRON_SECRET` (cadenas aleatorias largas)
-   - `NEXT_PUBLIC_WHATSAPP_NUMBER` (cuando haya número de empresa)
-   - `MP_ACCESS_TOKEN`, `MP_WEBHOOK_SECRET` cuando tengas cuenta de Mercado Pago
-   - Redeploy después de guardarlas.
-4. **Mercado Pago** (opcional al inicio): crea la aplicación en *Tus integraciones*, copia el Access Token de producción y registra el webhook `https://TU-DOMINIO/api/webhooks/mercadopago` con el evento *Suscripciones (preapproval)*.
-5. **Dominio propio**: agrega `libroclaro.pe` (o el que compres) en Vercel y actualiza `NEXT_PUBLIC_APP_URL`, la Site URL de Supabase y la URL del webhook.
-
-## Activar un plan a mano
+## Publicación
 
 ```bash
-curl -X POST https://TU-DOMINIO/api/admin/activate \
-  -H "x-admin-secret: TU_ADMIN_SECRET" -H "Content-Type: application/json" \
-  -d '{"slug":"mi-negocio","plan":"pro","months":1}'
+npx opennextjs-cloudflare build
+npx opennextjs-cloudflare deploy
 ```
 
-También puedes hacerlo desde el SQL editor de Supabase:
-
-```sql
-update public.businesses set plan = 'pro', plan_expires_at = now() + interval '30 days' where slug = 'mi-negocio';
-```
-
-## Cuenta demo
-
-- Negocio público: `/r/demo` (Cafetería Demo S.A.C., con 2 hojas de ejemplo).
-- Usuario: `demo@libroclaro.app` · Contraseña: `Demo.LibroClaro.2026` (cámbiala o elimina la cuenta antes de publicitar el producto).
-
-## Cómo conseguir los primeros clientes
-
-1. **Contenido SEO local**: la landing ya apunta a «libro de reclamaciones virtual», «INDECOPI», «tienda online». Publica 3–5 artículos: cómo responder un reclamo en 15 días hábiles, diferencias reclamo vs. queja, cómo poner el aviso en Shopify/WooCommerce/Instagram.
-2. **Marca «Powered by»**: cada negocio en plan Gratis muestra el enlace a LibroClaro en su formulario y su hoja. Cada consumidor que reclama ve la marca.
-3. **Outbound directo**: busca tiendas en Instagram/TikTok Perú que venden sin libro de reclamaciones visible (la mayoría). Mensaje corto: «Vi que tu tienda no tiene el aviso del Libro de Reclamaciones que exige INDECOPI. Te lo dejo listo gratis en 5 minutos: [enlace]».
-4. **Alianzas**: contadores, estudios contables y agencias que crean tiendas online. Ofréceles Pro gratis para sus propios clientes a cambio de recomendación.
-5. **Marketplace/gremios**: cámaras de comercio locales, asociaciones de emprendedores, grupos de Facebook de dueños de negocios.
-
-## Posicionamiento frente a la competencia
-
-Precios verificados en setiembre de 2026: librovirtual.pe S/ 100/año, reclamavirtual.com S/ 125/año más S/ 55 de activación, respondo.pe S/ 179.90/año, reclamovirtual.pe S/ 189/año o S/ 35/mes. Ninguno ofrece plan gratuito permanente, solo pruebas de 7 días, y varios topean la cantidad de reclamos al año.
-
-Por eso LibroClaro se posiciona con Pro a S/ 149/año (S/ 19/mes), por debajo de respondo.pe y reclamovirtual.pe e incluyendo 3 negocios, con reclamos ilimitados en todos los planes y una prueba de 30 días (los competidores dan 7). El plan gratuito permanente se retiró el 2026-09-28: le daba a un negocio de un solo local todo lo que la norma exige, así que ese cliente, el más común, nunca tenía motivo para pagar.
-
-Funciones que la competencia ya vende y aquí faltan: avisos por WhatsApp, varios usuarios por cuenta, exportación a SIREC, verificación automática de RUC y adjuntar fotos o boletas al reclamo.
-
-Métrica objetivo: 100 negocios en Gratis → 10–15 % convierte a Pro por alertas por correo y quitar la marca. 50 Pro anuales ≈ S/ 4 950/año, con costos de infraestructura ≈ S/ 0 (planes gratuitos de Vercel, Supabase y Resend cubren varios miles de reclamos al mes).
+Los secretos del servidor se cargan con `npx wrangler secret put NOMBRE`. El cron diario está definido en `wrangler.jsonc`.
 
 ## Aviso legal
 
-LibroClaro es una herramienta tecnológica y no brinda asesoría legal. Los textos legales se basan en el D.S. 011-2011-PCM y sus modificatorias (D.S. 006-2014-PCM, D.S. 058-2017-PCM y D.S. 101-2022-PCM). Verifica los requisitos vigentes con INDECOPI antes de comercializar.
+LibroClaro es una herramienta tecnológica y no brinda asesoría legal. Los textos legales se basan en el D.S. 011-2011-PCM y sus modificatorias (D.S. 006-2014-PCM, D.S. 058-2017-PCM y D.S. 101-2022-PCM).
+
+## Autor
+
+Fabrizio Carruitero · [libroclaro.pe](https://libroclaro.pe)
+
+© 2026 Fabrizio Carruitero. El código se publica como portafolio; todos los derechos reservados.
