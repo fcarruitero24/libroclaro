@@ -1,0 +1,37 @@
+// Worker del panel de consumo (panel.libroclaro.pe): una página privada con el
+// uso de cada plataforma frente a su límite, y una revisión cada hora que avisa
+// por correo si algo se acerca al límite. Entra en el plan Workers Paid que ya
+// paga LibroClaro (cuenta compartida).
+//
+// Local: npx wrangler dev --config panel/wrangler.jsonc --port 8790
+// Las variables locales van en panel/.dev.vars (ignorado por git).
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "libroclaro-panel",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-20",
+  // Solo en su dominio: sin dirección *.workers.dev ni vistas previas, que
+  // quedarían fuera de Cloudflare Access.
+  "routes": [{ "pattern": "panel.libroclaro.pe", "custom_domain": true }],
+  "workers_dev": false,
+  "preview_urls": false,
+  // run_worker_first: el Worker corre antes de servir cualquier archivo, así
+  // que hasta la página pasa por la verificación del token de Access.
+  "assets": { "directory": "./public", "binding": "ASSETS", "run_worker_first": true },
+  // LibroClaro se consulta por dentro de Cloudflare (service binding): sin
+  // pasar por internet ni por las reglas de la zona, como el límite de visitas.
+  "services": [{ "binding": "LIBROCLARO", "service": "libroclaro" }],
+  // Cada hora revisa todo y pide a LibroClaro mandar las alertas nuevas.
+  "triggers": { "crons": ["0 * * * *"] },
+  // No son secretos. Con ACCESS_EQUIPO y ACCESS_AUD vacíos todo responde 403:
+  // se llenan al crear la aplicación de Cloudflare Access.
+  // Secretos (wrangler secret put): CLOUDFLARE_ANALYTICS_TOKEN y PANEL_SECRET.
+  "vars": {
+    "CLOUDFLARE_ACCOUNT_ID": "09006dca4aa7164ce87bddeeda2c43bb",
+    "ACCESS_EQUIPO": "",
+    "ACCESS_AUD": ""
+  },
+  "observability": {
+    "enabled": true
+  }
+}
