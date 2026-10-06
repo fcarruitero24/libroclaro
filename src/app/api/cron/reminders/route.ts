@@ -4,6 +4,7 @@ import { sendEmail, tplPlanReminder, tplReminder } from "@/lib/email";
 import { getAppUrl } from "@/lib/env";
 import { GRACE_MS, MARGEN_COBRO_MS, planFor, PLANS, type PlanId } from "@/lib/plans";
 import { createAdminClient, hasAdminClient } from "@/lib/supabase/admin";
+import { guardarUso } from "@/lib/uso";
 
 interface Row {
   id: string;
@@ -38,7 +39,10 @@ export async function GET(request: NextRequest) {
     .select("id, code, due_at, business_id, businesses(name, email, plan, plan_expires_at, archived_at)")
     .in("status", ["pendiente", "en_proceso"])
     .lte("due_at", horizon);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    await guardarUso("cron.recordatorios", { ok: false, enviados: 0, negocios: 0, error: error.message });
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 
   const appUrl = await getAppUrl();
   type ReminderItem = { code: string; daysLeft: number; url: string };
@@ -65,6 +69,15 @@ export async function GET(request: NextRequest) {
   }
 
   const planes = await recordatoriosDePlan(admin, appUrl);
+
+  // El panel de consumo muestra la última corrida y avisa si falla o deja de correr.
+  const errorDePlanes = planes.error ?? null;
+  await guardarUso("cron.recordatorios", {
+    ok: errorDePlanes === null,
+    enviados: sent + (planes.enviados ?? 0),
+    negocios: byBusiness.size,
+    error: errorDePlanes,
+  });
 
   return NextResponse.json({ ok: true, businesses: byBusiness.size, sent, planes });
 }

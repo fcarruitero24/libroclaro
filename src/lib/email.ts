@@ -1,5 +1,7 @@
+import { cuotaDeResend } from "@/lib/consumo";
 import { escapeHtml, fmtDate } from "@/lib/format";
 import { PLANS } from "@/lib/plans";
+import { guardarUso } from "@/lib/uso";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const FROM = process.env.EMAIL_FROM ?? "LibroClaro <no-responder@libroclaro.pe>";
@@ -37,6 +39,11 @@ export async function sendEmail(input: SendEmailInput): Promise<{ ok: boolean; s
       console.error("[email:error]", res.status, await res.text());
       return { ok: false };
     }
+    // Resend no tiene consulta de uso: su cuota llega en las cabeceras de cada
+    // envío y el panel de consumo muestra la última guardada. Con await porque
+    // en el Worker una promesa suelta se puede cortar al responder.
+    const cuota = cuotaDeResend(res.headers);
+    if (cuota) await guardarUso("resend", cuota);
     return { ok: true };
   } catch (err) {
     console.error("[email:error]", err);
