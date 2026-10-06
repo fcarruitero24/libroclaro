@@ -14,6 +14,10 @@ export const redondear2 = (n: number) => Math.round(n * 100) / 100;
 export const sumarDias = (fecha: string, n: number) =>
   new Date(Date.parse(fecha) + n * DIA_MS).toISOString().slice(0, 10);
 
+/** Días de calendario que faltan, contados desde el día de hoy en Lima, hasta `fecha` ("YYYY-MM-DD"). */
+export const diasHasta = (fecha: string, ahora: Date) =>
+  Math.round((Date.parse(fecha) - Date.parse(fechaEnLima(ahora))) / DIA_MS);
+
 /** Medianoche UTC del día de corte de un mes, o del último día si el mes es más corto. */
 function corte(anio: number, mes: number, dia: number): Date {
   const ultimoDia = new Date(Date.UTC(anio, mes + 1, 0)).getUTCDate();

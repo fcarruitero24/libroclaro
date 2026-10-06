@@ -67,6 +67,8 @@ export interface Resumen {
     tabla: { plan: string; precio: number; comision: number; recibes: number }[];
   }>;
   servicios: { ruc: Prueba; qr: Prueba };
+  /** Días que faltan para que venza el dominio (negativos si ya venció). */
+  dominio: { dias: number };
   recordatorios: Fuente<{
     ultima: { hora: string; ok: boolean; enviados: number; error: string | null } | null;
     dias: { fecha: string; estado: EstadoDelDia }[];

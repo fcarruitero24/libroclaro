@@ -162,6 +162,31 @@ test("recién publicado: sin datos acumulados no hay NaN, ritmos inventados ni a
   assert.equal(okDe(r.recordatorios).dias[6].estado, "pendiente");
 });
 
+test("dominio: a 61 días no avisa; a 60, una sola alerta con la fecha de vencimiento en la clave", () => {
+  const delDominio = (ahora: Date) => {
+    const r = armarResumen(datos(), ahora);
+    return { dias: r.dominio.dias, alertas: r.alertas.filter((a) => a.clave.startsWith("dominio.")) };
+  };
+
+  const a61 = delDominio(d("2028-07-20T15:00:00Z"));
+  assert.equal(a61.dias, 61);
+  assert.deepEqual(a61.alertas, []);
+
+  const a60 = delDominio(d("2028-07-21T15:00:00Z"));
+  assert.equal(a60.dias, 60);
+  assert.deepEqual(
+    a60.alertas.map((a) => a.clave),
+    ["dominio.vence.2028-09-19"],
+  );
+  assert.match(a60.alertas[0].texto, /libroclaro\.pe vence el 19 de setiembre de 2028 \(en 60 días\)/);
+  assert.match(a60.alertas[0].texto, /punto\.pe/);
+});
+
+test("dominio: los días se cuentan en Lima aunque en UTC ya sea el día siguiente", () => {
+  // 21 de julio a las 3 a. m. UTC = 20 de julio a las 10 p. m. en Lima: todavía faltan 61.
+  assert.equal(armarResumen(datos(), d("2028-07-21T03:00:00Z")).dominio.dias, 61);
+});
+
 test("Resend de ayer: hoy van 0 correos y el mes sigue", () => {
   const r = armarResumen(
     datos({ libroclaro: { ok: true, datos: libroclaro({ resend: { dia: 60, mes: 900, fecha: "2026-10-04T22:00:00Z" } }) } }),

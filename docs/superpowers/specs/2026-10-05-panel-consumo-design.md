@@ -16,7 +16,9 @@ correo. Sin costo extra.
    comercial y deja todo en un solo lugar.
 2. **Qué muestra:** Cloudflare, Supabase, Resend y Mercado Pago con su uso, límite, precio y "cuándo pagarías";
    la consulta de RUC (apis.net.pe) y el generador de QR (api.qrserver.com) solo como "responde / no responde";
-   y el estado de los recordatorios de cada mañana. Fuera: GitHub, Vercel (retirado) y Gmail.
+   el estado de los recordatorios de cada mañana; y el vencimiento del dominio `libroclaro.pe` (agregado el
+   2026-10-06: es un dato a mano porque punto.pe no tiene API, y si se olvida se apaga todo LibroClaro).
+   Fuera: GitHub, Vercel (retirado) y Gmail.
 3. **En vivo:** consulta a cada plataforma al abrir la página, al tocar "Actualizar" y cada 5 minutos mientras la
    pestaña está a la vista. Resend no tiene consulta de uso: su dato es el del último correo enviado.
 4. **Alertas:** cada hora se revisa todo y se manda un correo a `PLATFORM_EMAIL` cuando algo cruza el 80 % o el
@@ -35,7 +37,7 @@ La muestra aprobada, con datos reales:
   al ritmo actual, el costo del mes y "cuándo pagarías". Cloudflare suma un gráfico de visitas por día. Mercado
   Pago muestra suscripciones activas, lo cobrado y las comisiones del mes, más la tabla de lo que queda de cada
   plan con la tarifa publicada.
-- **Abajo:** RUC, QR, los últimos 7 días de los recordatorios y las alertas.
+- **Abajo:** RUC, QR, los últimos 7 días de los recordatorios, el vencimiento del dominio y las alertas.
 - **Estados:** mientras carga, esqueletos; si una fuente falla, su tarjeta dice qué no se pudo consultar y el resto
   se muestra igual; si el dato tiene más de 10 minutos, se indica su antigüedad. Resend muestra siempre la hora de
   su último envío ("último correo hace 2 h").
@@ -105,9 +107,12 @@ La muestra aprobada, con datos reales:
 
 ### Alertas
 
-- Umbrales: 80 % y 100 % de cada límite medido, y recordatorios fallidos o sin correr en más de 26 horas.
+- Umbrales: 80 % y 100 % de cada límite medido, recordatorios fallidos o sin correr en más de 26 horas, y 60 días
+  o menos para que venza el dominio (contados en día de Lima).
 - La clave de cada alerta junta métrica, umbral y ciclo (por ejemplo `cloudflare.cpu.80.2026-10-29`); la de
-  recordatorios usa el día (`cron.recordatorios.2026-10-05`). La tabla `alertas_panel` impide repetirlas.
+  recordatorios usa el día (`cron.recordatorios.2026-10-05`) y la del dominio, su fecha de vencimiento
+  (`dominio.vence.2028-09-19`: un solo correo hasta que se renueve y cambie la fecha). La tabla `alertas_panel`
+  impide repetirlas.
 - El correo lo manda LibroClaro, que ya tiene Resend; el panel no guarda la clave de Resend.
 
 ### Seguridad

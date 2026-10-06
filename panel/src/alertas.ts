@@ -63,6 +63,18 @@ export function alertasDelResumen(r: Resumen, ahora: Date): Alerta[] {
     porLimite("resend.mes", r.resend.mes, mesUtc);
   }
 
+  // Un solo correo por vencimiento: la clave lleva la fecha, que cambia al renovar.
+  const dominio = r.config.dominio;
+  if (r.dominio.dias <= dominio.avisoDias) {
+    const vence = new Intl.DateTimeFormat("es-PE", { dateStyle: "long", timeZone: "UTC" }).format(
+      new Date(`${dominio.vence}T00:00:00Z`),
+    );
+    alertas.push({
+      clave: `dominio.vence.${dominio.vence}`,
+      texto: `El dominio ${dominio.nombre} vence el ${vence} (en ${r.dominio.dias} días). Renuévalo en ${dominio.registrador} (${dominio.renovacion}).`,
+    });
+  }
+
   if (r.recordatorios.ok && r.recordatorios.ultima) {
     const ultima = r.recordatorios.ultima;
     const clave = `cron.recordatorios.${fechaEnLima(ahora)}`;

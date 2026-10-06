@@ -430,11 +430,26 @@
     return servicio(nombre, chip, sub, rec.dias.length ? puntos : null);
   }
 
+  function dominio(r) {
+    const c = r.config.dominio;
+    const dias = r.dominio.dias;
+    const vence = formato({ day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(`${c.vence}T00:00:00Z`));
+    const chip =
+      dias < 0
+        ? el("span", "chip limite", "Vencido")
+        : dias <= c.avisoDias
+          ? el("span", "chip atencion", "Renovar pronto")
+          : el("span", "chip ok", "Vigente");
+    const cuando = dias < 0 ? `venció el ${vence}` : `vence el ${vence} (${dias === 1 ? "en 1 día" : `en ${numero(dias)} días`})`;
+    return servicio(`Dominio ${c.nombre}`, chip, `${cuando} · renovar en ${c.registrador} · ${c.renovacion}`);
+  }
+
   function pintarServicios(r) {
     document.getElementById("servicios").replaceChildren(
       prueba("Consulta de RUC", r.servicios.ruc, "apis.net.pe", "sin cuenta ni límite publicado"),
       prueba("Códigos QR del aviso", r.servicios.qr, "api.qrserver.com", "sin cuenta"),
       recordatorios(r.recordatorios),
+      dominio(r),
     );
   }
 
@@ -443,7 +458,7 @@
       "p",
       null,
       el("b", null, "Alertas por correo."),
-      " Si algo pasa del 80 % de su límite, o si los recordatorios fallan una mañana, te llega un correo a libroclaro.pe@gmail.com.",
+      ` Si algo pasa del 80 % de su límite, si los recordatorios fallan una mañana o si faltan ${r.config.dominio.avisoDias} días para que venza el dominio, te llega un correo a libroclaro.pe@gmail.com.`,
     );
     const a = r.alertasDelMes;
     let detalle;

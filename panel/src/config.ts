@@ -42,6 +42,15 @@ export const CONFIG = {
     fijo: 1,
     igv: 0.18,
   },
+  /** Dato a mano: punto.pe no tiene API. Al renovar, se cambia `vence`. */
+  dominio: {
+    nombre: "libroclaro.pe",
+    vence: "2028-09-19",
+    registrador: "punto.pe",
+    renovacion: "S/ 110 al año",
+    /** Desde cuántos días antes del vencimiento llega el correo de aviso. */
+    avisoDias: 60,
+  },
 } as const;
 
 /** RUC de SUNAT: siempre existe, sirve para probar que la consulta de RUC responde. */
