@@ -410,8 +410,10 @@
         ? el("span", "chip gris", "Sin datos")
         : el("span", `chip ${bien === contados.length ? "ok" : "atencion"}`, `${bien} de ${contados.length}`);
     const u = rec.ultima;
+    // Los puntos salen de la analítica de Cloudflare; el detalle (hora y avisos) lo guarda
+    // LibroClaro desde la primera corrida con esta versión.
     const sub = !u
-      ? "Aún sin corridas registradas · también mantiene activa la base"
+      ? "El detalle de cada corrida aparece desde la próxima mañana · también mantiene activa la base"
       : u.ok
         ? `Última: ${hace(u.hora)} (${fechaHoraLima(u.hora)}) · ${u.enviados === 1 ? "1 aviso enviado" : `${numero(u.enviados)} avisos enviados`} · también mantiene activa la base`
         : `La última corrida falló ${hace(u.hora)}: ${u.error || "sin detalle"}`;
