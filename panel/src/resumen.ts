@@ -159,7 +159,14 @@ function seccionRecordatorios(
   // La corrida también tiene un campo error (null si salió bien): el fallo de
   // LibroClaro se reconoce porque no trae hora.
   if (rec !== null && !("hora" in rec)) return { ok: false, error: rec.error };
-  return { ok: true, ultima: rec, dias: cron.ok ? diasDelCron(cron.corridas, ahora) : [] };
+  const dias = cron.ok ? diasDelCron(cron.corridas, ahora) : [];
+  // Para Cloudflare la corrida salió bien aunque la ruta del cron haya fallado (el handler no lanza):
+  // lo que guardó LibroClaro manda sobre el día de esa corrida.
+  if (rec !== null && !rec.ok) {
+    const diaDelFallo = fechaEnLima(new Date(rec.hora));
+    for (const dia of dias) if (dia.fecha === diaDelFallo) dia.estado = "fallo";
+  }
+  return { ok: true, ultima: rec, dias };
 }
 
 function seccionAlertasDelMes(a: ResumenLibroClaro["alertas_del_mes"]): Resumen["alertasDelMes"] {

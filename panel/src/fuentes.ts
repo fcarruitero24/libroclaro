@@ -216,11 +216,31 @@ export function llamarLibroClaro(env: Env, ruta: string, init: RequestInit = {})
     : env.LIBROCLARO.fetch(new Request(`https://libroclaro.pe${ruta}`, pedido));
 }
 
+const esObjeto = (x: unknown): x is object => typeof x === "object" && x !== null;
+
+/**
+ * Comprueba que la respuesta de LibroClaro tenga sus cinco partes. Si los dos Workers quedan
+ * publicados con versiones distintas, su parte dice el error y el resto del panel sigue.
+ */
+export function leerResumenLibroClaro(json: unknown): DatosCrudos["libroclaro"] {
+  const r = json as Record<keyof ResumenLibroClaro, unknown> | null;
+  const forma =
+    esObjeto(r) &&
+    esObjeto(r.supabase) &&
+    esObjeto(r.mercado_pago) &&
+    esObjeto(r.alertas_del_mes) &&
+    (r.resend === null || esObjeto(r.resend)) &&
+    (r.recordatorios === null || esObjeto(r.recordatorios));
+  return forma
+    ? { ok: true, datos: r as unknown as ResumenLibroClaro }
+    : { ok: false, error: "LibroClaro respondió algo inesperado: ¿están publicadas las dos versiones?" };
+}
+
 async function consultarLibroClaro(env: Env): Promise<DatosCrudos["libroclaro"]> {
   try {
     const res = await llamarLibroClaro(env, "/api/panel/resumen");
     if (res.status !== 200) return { ok: false, error: errorDeLibroClaro(res.status) };
-    return { ok: true, datos: (await res.json()) as ResumenLibroClaro };
+    return leerResumenLibroClaro(await res.json());
   } catch (e) {
     return { ok: false, error: `LibroClaro no respondió: ${mensaje(e)}` };
   }

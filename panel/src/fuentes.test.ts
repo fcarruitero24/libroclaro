@@ -1,6 +1,13 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { errorDeLibroClaro, leerCorridas, leerInvocaciones, leerSuscripciones, sumarPorFecha } from "./fuentes.ts";
+import {
+  errorDeLibroClaro,
+  leerCorridas,
+  leerInvocaciones,
+  leerResumenLibroClaro,
+  leerSuscripciones,
+  sumarPorFecha,
+} from "./fuentes.ts";
 
 const conCuenta = (datos: Record<string, unknown>) => ({ data: { viewer: { accounts: [datos] } }, errors: null });
 const conErrores = { data: null, errors: [{ message: "not authorized for that account" }] };
@@ -74,4 +81,25 @@ test("errorDeLibroClaro: un 404 casi siempre es PANEL_SECRET distinto entre los 
     "LibroClaro respondió 404: revisa que PANEL_SECRET sea el mismo en los dos Workers",
   );
   assert.equal(errorDeLibroClaro(503), "LibroClaro respondió 503");
+});
+
+test("leerResumenLibroClaro pasa la respuesta con sus cinco partes", () => {
+  const datos = {
+    supabase: { error: "x" },
+    resend: null,
+    recordatorios: null,
+    mercado_pago: { cobrado: 0, comisiones: 0, pagos: 0 },
+    alertas_del_mes: [],
+  };
+  assert.deepEqual(leerResumenLibroClaro(datos), { ok: true, datos });
+});
+
+test("leerResumenLibroClaro con otra forma es un error, no una caída del panel", () => {
+  const inesperado = { ok: false, error: "LibroClaro respondió algo inesperado: ¿están publicadas las dos versiones?" };
+  assert.deepEqual(leerResumenLibroClaro({ error: "algo" }), inesperado);
+  assert.deepEqual(leerResumenLibroClaro(null), inesperado);
+  assert.deepEqual(
+    leerResumenLibroClaro({ supabase: null, resend: null, recordatorios: null, mercado_pago: { pagos: 0 }, alertas_del_mes: [] }),
+    inesperado,
+  );
 });

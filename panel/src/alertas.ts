@@ -77,12 +77,20 @@ export function alertasDelResumen(r: Resumen, ahora: Date): Alerta[] {
 
   if (r.recordatorios.ok && r.recordatorios.ultima) {
     const ultima = r.recordatorios.ultima;
-    const clave = `cron.recordatorios.${fechaEnLima(ahora)}`;
-    if (!ultima.ok) {
+    // Si dejaron de correr, eso pesa más que el último fallo: un aviso por día de Lima mientras no corran.
+    // Un fallo, en cambio, se avisa una vez por corrida: la clave lleva el día de la corrida y no el de ahora,
+    // para no repetirlo pasada la medianoche ni tapar el fallo de la mañana siguiente.
+    if (ahora.getTime() - new Date(ultima.hora).getTime() > SIN_CORRER_MS) {
+      alertas.push({
+        clave: `cron.recordatorios.sin-correr.${fechaEnLima(ahora)}`,
+        texto: `Los recordatorios de la mañana no corren desde el ${fechaYHoraDeLima(ultima.hora)}.`,
+      });
+    } else if (!ultima.ok) {
       const detalle = (ultima.error ?? "sin detalle").slice(0, 200);
-      alertas.push({ clave, texto: `Los recordatorios de la mañana fallaron (${detalle}).` });
-    } else if (ahora.getTime() - new Date(ultima.hora).getTime() > SIN_CORRER_MS) {
-      alertas.push({ clave, texto: `Los recordatorios de la mañana no corren desde el ${fechaYHoraDeLima(ultima.hora)}.` });
+      alertas.push({
+        clave: `cron.recordatorios.fallo.${fechaEnLima(new Date(ultima.hora))}`,
+        texto: `Los recordatorios de la mañana fallaron el ${fechaYHoraDeLima(ultima.hora)} (${detalle}).`,
+      });
     }
   }
 

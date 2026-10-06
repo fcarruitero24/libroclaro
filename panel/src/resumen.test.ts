@@ -120,15 +120,47 @@ test("recordatorios fallidos: la alerta lleva el día de Lima aunque en UTC ya s
     d("2026-10-06T02:00:00Z"),
   );
   const alerta = r.alertas.find((a) => a.clave.startsWith("cron."));
-  assert.equal(alerta?.clave, "cron.recordatorios.2026-10-05");
+  assert.equal(alerta?.clave, "cron.recordatorios.fallo.2026-10-05");
   assert.match(alerta?.texto ?? "", /fallaron/);
+});
+
+test("recordatorios fallidos: la clave es el día de la corrida, no el de ahora", () => {
+  const clavesCron = (ultima: ResumenLibroClaro["recordatorios"], ahora: Date) =>
+    armarResumen(conRecordatorios(ultima), ahora)
+      .alertas.filter((a) => a.clave.startsWith("cron."))
+      .map((a) => a.clave);
+  const fallo5 = { hora: "2026-10-05T13:00:05Z", ok: false, enviados: 0, error: "X" };
+
+  // El mismo fallo, visto a las 9 a. m. y pasada la medianoche de Lima: la misma clave, un solo correo.
+  assert.deepEqual(clavesCron(fallo5, d("2026-10-05T14:00:00Z")), ["cron.recordatorios.fallo.2026-10-05"]);
+  assert.deepEqual(clavesCron(fallo5, d("2026-10-06T05:30:00Z")), ["cron.recordatorios.fallo.2026-10-05"]);
+
+  // El fallo de la mañana siguiente tiene su propia clave: no queda tapado por el de ayer.
+  const fallo6 = { hora: "2026-10-06T13:00:05Z", ok: false, enviados: 0, error: "Y" };
+  assert.deepEqual(clavesCron(fallo6, d("2026-10-06T14:00:00Z")), ["cron.recordatorios.fallo.2026-10-06"]);
+});
+
+test("recordatorios que fallaron y después dejaron de correr: avisa que no corren", () => {
+  const fallo = { hora: "2026-10-05T13:00:05Z", ok: false, enviados: 0, error: "X" };
+  const r = armarResumen(conRecordatorios(fallo), d("2026-10-06T16:00:06Z"));
+  const alerta = r.alertas.find((a) => a.clave.startsWith("cron."));
+  assert.equal(alerta?.clave, "cron.recordatorios.sin-correr.2026-10-06");
+  assert.match(alerta?.texto ?? "", /no corren desde/);
+});
+
+test("recordatorios: el día de una corrida fallida no se pinta bien aunque Cloudflare diga success", () => {
+  // El handler scheduled de LibroClaro no lanza aunque la ruta del cron dé 500: Cloudflare lo cuenta como success.
+  const fallo = { hora: "2026-10-05T13:00:05Z", ok: false, enviados: 0, error: "X" };
+  const dias = okDe(armarResumen(conRecordatorios(fallo), AHORA).recordatorios).dias;
+  assert.equal(dias.find((x) => x.fecha === "2026-10-05")?.estado, "fallo");
+  assert.equal(dias.find((x) => x.fecha === "2026-10-04")?.estado, "ok");
 });
 
 test("recordatorios que no corren hace más de 26 h", () => {
   const ultimaBien = { hora: "2026-10-05T13:00:05Z", ok: true, enviados: 2, error: null };
   const tarde = armarResumen(conRecordatorios(ultimaBien), d("2026-10-06T16:00:06Z"));
   const alerta = tarde.alertas.find((a) => a.clave.startsWith("cron."));
-  assert.equal(alerta?.clave, "cron.recordatorios.2026-10-06");
+  assert.equal(alerta?.clave, "cron.recordatorios.sin-correr.2026-10-06");
   assert.match(alerta?.texto ?? "", /no corren desde/);
 
   const aTiempo = armarResumen(conRecordatorios(ultimaBien), d("2026-10-06T14:00:05Z"));

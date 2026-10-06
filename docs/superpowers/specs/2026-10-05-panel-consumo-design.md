@@ -110,7 +110,9 @@ La muestra aprobada, con datos reales:
 - Umbrales: 80 % y 100 % de cada límite medido, recordatorios fallidos o sin correr en más de 26 horas, y 60 días
   o menos para que venza el dominio (contados en día de Lima).
 - La clave de cada alerta junta métrica, umbral y ciclo (por ejemplo `cloudflare.cpu.80.2026-10-29`); la de
-  recordatorios usa el día (`cron.recordatorios.2026-10-05`) y la del dominio, su fecha de vencimiento
+  recordatorios fallidos usa el día de la corrida (`cron.recordatorios.fallo.2026-10-05`, un correo por corrida), la de
+  recordatorios que no corren usa el día de hoy (`cron.recordatorios.sin-correr.2026-10-06`, uno por día mientras no
+  corran) y la del dominio, su fecha de vencimiento
   (`dominio.vence.2028-09-19`: un solo correo hasta que se renueve y cambie la fecha). La tabla `alertas_panel`
   impide repetirlas.
 - El correo lo manda LibroClaro, que ya tiene Resend; el panel no guarda la clave de Resend.
