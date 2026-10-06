@@ -23,13 +23,14 @@
   "services": [{ "binding": "LIBROCLARO", "service": "libroclaro" }],
   // Cada hora revisa todo y pide a LibroClaro mandar las alertas nuevas.
   "triggers": { "crons": ["0 * * * *"] },
-  // No son secretos. Con ACCESS_EQUIPO y ACCESS_AUD vacíos todo responde 403:
-  // se llenan al crear la aplicación de Cloudflare Access.
+  // No son secretos (el AUD viaja dentro del token y el dominio del equipo es
+  // público). Vienen de la aplicación "Panel de consumo" de Cloudflare Access;
+  // si quedaran vacíos, todo respondería 403.
   // Secretos (wrangler secret put): CLOUDFLARE_ANALYTICS_TOKEN y PANEL_SECRET.
   "vars": {
     "CLOUDFLARE_ACCOUNT_ID": "09006dca4aa7164ce87bddeeda2c43bb",
-    "ACCESS_EQUIPO": "",
-    "ACCESS_AUD": ""
+    "ACCESS_EQUIPO": "dark-dream-6e59.cloudflareaccess.com",
+    "ACCESS_AUD": "d0adcbb7d9b4de95e864814de08abc04d625df6fa9ef8a6ab2f7d5c0cf8f923d"
   },
   "observability": {
     "enabled": true
