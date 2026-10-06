@@ -1,6 +1,13 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { cuotaDeResend, fechaEnLima, inicioDelMesEnLima, resumenDePagos, secretoValido } from "./consumo.ts";
+import {
+  cuotaDeResend,
+  fechaEnLima,
+  inicioDelMesEnLima,
+  leerAlertas,
+  resumenDePagos,
+  secretoValido,
+} from "./consumo.ts";
 
 const h = (o: Record<string, string>) => new Headers(o);
 
@@ -55,3 +62,30 @@ test("resumenDePagos suma solo lo aprobado y las comisiones que paga el vendedor
 });
 
 test("resumenDePagos sin pagos da ceros", () => assert.deepEqual(resumenDePagos([]), { cobrado: 0, comisiones: 0, pagos: 0 }));
+
+const alerta = (clave: string, texto = "x") => ({ clave, texto });
+
+test("leerAlertas acepta una lista válida", () =>
+  assert.deepEqual(leerAlertas({ alertas: [alerta("cloudflare.cpu.80.2026-10-29")] }), [
+    { clave: "cloudflare.cpu.80.2026-10-29", texto: "x" },
+  ]));
+
+test("leerAlertas rechaza listas vacías o de más de 20", () => {
+  assert.equal(leerAlertas({ alertas: [] }), null);
+  assert.equal(leerAlertas({ alertas: Array.from({ length: 21 }, (_, i) => alerta(`a.${i}`)) }), null);
+});
+
+test("leerAlertas rechaza claves con mayúsculas o espacios y textos de más de 500", () => {
+  assert.equal(leerAlertas({ alertas: [alerta("Cloudflare CPU")] }), null);
+  assert.equal(leerAlertas({ alertas: [alerta("a.b", "y".repeat(501))] }), null);
+});
+
+test("leerAlertas rechaza lo que no es un objeto con alertas", () => {
+  assert.equal(leerAlertas("hola"), null);
+  assert.equal(leerAlertas(null), null);
+});
+
+test("leerAlertas une las claves repetidas y deja la primera", () =>
+  assert.deepEqual(leerAlertas({ alertas: [alerta("a.b", "primera"), alerta("a.b", "segunda")] }), [
+    { clave: "a.b", texto: "primera" },
+  ]));

@@ -99,3 +99,30 @@ export interface ResumenLibroClaro {
   mercado_pago: { cobrado: number; comisiones: number; pagos: number } | { error: string };
   alertas_del_mes: { clave: string; texto: string; enviada_el: string }[] | { error: string };
 }
+
+/** Una alerta del panel: la clave junta métrica, umbral y ciclo; el texto va en el correo. */
+export interface AlertaPanel {
+  clave: string;
+  texto: string;
+}
+
+const CLAVE_DE_ALERTA = /^[a-z0-9.-]{1,120}$/;
+
+/**
+ * Valida el cuerpo de POST /api/panel/alertas: { alertas: [...] } con 1 a 20
+ * alertas, claves en minúsculas con puntos y guiones (se guardan en la base) y
+ * textos de 1 a 500 caracteres (van en el correo). Las claves repetidas se
+ * unen y queda la primera. Cualquier otra cosa → null.
+ */
+export function leerAlertas(cuerpo: unknown): AlertaPanel[] | null {
+  const lista = (cuerpo as { alertas?: unknown } | null)?.alertas;
+  if (!Array.isArray(lista) || lista.length < 1 || lista.length > 20) return null;
+  const unicas = new Map<string, AlertaPanel>();
+  for (const a of lista) {
+    const { clave, texto } = (a ?? {}) as { clave?: unknown; texto?: unknown };
+    if (typeof clave !== "string" || !CLAVE_DE_ALERTA.test(clave)) return null;
+    if (typeof texto !== "string" || texto.length < 1 || texto.length > 500) return null;
+    if (!unicas.has(clave)) unicas.set(clave, { clave, texto });
+  }
+  return [...unicas.values()];
+}

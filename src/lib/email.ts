@@ -1,4 +1,4 @@
-import { cuotaDeResend } from "@/lib/consumo";
+import { cuotaDeResend, type AlertaPanel } from "@/lib/consumo";
 import { escapeHtml, fmtDate } from "@/lib/format";
 import { PLANS } from "@/lib/plans";
 import { guardarUso } from "@/lib/uso";
@@ -188,6 +188,26 @@ export function tplPlatformNewBusiness(p: {
          <li>Plan: ${escapeHtml(p.plan)}</li>
        </ul>
        ${button(p.publicUrl, "Ver su libro")}`,
+      "Aviso interno de LibroClaro",
+    ),
+  };
+}
+
+/**
+ * Alertas del panel de consumo (panel.libroclaro.pe): algo cruzó el 80 % o el
+ * 100 % de su límite, o los recordatorios de la mañana fallaron. Todas las de
+ * una revisión salen juntas en un solo correo.
+ */
+export function tplPlatformAlertas(alertas: AlertaPanel[]) {
+  const titulo = alertas.length === 1 ? "Alerta del panel de consumo" : `${alertas.length} alertas del panel de consumo`;
+  return {
+    // Sin saltos de línea: el asunto es una cabecera del correo.
+    subject:
+      alertas.length === 1 ? `Alerta del panel: ${alertas[0].texto.replace(/\s+/g, " ")}` : titulo,
+    html: layout(
+      titulo,
+      `<ul>${alertas.map((a) => `<li style="margin:6px 0">${escapeHtml(a.texto)}</li>`).join("")}</ul>
+       ${button("https://panel.libroclaro.pe", "Abrir el panel")}`,
       "Aviso interno de LibroClaro",
     ),
   };
