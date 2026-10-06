@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Panel de consumo · LibroClaro</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="estilos.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="envoltura">
+    <div class="barra-superior">
+      <div class="marca">
+        <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect x="2" y="2" width="30" height="30" rx="8" fill="var(--teal)"/><rect x="10" y="8" width="14" height="18" rx="2.5" fill="var(--papel)"/><rect x="13" y="12" width="8" height="2" rx="1" fill="var(--teal)"/><rect x="13" y="16" width="6" height="2" rx="1" fill="var(--teal)"/></svg>
+        <div>
+          <h1>Panel de consumo</h1>
+          <p class="dominio">panel.libroclaro.pe</p>
+        </div>
+      </div>
+      <div class="acciones">
+        <span class="acceso"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg> Solo tú · libroclaro.pe@gmail.com</span>
+        <span id="actualizado" class="num" aria-live="polite">Consultando a cada plataforma…</span>
+        <span id="antiguedad" class="chip atencion" hidden></span>
+        <button id="actualizar" class="boton" type="button">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg>
+          Actualizar
+        </button>
+      </div>
+    </div>
+
+    <p id="aviso" class="aviso" role="status" hidden>No se pudo actualizar. Si la página estuvo abierta muchas horas, recárgala para volver a entrar.</p>
+
+    <section id="resumen" class="resumen" aria-label="Resumen">
+      <div class="dato"><div class="esqueleto linea"></div><div class="esqueleto titulo"></div></div>
+      <div class="dato"><div class="esqueleto linea"></div><div class="esqueleto titulo"></div></div>
+      <div class="dato"><div class="esqueleto linea"></div><div class="esqueleto titulo"></div></div>
+      <div class="dato"><div class="esqueleto linea"></div><div class="esqueleto titulo"></div></div>
+    </section>
+
+    <section class="plataformas" aria-label="Plataformas">
+      <article id="cloudflare" class="tarjeta" aria-busy="true"><div class="esqueleto titulo"></div><div class="esqueleto barra"></div><div class="esqueleto barra"></div><div class="esqueleto bloque"></div></article>
+      <article id="supabase" class="tarjeta" aria-busy="true"><div class="esqueleto titulo"></div><div class="esqueleto barra"></div><div class="esqueleto barra"></div><div class="esqueleto linea"></div></article>
+      <article id="resend" class="tarjeta" aria-busy="true"><div class="esqueleto titulo"></div><div class="esqueleto barra"></div><div class="esqueleto barra"></div></article>
+      <article id="mercadopago" class="tarjeta" aria-busy="true"><div class="esqueleto titulo"></div><div class="esqueleto bloque"></div><div class="esqueleto linea"></div></article>
+    </section>
+
+    <section class="servicios" aria-label="Servicios gratuitos y tareas automáticas">
+      <h2>Servicios gratuitos y tareas automáticas</h2>
+      <div id="servicios" class="lista-servicios">
+        <div class="servicio"><div class="esqueleto linea"></div></div>
+        <div class="servicio"><div class="esqueleto linea"></div></div>
+        <div class="servicio"><div class="esqueleto linea"></div></div>
+      </div>
+    </section>
+
+    <section class="alertas" aria-label="Alertas">
+      <div id="alertas" class="texto"><p><b>Alertas por correo.</b> Si algo pasa del 80 % de su límite, o si los recordatorios fallan una mañana, te llega un correo a libroclaro.pe@gmail.com.</p></div>
+      <div class="leyenda" aria-label="Colores">
+        <span class="chip ok">Menos de 80 %</span><span class="chip atencion">80 a 99 %</span><span class="chip limite">100 % o más</span>
+      </div>
+    </section>
+
+    <footer>
+      <p>Se actualiza al abrir la página, al tocar Actualizar y cada 5 minutos mientras la pestaña está a la vista. Cloudflare puede tardar unos minutos en contar las visitas más recientes; Supabase y Mercado Pago, al instante; Resend, con cada correo que envía la web.</p>
+      <p>La raya fina en cada barra marca dónde terminarías el ciclo si sigues al ritmo de los últimos días.</p>
+      <p id="verificado"></p>
+    </footer>
+  </div>
+</body>
+</html>
