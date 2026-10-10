@@ -8,6 +8,7 @@ import { businessDaysBetween, businessDaysLeft } from "@/lib/business-days";
 import { categoriaLabel } from "@/lib/categorias";
 import { fmtDate, fmtDateTime, fmtMoney, ITEM_LABEL, KIND_LABEL, STATUS_LABEL } from "@/lib/format";
 import { planFor } from "@/lib/plans";
+import { createAdminClient, hasAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import type { Business, Complaint, ComplaintEvent, ResponseTemplate } from "@/lib/types";
 
@@ -47,6 +48,16 @@ export default async function ComplaintDetailPage({ params }: { params: Promise<
   const biz = bizData as Business;
   const plan = planFor(biz);
   const historial = (eventos ?? []) as ComplaintEvent[];
+
+  // LibIA. El negocio ya se leyó con la sesión del dueño (la seguridad de
+  // filas solo entrega los suyos), así que su cupo se puede consultar con la
+  // service role: las funciones de LibIA no se abren al navegador.
+  let libiaQuedan = 0;
+  if (plan.libia && hasAdminClient()) {
+    const { data: quedan } = await createAdminClient().rpc("libia_quedan", { p_business_id: bizId });
+    libiaQuedan = typeof quedan === "number" ? quedan : 0;
+  }
+  const libia = { incluido: plan.libia, quedan: libiaQuedan, usado: historial.some((e) => e.type === "libia") };
 
   const tipo = KIND_LABEL[c.kind].toLowerCase();
   const wa = numeroWhatsapp(c.consumer_phone);
@@ -152,6 +163,7 @@ export default async function ComplaintDetailPage({ params }: { params: Promise<
               businessName={biz.name}
               bizId={bizId}
               templates={plan.templates ? ((plantillas ?? []) as ResponseTemplate[]) : null}
+              libia={libia}
             />
             <details className="group mt-4 border-t border-slate-100 pt-4">
               <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-medium text-slate-700 hover:text-slate-900">
