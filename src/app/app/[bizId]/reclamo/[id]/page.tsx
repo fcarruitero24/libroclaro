@@ -282,6 +282,7 @@ const ICONO: Record<ComplaintEvent["type"], { fondo: string; trazo: string }> = 
   respuesta_editada: { fondo: "bg-amber-50 text-amber-700", trazo: "M13 4l3 3-8 8H5v-3l8-8Z" },
   respuesta_enviada: { fondo: "bg-green-50 text-green-700", trazo: "M3 5h14v10H3zM3 5l7 6 7-6" },
   nota: { fondo: "bg-violet-50 text-violet-700", trazo: "M5 3h10v14H5zM8 7h4M8 10h4M8 13h2" },
+  libia: { fondo: "bg-teal-50 text-teal-700", trazo: "M10 3l1.6 4.4L16 9l-4.4 1.6L10 15l-1.6-4.4L4 9l4.4-1.6Z" },
 };
 
 function describir(e: ComplaintEvent): string {
@@ -300,6 +301,8 @@ function describir(e: ComplaintEvent): string {
       return `Respuesta enviada por correo${e.data.correo ? ` a ${e.data.correo}` : ""}`;
     case "nota":
       return "Nota interna";
+    case "libia":
+      return "LibIA propuso un borrador";
   }
 }
 

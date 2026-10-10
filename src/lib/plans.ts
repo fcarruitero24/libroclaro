@@ -20,6 +20,8 @@ export interface PlanDef {
   analytics: boolean;
   /** Plantillas de respuesta guardadas */
   templates: boolean;
+  /** LibIA: borradores de respuesta con IA (los topes diarios viven en la migración 0010) */
+  libia: boolean;
   features: string[];
 }
 
@@ -43,6 +45,7 @@ export const PLANS: Record<PlanId, PlanDef> = {
     csvExport: true,
     analytics: false,
     templates: false,
+    libia: false,
     features: [],
   },
   pro: {
@@ -59,6 +62,7 @@ export const PLANS: Record<PlanId, PlanDef> = {
     csvExport: true,
     analytics: true,
     templates: true,
+    libia: true,
     features: [
       "Hasta 3 negocios o sucursales",
       "Sin marca LibroClaro",
@@ -84,6 +88,7 @@ export const PLANS: Record<PlanId, PlanDef> = {
     csvExport: true,
     analytics: true,
     templates: true,
+    libia: true,
     features: [
       "Hasta 25 sucursales",
       "Todo lo del plan Pro",

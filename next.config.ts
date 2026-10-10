@@ -1,4 +1,11 @@
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 import type { NextConfig } from "next";
+
+// En `next dev`, getCloudflareContext() entrega los bindings de
+// wrangler.dev.jsonc (hoy solo Workers AI, para LibIA; ver ese archivo). Solo
+// en desarrollo: en `next build` arrancaría también el proxy remoto de
+// Workers AI, que pide la sesión de wrangler.
+if (process.env.NODE_ENV === "development") initOpenNextCloudflareForDev({ configPath: "wrangler.dev.jsonc" });
 
 const nextConfig: NextConfig = {
   experimental: {

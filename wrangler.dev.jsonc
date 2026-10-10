@@ -1,0 +1,15 @@
+// Solo para `next dev` (next.config.ts): los bindings que la app usa con
+// getCloudflareContext(). Hoy solo Workers AI, para LibIA, que siempre es el
+// remoto: gasta neuronas de verdad y cuenta para los mismos topes que
+// producción. No lleva los archivos estáticos de .open-next: si los llevara,
+// el servidor de desarrollo dejaría esa carpeta bloqueada y el build de
+// OpenNext fallaría con EPERM mientras `next dev` esté corriendo.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "libroclaro",
+  "compatibility_date": "2026-09-20",
+  "compatibility_flags": ["nodejs_compat"],
+  "ai": {
+    "binding": "AI"
+  }
+}

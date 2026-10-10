@@ -47,6 +47,8 @@ export interface Complaint {
   /** Categoría interna que pone el negocio (ver src/lib/categorias.ts). */
   category: string | null;
   response: string | null;
+  /** La respuesta lleva al pie el aviso de que se redactó con ayuda de IA (LibIA). */
+  respuesta_con_ia: boolean;
   responded_at: string | null;
   due_at: string;
   created_at: string;
@@ -57,8 +59,8 @@ export interface ComplaintEvent {
   id: number;
   complaint_id: string;
   business_id: string;
-  type: "registrado" | "estado" | "categoria" | "respuesta" | "respuesta_editada" | "respuesta_enviada" | "nota";
-  data: { de?: string | null; a?: string | null; texto?: string; anterior?: string; correo?: string };
+  type: "registrado" | "estado" | "categoria" | "respuesta" | "respuesta_editada" | "respuesta_enviada" | "nota" | "libia";
+  data: { de?: string | null; a?: string | null; texto?: string; anterior?: string; correo?: string; modelo?: string };
   actor_id: string | null;
   created_at: string;
 }

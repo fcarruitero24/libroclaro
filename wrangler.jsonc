@@ -30,6 +30,12 @@
       "service": "libroclaro"
     }
   ],
+  // LibIA (borradores de respuesta) usa Workers AI, que regala 10.000
+  // neuronas al día por cuenta. Los topes que impiden pasarse viven en la
+  // migración 0010: 20 borradores por negocio y 9.000 neuronas en total.
+  "ai": {
+    "binding": "AI"
+  },
   // Mismo horario que tenía Vercel: 13:00 UTC = 8 a. m. de Lima.
   "triggers": {
     "crons": ["0 13 * * *"]
