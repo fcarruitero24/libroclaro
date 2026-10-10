@@ -9,7 +9,7 @@ export default function TermsPage() {
       <SiteHeader />
       <main className="mx-auto max-w-3xl flex-1 px-4 py-16 sm:px-6">
         <h1 className="text-3xl font-bold text-slate-900">Términos y condiciones</h1>
-        <p className="mt-2 text-sm text-slate-500">Última actualización: septiembre de 2026</p>
+        <p className="mt-2 text-sm text-slate-500">Última actualización: octubre de 2026</p>
         <div className="prose prose-slate mt-8 max-w-none text-slate-700 [&_h2]:mt-8 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-slate-900 [&_p]:mt-3 [&_p]:leading-relaxed">
           <h2>1. El servicio</h2>
           <p>
@@ -22,7 +22,9 @@ export default function TermsPage() {
             El Negocio es el único responsable de la veracidad de sus datos (razón social, RUC, dirección), de exhibir el
             aviso del Libro de Reclamaciones, de responder a los consumidores dentro del plazo legal y de conservar sus
             registros conforme a la normativa vigente. LibroClaro es una herramienta de apoyo y no garantiza el cumplimiento
-            normativo, que depende del uso que el Negocio haga de la plataforma.
+            normativo, que depende del uso que el Negocio haga de la plataforma. Las propuestas de LibIA son sugerencias
+            generadas con inteligencia artificial, no asesoría legal; el Negocio las revisa y es responsable de la respuesta
+            que envía.
           </p>
           <h2>3. Planes y pagos</h2>
           <p>

@@ -71,6 +71,7 @@ export const PLANS: Record<PlanId, PlanDef> = {
       "Recordatorio antes de vencer los 15 días hábiles",
       "Análisis con gráficos y categorías",
       "Plantillas de respuesta",
+      "Borradores de respuesta con LibIA (IA)",
       "Exportar a Excel (CSV)",
       "Soporte por WhatsApp",
     ],

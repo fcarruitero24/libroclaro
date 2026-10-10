@@ -9,7 +9,7 @@ export default function PrivacyPage() {
       <SiteHeader />
       <main className="mx-auto max-w-3xl flex-1 px-4 py-16 sm:px-6">
         <h1 className="text-3xl font-bold text-slate-900">Política de privacidad</h1>
-        <p className="mt-2 text-sm text-slate-500">Última actualización: septiembre de 2026</p>
+        <p className="mt-2 text-sm text-slate-500">Última actualización: octubre de 2026</p>
         <div className="mt-8 text-slate-700 [&_h2]:mt-8 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-slate-900 [&_p]:mt-3 [&_p]:leading-relaxed [&_ul]:mt-3 [&_ul]:list-disc [&_ul]:pl-6">
           <h2>1. Qué datos tratamos</h2>
           <p>
@@ -39,7 +39,9 @@ export default function PrivacyPage() {
             Usamos Supabase (base de datos alojada en la región de São Paulo, Brasil) y Cloudflare para el alojamiento de
             la aplicación. Los correos se envían mediante Resend. Los pagos de los planes los procesa Mercado Pago en su
             propia página: LibroClaro no recibe ni guarda los datos de tu tarjeta. Estos proveedores aplican medidas de
-            seguridad estándar de la industria.
+            seguridad estándar de la industria. Para generar propuestas de respuesta, el texto del reclamo (sin documento,
+            dirección, teléfono ni correo) se procesa con un modelo de inteligencia artificial en los servidores de
+            Cloudflare, que no lo guarda ni lo usa para entrenar modelos.
           </p>
           <h2>5. Conservación</h2>
           <p>
