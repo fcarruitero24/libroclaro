@@ -8,10 +8,12 @@ import {
   huecosPendientes,
   INSTRUCCIONES_LIBIA,
   limpiarBorrador,
+  mensajeMientrasEscribe,
   mensajeParaLibIA,
   neuronasReales,
   nombreDePila,
   reservaDeNeuronas,
+  textoQuedan,
 } from "./libia.ts";
 import type { DatosParaLibIA } from "./libia.ts";
 
@@ -322,4 +324,24 @@ test("gastoAlCerrar: si se agotó el tiempo, se queda la reserva (el pedido pued
 test("gastoAlCerrar: si falló antes de escribir, se devuelve el cupo", () => {
   assert.equal(gastoAlCerrar({ tipo: "error", error: new Error("3040: Capacity temporarily exceeded, please try again.") }, 80), null);
   assert.equal(gastoAlCerrar({ tipo: "error", error: new Error("5007: No such model @cf/no/existe or task") }, 80), null);
+});
+
+test("textoQuedan usa el singular solo cuando queda 1", () => {
+  assert.equal(textoQuedan(1), "Te queda 1 hoy");
+  assert.equal(textoQuedan(0), "Te quedan 0 hoy");
+  assert.equal(textoQuedan(12), "Te quedan 12 hoy");
+});
+
+test("mensajeMientrasEscribe avanza por etapas según los segundos de espera", () => {
+  const casos: Array<[number, string]> = [
+    [0, "Leyendo el reclamo…"],
+    [1, "Leyendo el reclamo…"],
+    [2, "Redactando la propuesta…"],
+    [4, "Redactando la propuesta…"],
+    [5, "Ya casi…"],
+    [11, "Ya casi…"],
+    [12, "Está tardando un poco más de lo normal…"],
+    [40, "Está tardando un poco más de lo normal…"],
+  ];
+  for (const [segundos, mensaje] of casos) assert.equal(mensajeMientrasEscribe(segundos), mensaje, `${segundos} s`);
 });

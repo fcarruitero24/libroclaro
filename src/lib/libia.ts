@@ -201,6 +201,24 @@ export function avisoDeIA(negocio: string): string {
   }`;
 }
 
+/** Los borradores que le quedan hoy al negocio, con el singular cuando queda uno. */
+export function textoQuedan(n: number): string {
+  return n === 1 ? "Te queda 1 hoy" : `Te quedan ${n} hoy`;
+}
+
+/**
+ * Lo que se lee sobre la caja de respuesta mientras LibIA escribe, según los
+ * segundos de espera. El modelo escribe todo de una vez, sin pasos de verdad:
+ * los mensajes solo muestran que sigue trabajando. El último cubre la espera
+ * larga, cuando Cloudflare está ocupado y `conReintento` vuelve a pedir.
+ */
+export function mensajeMientrasEscribe(segundos: number): string {
+  if (segundos < 2) return "Leyendo el reclamo…";
+  if (segundos < 5) return "Redactando la propuesta…";
+  if (segundos < 12) return "Ya casi…";
+  return "Está tardando un poco más de lo normal…";
+}
+
 /** El mensaje del error con que `conReintento` corta al agotar el plazo. */
 export const TIEMPO_AGOTADO = "LibIA: se agotó el tiempo";
 

@@ -1,14 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { Icon } from "@/components/icons";
 import { Alert, Button, Textarea } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import { respondComplaint } from "@/lib/actions/complaints";
 import { pedirBorradorLibIA } from "@/lib/actions/libia";
-import { avisoDeIA, huecosPendientes, NOTA_MAXIMA } from "@/lib/libia";
+import { avisoDeIA, huecosPendientes, mensajeMientrasEscribe, NOTA_MAXIMA, textoQuedan } from "@/lib/libia";
 import type { ActionState, Complaint, ResponseTemplate } from "@/lib/types";
 
 const initial: ActionState = {};
@@ -71,6 +71,39 @@ function BotonEstado({
   );
 }
 
+// Anchos de las líneas del velo: que parezcan un párrafo.
+const LINEAS = ["w-11/12", "w-full", "w-10/12", "w-full", "w-8/12", "w-5/12"];
+
+/**
+ * El velo que cubre la caja de respuesta mientras LibIA escribe: líneas que
+ * brillan y un mensaje que avanza con los segundos de espera. Lo que hubiera
+ * escrito el dueño queda debajo, intacto si LibIA falla. Los lectores de
+ * pantalla oyen el aviso del formulario, no estos mensajes.
+ */
+function LibIAEscribiendo() {
+  const [segundos, setSegundos] = useState(0);
+  useEffect(() => {
+    const reloj = setInterval(() => setSegundos((s) => s + 1), 1000);
+    return () => clearInterval(reloj);
+  }, []);
+  const mensaje = mensajeMientrasEscribe(segundos);
+  return (
+    <div
+      aria-hidden="true"
+      className="libia-velo absolute inset-0 z-10 rounded-lg border border-teal-200 bg-white/95 p-3 backdrop-blur-[2px]"
+    >
+      <p key={mensaje} className="libia-mensaje text-sm font-medium text-teal-800">
+        {mensaje}
+      </p>
+      <div className="mt-3 space-y-2.5">
+        {LINEAS.map((ancho, i) => (
+          <div key={i} className={cn("esqueleto libia-esqueleto h-2.5 rounded-full", ancho)} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function ResponseForm({
   complaint,
   businessName,
@@ -104,11 +137,19 @@ export function ResponseForm({
   // Viene marcada, salvo que la respuesta ya se haya enviado antes sin el aviso.
   const [conIA, setConIA] = useState(!(respondido && !complaint.respuesta_con_ia));
   const [errorHuecos, setErrorHuecos] = useState<string | null>(null);
+  // Al llegar un borrador: la cortina que lo destapa y el destello de la caja.
+  const [revelar, setRevelar] = useState(false);
+  // Lo que oyen los lectores de pantalla. Los errores ya los anuncia el Alert.
+  const [anuncio, setAnuncio] = useState("");
   const esBorradorLibIA = ultimoBorrador !== null && texto === ultimoBorrador;
 
   async function pedirBorrador() {
     setGenerando(true);
     setAvisoLibIA(null);
+    setRevelar(false);
+    // El velo de "LibIA está escribiendo" va sobre la caja, no sobre la vista previa.
+    setVista(false);
+    setAnuncio("LibIA está escribiendo un borrador.");
     try {
       const r = await pedirBorradorLibIA({ complaintId: complaint.id, businessId: complaint.business_id, nota });
       if (r.ok) {
@@ -121,16 +162,19 @@ export function ResponseForm({
         // una respuesta anterior se haya enviado sin él.
         setConIA(true);
         setErrorHuecos(null);
-        setVista(false);
+        setRevelar(true);
+        setAnuncio("LibIA terminó el borrador. Revísalo antes de enviarlo.");
       } else {
         setAvisoLibIA({
           texto: r.mensaje,
           conPlan: r.motivo === "sin_plan",
           tope: r.motivo === "tope_negocio" || r.motivo === "tope_global",
         });
+        setAnuncio("");
       }
     } catch {
       setAvisoLibIA({ texto: "LibIA no pudo escribir ahora. Inténtalo de nuevo.", conPlan: false, tope: false });
+      setAnuncio("");
     } finally {
       setGenerando(false);
     }
@@ -140,6 +184,7 @@ export function ResponseForm({
     setTexto(anterior ?? "");
     setAnterior(null);
     setUltimoBorrador(null);
+    setRevelar(false);
   }
 
   return (
@@ -161,49 +206,84 @@ export function ResponseForm({
     >
       <input type="hidden" name="id" value={complaint.id} />
       <input type="hidden" name="business_id" value={complaint.business_id} />
+      <p role="status" className="sr-only">
+        {anuncio}
+      </p>
 
       {libia.incluido ? (
-        <div className="space-y-2.5 rounded-xl border border-teal-200 bg-teal-50/50 p-3.5">
-          <p className="flex items-center gap-2.5 text-sm font-medium text-slate-700">
-            <Icon name="chispa" className="h-4 w-4 shrink-0 text-teal-600" />
-            Pedirle una propuesta a LibIA
-          </p>
-          <div className="space-y-1">
-            <label htmlFor="libia-nota" className="block text-xs font-medium text-slate-600">
-              ¿Algo que LibIA deba saber? (opcional)
-            </label>
-            <Textarea
-              id="libia-nota"
-              value={nota}
-              onChange={(e) => setNota(e.target.value)}
-              maxLength={NOTA_MAXIMA}
-              placeholder="Ej.: Ya le devolvimos el dinero el 5 de octubre."
-              className="min-h-16"
-              disabled={generando}
-            />
+        // Borde con degradado: el fondo de afuera asoma por el px de relleno.
+        <div className="rounded-xl bg-gradient-to-br from-teal-300 via-teal-100 to-cyan-300 p-px shadow-[0_10px_28px_-16px_rgb(15_118_110/0.5)]">
+          <div className="space-y-2.5 rounded-[11px] bg-gradient-to-br from-teal-50 via-white to-cyan-50 p-3.5">
+            <p className="flex items-center gap-2.5 text-sm font-semibold text-slate-800">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-teal-500 to-teal-700 text-white shadow-sm">
+                <Icon name="chispa" className="h-4 w-4" />
+              </span>
+              <span>
+                Pedirle una propuesta a <span className="text-teal-700">LibIA</span>
+              </span>
+            </p>
+            <div className="space-y-1">
+              <div className="flex items-baseline justify-between gap-2">
+                <label htmlFor="libia-nota" className="text-xs font-medium text-slate-600">
+                  ¿Algo que LibIA deba saber? (opcional)
+                </label>
+                <span
+                  className={cn(
+                    "shrink-0 text-xs tabular-nums",
+                    nota.length > NOTA_MAXIMA - 50 ? "text-amber-700" : "text-slate-500",
+                  )}
+                >
+                  {nota.length} / {NOTA_MAXIMA}
+                </span>
+              </div>
+              <Textarea
+                id="libia-nota"
+                value={nota}
+                onChange={(e) => setNota(e.target.value)}
+                maxLength={NOTA_MAXIMA}
+                placeholder="Ej.: Ya le devolvimos el dinero el 5 de octubre."
+                className="min-h-16"
+                disabled={generando}
+              />
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              {/* Antes del primer borrador es la acción principal; después, lo
+                  que sigue es revisar y enviar, y pedir otra versión pasa a
+                  segundo plano. Mientras escribe no se atenúa: la chispa que
+                  titila es la señal de que está trabajando. */}
+              <Button
+                type="button"
+                variant={ultimoBorrador === null ? "primary" : "secondary"}
+                onClick={pedirBorrador}
+                disabled={generando}
+                aria-busy={generando}
+                className={cn(
+                  ultimoBorrador === null && "btn-brillo",
+                  generando && "disabled:cursor-progress! disabled:opacity-100!",
+                )}
+              >
+                <Icon name="chispa" className={cn("h-4 w-4 shrink-0", generando && "libia-chispa-activa")} />
+                {generando ? "LibIA está escribiendo…" : ultimoBorrador !== null ? "Pedir otra versión" : "Escribir borrador"}
+              </Button>
+              <span className="text-xs text-slate-500">{textoQuedan(quedan)}</span>
+            </div>
+            <p className="text-xs text-slate-500">
+              LibIA lee el reclamo, sin documento ni datos de contacto, y te propone un texto. Revísalo siempre.
+            </p>
+            {avisoLibIA && (
+              <Alert kind={avisoLibIA.tope ? "info" : "error"}>
+                {avisoLibIA.texto}
+                {avisoLibIA.conPlan && (
+                  <>
+                    {" "}
+                    <Link href={`/app/${bizId}/plan`} className="font-semibold underline">
+                      Ver planes
+                    </Link>
+                  </>
+                )}
+              </Alert>
+            )}
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <Button type="button" variant="secondary" onClick={pedirBorrador} disabled={generando} aria-busy={generando}>
-              {generando ? "LibIA está escribiendo…" : ultimoBorrador !== null ? "Pedir otra versión" : "Escribir borrador"}
-            </Button>
-            <span className="text-xs text-slate-500">Te quedan {quedan} hoy</span>
-          </div>
-          <p className="text-xs text-slate-500">
-            LibIA lee el reclamo, sin documento ni datos de contacto, y te propone un texto. Revísalo siempre.
-          </p>
-          {avisoLibIA && (
-            <Alert kind={avisoLibIA.tope ? "info" : "error"}>
-              {avisoLibIA.texto}
-              {avisoLibIA.conPlan && (
-                <>
-                  {" "}
-                  <Link href={`/app/${bizId}/plan`} className="font-semibold underline">
-                    Ver planes
-                  </Link>
-                </>
-              )}
-            </Alert>
-          )}
         </div>
       ) : (
         <div className="flex w-full items-center gap-2.5 rounded-xl border border-dashed border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-medium text-slate-500">
@@ -294,21 +374,47 @@ export function ResponseForm({
           <input type="hidden" name="response" value={texto} />
         </div>
       ) : (
-        <Textarea
-          id="response"
-          name="response"
-          value={texto}
-          onChange={(e) => setTexto(e.target.value)}
-          placeholder={`Estimado(a) cliente, hemos revisado su ${complaint.kind === "queja" ? "queja" : "reclamo"} y…`}
-          className="min-h-56"
-          maxLength={5000}
-          readOnly={generando}
-          aria-busy={generando}
-        />
+        <div className="relative">
+          <Textarea
+            id="response"
+            name="response"
+            value={texto}
+            onChange={(e) => setTexto(e.target.value)}
+            placeholder={`Estimado(a) cliente, hemos revisado su ${complaint.kind === "queja" ? "queja" : "reclamo"} y…`}
+            className="block min-h-56"
+            maxLength={5000}
+            readOnly={generando}
+            aria-busy={generando}
+          />
+          {generando && <LibIAEscribiendo />}
+          {revelar && (
+            <>
+              {/* La cortina se recorta al borde de adentro de la caja y el
+                  destello la rodea por fuera. Cuando el destello termina,
+                  se desmontan los dos. */}
+              <span aria-hidden="true" className="pointer-events-none absolute inset-px overflow-hidden rounded-[7px]">
+                <span className="libia-cortina absolute inset-x-0 top-0 h-[200%]" />
+              </span>
+              <span
+                aria-hidden="true"
+                onAnimationEnd={() => setRevelar(false)}
+                className="libia-destello pointer-events-none absolute -inset-1 rounded-xl"
+              />
+            </>
+          )}
+        </div>
       )}
 
       <div className="flex items-center justify-between text-xs text-slate-500">
-        <button type="button" onClick={() => setVista((v) => !v)} className="font-semibold text-teal-700 hover:underline">
+        <button
+          type="button"
+          onClick={() => {
+            setVista((v) => !v);
+            // Al volver a la caja no se repite la entrada del borrador.
+            setRevelar(false);
+          }}
+          className="font-semibold text-teal-700 hover:underline"
+        >
           {vista ? "Seguir editando" : "Vista previa del correo"}
         </button>
         <span className={texto.length > 4800 ? "text-amber-700" : undefined}>{texto.length} / 5000</span>
