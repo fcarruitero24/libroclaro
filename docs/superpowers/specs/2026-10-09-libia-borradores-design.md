@@ -22,7 +22,9 @@ aparece en la caja de respuesta para editarlo. **Nunca se envía solo.** Sin cos
    detalle, pedido, la nota opcional del dueño, el nombre del negocio y **solo el nombre de pila** del consumidor (la
    primera palabra del nombre, como `{nombre}` en las plantillas). Si es menor de edad, el nombre de pila de su
    apoderado, a quien se dirige la respuesta. **Nunca:** documento,
-   dirección, teléfono, correo ni apellidos.
+   dirección, teléfono, correo ni apellidos. Si el consumidor o el dueño escribieron un correo o un celular dentro
+   del detalle, el pedido o la nota, se reemplazan por `[correo]` y `[teléfono]` antes de mandarlos (agregado al
+   planificar, para que la frase de Privacidad sea cierta también en ese caso).
 4. **Topes diarios:** 20 borradores por negocio y **9.000 neuronas en total** (de las 10.000 gratis). Cada borrador
    reserva lo máximo que podría gastar y, al terminar, se ajusta a lo que gastó de verdad: así no se sale de lo
    gratis aunque los reclamos sean larguísimos (el formulario admite 5.000 caracteres de detalle y 3.000 de pedido;
@@ -98,7 +100,8 @@ En el detalle del reclamo, donde hoy está "Pedirle una propuesta a la IA · Pr�
 1. Exige sesión y lee el reclamo con la sesión del dueño (la seguridad de filas solo entrega los suyos).
 2. Revisa que el plan incluya LibIA.
 3. Arma el mensaje y calcula la reserva de neuronas según su largo.
-4. Llama a `reservar_borrador_libia`. Si no hay cupo, devuelve el motivo (tope del negocio o global).
+4. Llama a `reservar_borrador_libia` con el cliente de servicio (negocio, usuario y reserva). Si no hay cupo, devuelve
+   el motivo (tope del negocio o global).
 5. Pide el borrador a Mistral por el binding (`getCloudflareContext()` y `env.AI.run`), con `temperature: 0.4`,
    `max_tokens: 600` y un límite **total** de 25 s, reintento incluido. Si Cloudflare responde "ocupado" (error
    3040) o falla la conexión, espera 1 s y reintenta una vez con el tiempo que quede. Si se agotan los 25 s, corta.
@@ -170,9 +173,10 @@ Solo agrega; la web actual no se entera, así que se puede aplicar antes de publ
 
 - **Tabla `libia_uso`:** `dia` (fecha UTC), `business_id` (se borra en cascada con el negocio), `borradores`,
   `neuronas`; clave `(dia, business_id)`. Seguridad de filas sin políticas: solo la tocan las funciones.
-- **`reservar_borrador_libia(p_business_id, p_reserva)`** (security definer): exige que el negocio sea de
-  `auth.uid()` y que `plan_vigente()` sea verdadero; toma un candado de transacción para que dos pedidos simultáneos
-  no se cuenten mal. Si el negocio lleva 20 hoy, responde `tope_negocio`; si las neuronas del día más la reserva
+- **`reservar_borrador_libia(p_business_id, p_usuario, p_reserva)`** (security definer): exige que el negocio sea
+  de `p_usuario` (el servidor ya lo comprobó con la sesión del dueño; la base lo vuelve a mirar), que la reserva sea
+  mayor que 0 y como máximo 1.000, y que `plan_vigente()` sea verdadero; toma un candado de transacción para que dos
+  pedidos simultáneos no se cuenten mal. Si el negocio lleva 20 hoy, responde `tope_negocio`; si las neuronas del día más la reserva
   pasan de 9.000, responde `tope_global`; si no, suma 1 borrador y la reserva, y responde `ok`, el día y cuántos
   quedan.
 - **`cerrar_borrador_libia(p_business_id, p_dia, p_reserva, p_real)`:** con `p_real`, cambia la reserva por lo real;
@@ -185,9 +189,12 @@ Solo agrega; la web actual no se entera, así que se puede aplicar antes de publ
 - **`complaints.respuesta_con_ia`** (`boolean not null default false`).
 - **`complaint_events`:** el tipo `libia` entra en la lista de tipos permitidos y en la política que deja al dueño
   anotar eventos. Su `data` guarda solo el modelo (`{"modelo": "mistral-small-3.1"}`).
-- Permisos: las 3 funciones con `revoke` a `public` y `anon`. `reservar_borrador_libia` y `libia_quedan` con
-  `grant execute` a `authenticated` (necesitan `auth.uid()` para saber quién es el dueño); `cerrar_borrador_libia`
-  solo a `service_role`. Llamar a `reservar` directamente desde el navegador solo gasta el cupo del propio negocio.
+- Permisos: las 3 funciones solo para `service_role` (`revoke` a `public`, `anon` y `authenticated`). El servidor las
+  llama con `createAdminClient()` después de leer el reclamo o el negocio con la sesión del dueño, que es lo que
+  prueba que es suyo. Corregido al planificar: si el navegador pudiera llamar a `reservar`, un dueño podría mandar
+  una reserva negativa (bajaría el contador global) o enorme (dejaría a LibIA sin cupo para todos ese día).
+- **`get_complaint_public`** (la función que lee la hoja pública) se vuelve a crear igual, más la columna
+  `respuesta_con_ia` al final, con los mismos permisos. El código actual no se entera: ignora la columna nueva.
 
 ### Seguridad y privacidad
 
@@ -240,11 +247,12 @@ No hay que configurar nada en Cloudflare ni crear claves.
    de edad con apoderado; con y sin nota; nombre de pila; limpieza de la salida; huecos; reserva y neuronas reales;
    interruptor del plan; aviso al pie del correo.
 2. **Base de datos:** las funciones con transacciones que se deshacen al final: dueño contra extraño, plan inactivo,
-   tope de 20, tope de 9.000, cerrar con éxito y con falla, cambio de día, y que un usuario con sesión **no** pueda
-   llamar a `cerrar_borrador_libia` ni tocar `libia_uso`.
+   reserva inválida (negativa, cero o más de 1.000), tope de 20, tope de 9.000, cerrar con éxito y con falla, cambio
+   de día, y que un usuario con sesión **no** pueda llamar a ninguna de las 3 funciones ni tocar `libia_uso`.
 3. **Calidad, antes de lanzar:** los 4 reclamos inventados de la prueba, con y sin nota (8 borradores), con Mistral
    y las instrucciones finales, en una página privada para Fabrizio. **Criterio: 0 malos;** si sale alguno, se
-   ajustan las instrucciones y se repite. Costo: ~180 neuronas.
+   ajustan las instrucciones y se repite. Un noveno pedido, con un detalle de 5.000 caracteres, comprueba que lo
+   gastado de verdad nunca pasa de la reserva. Costo: ~300 neuronas.
 4. **Real en localhost:** un reclamo de prueba en `/r/demo` con el correo libroclaro.pe@gmail.com: pedir, deshacer,
    otra versión, bloqueo por huecos, enviar con aviso y revisar el correo y la hoja.
 
