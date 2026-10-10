@@ -117,6 +117,9 @@ export function ResponseForm({
         setUltimoBorrador(r.texto);
         setQuedan(r.quedan);
         setUsoLibIA(true);
+        // Un texto nuevo de LibIA vuelve a llevar el aviso por defecto, aunque
+        // una respuesta anterior se haya enviado sin él.
+        setConIA(true);
         setErrorHuecos(null);
         setVista(false);
       } else {
@@ -249,11 +252,19 @@ export function ResponseForm({
       {!errorHuecos && state.error && <Alert kind="error">{state.error}</Alert>}
       {state.success && <Alert kind="success">{state.success}</Alert>}
 
-      {esBorradorLibIA && (
+      {/* "Deshacer" sigue a mano aunque el dueño ya haya empezado a corregir el
+          borrador, y se apaga mientras LibIA escribe: si no, el texto propio
+          se perdería al llegar la otra versión. */}
+      {(esBorradorLibIA || anterior !== null) && (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-teal-50 px-3 py-2 text-xs font-medium text-teal-800">
           <span>Borrador de LibIA: revísalo antes de enviarlo</span>
           {anterior !== null && (
-            <button type="button" onClick={deshacer} className="font-semibold underline hover:text-teal-900">
+            <button
+              type="button"
+              onClick={deshacer}
+              disabled={generando}
+              className="font-semibold underline hover:text-teal-900 disabled:cursor-not-allowed disabled:opacity-50"
+            >
               Deshacer
             </button>
           )}
@@ -274,7 +285,9 @@ export function ResponseForm({
             <blockquote className="mt-3 whitespace-pre-wrap border-l-4 border-green-600 bg-slate-50 px-3 py-2 text-slate-700">
               {texto || "(todavía sin texto)"}
             </blockquote>
-            {usoLibIA && conIA && <p className="mt-2 text-xs text-slate-500">{avisoDeIA(businessName)}</p>}
+            {(usoLibIA || complaint.respuesta_con_ia) && conIA && (
+              <p className="mt-2 text-xs text-slate-500">{avisoDeIA(businessName)}</p>
+            )}
             <p className="mt-3 text-xs text-slate-500">Si no estás conforme con la respuesta, puedes acudir a INDECOPI.</p>
           </div>
           {/* El texto viaja igual aunque la vista previa esté abierta. */}
@@ -308,7 +321,9 @@ export function ResponseForm({
         </span>
       </label>
 
-      {usoLibIA && (
+      {/* También si la respuesta ya lleva el aviso aunque falte el evento de
+          LibIA: sin la casilla, el próximo guardado lo quitaría en silencio. */}
+      {(usoLibIA || complaint.respuesta_con_ia) && (
         <label className="flex items-start gap-2 text-xs text-slate-600">
           <input
             type="checkbox"

@@ -76,7 +76,7 @@ Los mensajes de la acción están en la Tarea 4.
 
 **Publicar**
 - La migración se aplica solo con el OK de Fabrizio.
-- El código se publica solo después de su "súbelo", con `npx opennextjs-cloudflare deploy` exacto desde este worktree, y se sube a GitHub con `git push origin refs/heads/cloudflare:refs/heads/main`.
+- El código se publica solo después de su "súbelo": primero `npx opennextjs-cloudflare build` y luego `npx opennextjs-cloudflare deploy` exacto, desde este worktree (el deploy publica lo que ya está construido en `.open-next`), y se sube a GitHub con `git push origin refs/heads/cloudflare:refs/heads/main`.
 
 ## Review Focus
 
@@ -449,7 +449,7 @@ export async function pedirBorradorLibIA(entrada: {
 
 ### Task 9: Publicar y comprobar en producción
 
-- [ ] **Step 1:** Con el "súbelo" de Fabrizio y su decisión sobre la parte del panel de consumo, correr `npx opennextjs-cloudflare deploy` exacto desde este worktree.
+- [ ] **Step 1:** Con el "súbelo" de Fabrizio y su decisión sobre la parte del panel de consumo: fusionar `libia-borradores` en `cloudflare` (fast-forward), `npx opennextjs-cloudflare build`, comprobar que `.open-next/server-functions` trae `reservar_borrador_libia`, y recién entonces `npx opennextjs-cloudflare deploy` exacto desde este worktree.
 - [ ] **Step 2:** En libroclaro.pe, con la sesión del demo, pedir un borrador del reclamo de prueba: aparece, y el historial y `libia_uso` lo registran.
 - [ ] **Step 3:** `git push origin refs/heads/cloudflare:refs/heads/main`.
 - [ ] **Step 4:** Actualizar `../traspaso-ia-borradores/TRASPASO.md` y la memoria con LibIA publicada (versión del Worker y commit) y con la siguiente entrega: LibIA en el panel de consumo.

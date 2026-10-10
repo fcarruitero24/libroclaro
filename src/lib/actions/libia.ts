@@ -4,15 +4,16 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { revalidatePath } from "next/cache";
 import {
   conReintento,
+  gastoAlCerrar,
   INSTRUCCIONES_LIBIA,
   LIBIA_MODELO,
   LIBIA_MODELO_CORTO,
   limpiarBorrador,
   MAX_TOKENS_SALIDA,
   mensajeParaLibIA,
-  neuronasReales,
   NOTA_MAXIMA,
   reservaDeNeuronas,
+  type ResultadoDelModelo,
 } from "@/lib/libia";
 import { planFor } from "@/lib/plans";
 import { createAdminClient, hasAdminClient } from "@/lib/supabase/admin";
@@ -44,7 +45,8 @@ const MINIMO_DE_TEXTO = 40;
  * Le pide a LibIA un borrador de respuesta para un reclamo. Solo lee los datos
  * que necesita para redactar (nunca documento, dirección, teléfono ni
  * correo), reserva el cupo antes de llamar al modelo y lo ajusta a lo gastado
- * de verdad, o lo devuelve si falló. No guarda ni el borrador ni la nota.
+ * de verdad, o lo devuelve si falló antes de escribir. No guarda ni el
+ * borrador ni la nota.
  */
 export async function pedirBorradorLibIA(entrada: {
   complaintId: string;
@@ -108,7 +110,7 @@ export async function pedirBorradorLibIA(entrada: {
   }
 
   let texto = "";
-  let gastado: number | null = null;
+  let resultado: ResultadoDelModelo;
   try {
     const { env } = await getCloudflareContext({ async: true });
     const respuesta = (await conReintento(() =>
@@ -121,23 +123,25 @@ export async function pedirBorradorLibIA(entrada: {
         max_tokens: MAX_TOKENS_SALIDA,
       }),
     )) as { response?: unknown; usage?: unknown };
+    resultado = { tipo: "respuesta", usage: respuesta.usage };
     texto = limpiarBorrador(String(respuesta.response ?? ""));
-    if (texto.length >= MINIMO_DE_TEXTO) gastado = neuronasReales(respuesta.usage, reserva);
-    else console.error("[libia]", "fallo", `respuesta de ${texto.length} caracteres`);
+    if (texto.length < MINIMO_DE_TEXTO) console.error("[libia]", "fallo", `respuesta de ${texto.length} caracteres`);
   } catch (e) {
+    resultado = { tipo: "error", error: e };
     console.error("[libia]", "fallo", e instanceof Error ? e.message : String(e));
   }
 
-  // Con lo gastado, la reserva se cambia por ese número; sin él (falló), el
-  // cupo se devuelve al día en que se reservó.
+  // Si el modelo respondió, cuenta lo gastado aunque el texto no sirva; si se
+  // agotó el tiempo, la reserva; solo un error antes de escribir devuelve el
+  // cupo, al día en que se reservó (ver gastoAlCerrar).
   const { error: errorAlCerrar } = await admin.rpc("cerrar_borrador_libia", {
     p_business_id: entrada.businessId,
     p_dia: cupo.dia,
     p_reserva: reserva,
-    p_real: gastado,
+    p_real: gastoAlCerrar(resultado, reserva),
   });
   if (errorAlCerrar) console.error("[libia]", "cerrar", errorAlCerrar.message);
-  if (gastado === null) return FALLO;
+  if (resultado.tipo !== "respuesta" || texto.length < MINIMO_DE_TEXTO) return FALLO;
 
   const { error: errorDelEvento } = await supabase.from("complaint_events").insert({
     complaint_id: entrada.complaintId,

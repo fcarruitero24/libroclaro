@@ -24,7 +24,9 @@ aparece en la caja de respuesta para editarlo. **Nunca se envía solo.** Sin cos
    apoderado, a quien se dirige la respuesta. **Nunca:** documento,
    dirección, teléfono, correo ni apellidos. Si el consumidor o el dueño escribieron un correo o un celular dentro
    del detalle, el pedido o la nota, se reemplazan por `[correo]` y `[teléfono]` antes de mandarlos (agregado al
-   planificar, para que la frase de Privacidad sea cierta también en ese caso).
+   planificar, para que la frase de Privacidad sea cierta también en ese caso). Tras la revisión final, cada dato va
+   en una sola línea (los saltos del consumidor se cambian por " / ", para que no pueda inventar una línea "Nota del
+   negocio:") y con largo máximo: negocio 200, descripción 300, detalle 5.000, pedido 3.000, nombres 40 y nota 500.
 4. **Topes diarios:** 20 borradores por negocio y **9.000 neuronas en total** (de las 10.000 gratis). Cada borrador
    reserva lo máximo que podría gastar y, al terminar, se ajusta a lo que gastó de verdad: así no se sale de lo
    gratis aunque los reclamos sean larguísimos (el formulario admite 5.000 caracteres de detalle y 3.000 de pedido;
@@ -61,6 +63,8 @@ En el detalle del reclamo, donde hoy está "Pedirle una propuesta a la IA · Pr�
   otro y cuenta para el tope.
 - **Huecos:** sin nota, LibIA deja `[indica aquí la solución que ofreces]` y, si hace falta, `[canal de contacto]`.
   No se puede enviar con un hueco sin completar; el mensaje dice cuál falta. Guardar como borrador sí se puede.
+  También cuentan como huecos sus variantes probables ("[indique aquí … ofrece]", "[medio de contacto]") y los
+  "[correo]" y "[teléfono]" con que se tapan los datos, por si el modelo los repite.
 - **Casilla al enviar,** bajo "Enviar por correo a…": "Indicar que se redactó con ayuda de inteligencia artificial".
   Se muestra si se usó LibIA en ese reclamo, aunque se haya guardado como borrador y se vuelva otro día. Viene
   marcada, salvo que la respuesta ya se haya enviado antes sin el aviso. La vista previa del correo muestra el aviso
@@ -106,9 +110,12 @@ En el detalle del reclamo, donde hoy está "Pedirle una propuesta a la IA · Pr�
    `max_tokens: 600` y un límite **total** de 25 s, reintento incluido. Si Cloudflare responde "ocupado" (error
    3040) o falla la conexión, espera 1 s y reintenta una vez con el tiempo que quede. Si se agotan los 25 s, corta.
 6. Limpia la salida: comillas que envuelven todo el texto, títulos como "Borrador:" y negritas de Markdown (el correo
-   es texto plano). Si queda vacía o con menos de 40 caracteres, cuenta como falla.
-7. Llama a `cerrar_borrador_libia` con el cliente de servicio (`createAdminClient()`), con lo gastado de verdad o
-   como falla (devuelve el cupo).
+   es texto plano). Si queda vacía o con menos de 40 caracteres, se muestra como falla.
+7. Llama a `cerrar_borrador_libia` con el cliente de servicio (`createAdminClient()`). Si el modelo respondió, con lo
+   gastado de verdad, aunque el texto no sirva (Cloudflare ya cobró); si se agotó el tiempo, con la reserva (el pedido
+   puede seguir y cobrarse); solo un error antes de escribir devuelve el cupo (`gastoAlCerrar` en `src/lib/libia.ts`).
+   Corregido en la revisión final: antes toda falla devolvía el cupo y una respuesta inútil repetida en bucle podía
+   salir de lo gratis.
 8. Si salió bien, anota el evento `libia` en el historial y devuelve el texto y cuántos quedan.
 
 ### Instrucciones del modelo
@@ -217,8 +224,8 @@ Solo agrega; la web actual no se entera, así que se puede aplicar antes de publ
 | Caso | Qué pasa |
 |---|---|
 | Mistral ocupado (error 3040) o falla la conexión | Espera 1 s y reintenta una vez; si vuelve a fallar, devuelve el cupo y dice "LibIA no pudo escribir ahora. Inténtalo de nuevo." |
-| Se agotan los 25 s (reintento incluido) | Corta, devuelve el cupo y muestra el mismo mensaje |
-| Respuesta vacía o de menos de 40 caracteres | Cuenta como falla |
+| Se agotan los 25 s (reintento incluido) | Corta y muestra el mismo mensaje; el borrador y la reserva cuentan (el pedido puede seguir y cobrarse) |
+| Respuesta vacía o de menos de 40 caracteres | Se muestra como falla; cuenta lo gastado de verdad |
 | Texto con comillas, títulos o negritas | Se limpia antes de ponerlo en la caja |
 | El plan venció justo antes de pulsar | La base lo rechaza: "Tu plan ya no incluye LibIA", con enlace a Plan |
 | Doble clic | El botón queda bloqueado mientras escribe |
@@ -266,7 +273,7 @@ No hay que configurar nada en Cloudflare ni crear claves.
 
 1. Aplicar la migración 0010.
 2. Commit en la rama `cloudflare` (archivos concretos, nunca `git add -A`).
-3. Con el "súbelo" de Fabrizio: `npx opennextjs-cloudflare deploy` desde `libroclaro-cloudflare`.
+3. Con el "súbelo" de Fabrizio, desde `libroclaro-cloudflare` con la rama `cloudflare` ya fusionada: `npx opennextjs-cloudflare build` y luego `npx opennextjs-cloudflare deploy` (el deploy publica lo que ya está construido en `.open-next`; antes de publicar, comprobar que el bundle trae `reservar_borrador_libia`).
 4. Probar un borrador real en producción.
 5. Subir a GitHub (`git push origin refs/heads/cloudflare:refs/heads/main`).
 

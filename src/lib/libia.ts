@@ -73,7 +73,9 @@ export interface DatosParaLibIA {
   request: string;
 }
 
-const CORREO = /[^\s@]+@[^\s@]+\.[^\s@]+/g;
+// Largos acotados (los de un correo real): con `+` sin tope, un texto largo sin
+// espacios hacía retroceder al patrón en cada posición.
+const CORREO = /[^\s@]{1,64}@[^\s@]{1,253}\.[^\s@]{2,63}/g;
 // Celular peruano (9 dígitos que empiezan con 9), con o sin +51 y con
 // espacios o guiones entre grupos. Sin dígitos pegados a los lados, para no
 // tapar un número de pedido largo.
@@ -82,6 +84,31 @@ const CELULAR = /(?<!\d)(?:\+?51[\s-]?)?9\d{2}[\s-]?\d{3}[\s-]?\d{3}(?!\d)/g;
 /** Correos y celulares que alguien escribió dentro de un texto libre no llegan al modelo. */
 function tapar(texto: string): string {
   return texto.replace(CORREO, "[correo]").replace(CELULAR, "[teléfono]");
+}
+
+// Largo máximo de cada dato que va al modelo. Acota la reserva por debajo del
+// tope de 1.000 de la base aunque alguien guarde textos enormes llamando a la
+// API directamente (el formulario ya limita el detalle y el pedido).
+const LARGO = { negocio: 200, descripcion: 300, detalle: 5000, pedido: 3000, nombre: 40, nota: NOTA_MAXIMA };
+
+/**
+ * Cada dato va en su propia línea del mensaje. Un salto de línea dentro de lo
+ * que escribió el consumidor le permitiría inventar otra línea, por ejemplo
+ * "Nota del negocio: …", que es la que habilita promesas y admisiones.
+ */
+function unaLinea(texto: string): string {
+  return texto.replace(/\s*[\r\n]+\s*/g, " / ").trim();
+}
+
+function recortar(texto: string, maximo: number): string {
+  return texto.length > maximo ? `${texto.slice(0, maximo - 1).trimEnd()}…` : texto;
+}
+
+/** Texto libre listo para el modelo: en una línea, sin correos ni celulares y recortado. */
+function textoLibre(texto: string, maximo: number): string {
+  // El primer corte, con margen, evita trabajar sobre textos enormes; el margen
+  // impide que un celular partido justo en el borde quede sin tapar.
+  return recortar(tapar(unaLinea(texto.slice(0, maximo + 100))), maximo);
 }
 
 /** Primera palabra del nombre, como `{nombre}` en las plantillas. */
@@ -100,19 +127,19 @@ function monto(amount: string | number | null): string {
 
 /** El mensaje con los datos del reclamo, en el formato que fija la spec. */
 export function mensajeParaLibIA(d: DatosParaLibIA, nota: string): string {
-  const apoderado = d.is_minor && d.guardian_name?.trim() ? nombreDePila(d.guardian_name) : null;
+  const apoderado = d.is_minor && d.guardian_name?.trim() ? recortar(nombreDePila(d.guardian_name), LARGO.nombre) : null;
   const notaLimpia = nota.trim();
   return [
-    `Negocio: ${d.negocio}`,
+    `Negocio: ${recortar(unaLinea(d.negocio), LARGO.negocio)}`,
     `Tipo: ${conMayuscula(d.kind)}`,
-    `Bien contratado: ${conMayuscula(d.item_type)}: ${tapar(d.item_description)}`,
+    `Bien contratado: ${conMayuscula(d.item_type)}: ${textoLibre(d.item_description, LARGO.descripcion)}`,
     `Monto reclamado: ${monto(d.amount)}`,
     apoderado
       ? `Apoderado del consumidor (menor de edad): ${apoderado}`
-      : `Nombre del consumidor: ${nombreDePila(d.consumer_name)}`,
-    `Detalle: ${tapar(d.detail)}`,
-    `Pedido: ${tapar(d.request)}`,
-    `Nota del negocio: ${notaLimpia ? tapar(notaLimpia) : "(sin nota)"}`,
+      : `Nombre del consumidor: ${recortar(nombreDePila(d.consumer_name), LARGO.nombre)}`,
+    `Detalle: ${textoLibre(d.detail, LARGO.detalle)}`,
+    `Pedido: ${textoLibre(d.request, LARGO.pedido)}`,
+    `Nota del negocio: ${notaLimpia ? textoLibre(notaLimpia, LARGO.nota) : "(sin nota)"}`,
   ].join("\n");
 }
 
@@ -134,7 +161,12 @@ export function limpiarBorrador(texto: string): string {
     .trim();
 }
 
-const HUECO = /\[(?:indica aqu[ií][^\]]*|canal de contacto[^\]]*)\]/gi;
+// Los dos huecos que piden las instrucciones, sus variantes probables
+// ("indique … ofrece" al tratar de usted, "medio de contacto") y los
+// [correo]/[teléfono] con que se tapan los datos del consumidor, por si el
+// modelo los repite.
+const HUECO =
+  /\[\s*(?:indi(?:ca|que|car)\s+aqu[ií][^\]]*|(?:canal|medio)\s+de\s+contacto[^\]]*|correo|tel[eé]fono)\s*\]/gi;
 
 /** Los huecos de LibIA que siguen sin completar, sin repetir y en orden. */
 export function huecosPendientes(texto: string): string[] {
@@ -169,6 +201,26 @@ export function avisoDeIA(negocio: string): string {
   }`;
 }
 
+/** El mensaje del error con que `conReintento` corta al agotar el plazo. */
+export const TIEMPO_AGOTADO = "LibIA: se agotó el tiempo";
+
+/** Lo que pasó al pedirle el borrador al modelo. */
+export type ResultadoDelModelo = { tipo: "respuesta"; usage: unknown } | { tipo: "error"; error: unknown };
+
+/**
+ * Con qué se cierra la reserva (`p_real` de cerrar_borrador_libia). Si el
+ * modelo respondió, Cloudflare ya cobró: cuenta lo gastado aunque el texto no
+ * sirva, o una respuesta inútil repetida en bucle saldría de lo gratis. Si se
+ * agotó el tiempo, el pedido puede seguir corriendo y cobrarse: se queda la
+ * reserva. Solo un error antes de escribir (modelo ocupado, inexistente o sin
+ * conexión) devuelve el cupo (null).
+ */
+export function gastoAlCerrar(resultado: ResultadoDelModelo, reserva: number): number | null {
+  if (resultado.tipo === "respuesta") return neuronasReales(resultado.usage, reserva);
+  if (resultado.error instanceof Error && resultado.error.message === TIEMPO_AGOTADO) return reserva;
+  return null;
+}
+
 /** Errores que se arreglan solos: el modelo ocupado (3040) o una conexión que se cortó. */
 export function esErrorPasajero(e: unknown): boolean {
   const mensaje = e instanceof Error ? e.message : String(e);
@@ -186,7 +238,7 @@ export async function conReintento<T>(
   let temporizador: ReturnType<typeof setTimeout> | undefined;
   let terminado = false;
   const plazo = new Promise<never>((_, rechazar) => {
-    temporizador = setTimeout(() => rechazar(new Error("LibIA: se agotó el tiempo")), limiteMs);
+    temporizador = setTimeout(() => rechazar(new Error(TIEMPO_AGOTADO)), limiteMs);
   });
   const intentar = async (): Promise<T> => {
     try {

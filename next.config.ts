@@ -4,8 +4,15 @@ import type { NextConfig } from "next";
 // En `next dev`, getCloudflareContext() entrega los bindings de
 // wrangler.dev.jsonc (hoy solo Workers AI, para LibIA; ver ese archivo). Solo
 // en desarrollo: en `next build` arrancaría también el proxy remoto de
-// Workers AI, que pide la sesión de wrangler.
-if (process.env.NODE_ENV === "development") initOpenNextCloudflareForDev({ configPath: "wrangler.dev.jsonc" });
+// Workers AI, que pide la sesión de wrangler. Sin sesión válida (el token dura
+// 1 h) la conexión falla: se avisa y el servidor sigue, sin LibIA, en vez de
+// caerse por un rechazo sin manejar.
+if (process.env.NODE_ENV === "development") {
+  initOpenNextCloudflareForDev({ configPath: "wrangler.dev.jsonc" }).catch((e: unknown) => {
+    const motivo = e instanceof Error ? e.message.split("\n")[0] : String(e);
+    console.warn(`[libia] LibIA no está disponible en desarrollo (para usarla: npx wrangler login). ${motivo}`);
+  });
+}
 
 const nextConfig: NextConfig = {
   experimental: {
