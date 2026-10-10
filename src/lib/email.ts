@@ -113,13 +113,17 @@ export function tplConsumerResponse(p: {
   code: string;
   response: string;
   hojaUrl: string;
+  /** Aviso de que la respuesta se redactó con ayuda de IA (LibIA); va al pie de la respuesta. */
+  avisoIA?: string | null;
 }) {
   return {
     subject: `Respuesta a tu reclamo N.º ${p.code} · ${p.businessName}`,
     html: layout(
       `Respuesta del proveedor`,
       `<p><strong>${escapeHtml(p.businessName)}</strong> ha respondido a tu hoja de reclamación <strong>N.º ${p.code}</strong>:</p>
-       <blockquote style="margin:16px 0;padding:12px 16px;background:#f8fafc;border-left:4px solid #16a34a;color:#334155;white-space:pre-wrap">${escapeHtml(p.response)}</blockquote>
+       <blockquote style="margin:16px 0;padding:12px 16px;background:#f8fafc;border-left:4px solid #16a34a;color:#334155;white-space:pre-wrap">${escapeHtml(p.response)}</blockquote>${
+         p.avisoIA ? `<p style="color:#64748b;font-size:13px">${escapeHtml(p.avisoIA)}</p>` : ""
+       }
        ${button(p.hojaUrl, "Ver hoja completa")}
        <p style="color:#64748b;font-size:13px">Si no estás conforme con la respuesta, puedes acudir a INDECOPI.</p>`,
     ),

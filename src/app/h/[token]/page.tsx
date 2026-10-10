@@ -5,6 +5,7 @@ import { PoweredBy } from "@/components/powered-by";
 import { PrintButton } from "@/components/print-button";
 import { Alert } from "@/components/ui";
 import { fmtDate, fmtDateTime, fmtMoney, ITEM_LABEL, KIND_LABEL } from "@/lib/format";
+import { avisoDeIA } from "@/lib/libia";
 import { planFor } from "@/lib/plans";
 import { createClient } from "@/lib/supabase/server";
 import type { ComplaintPublic } from "@/lib/types";
@@ -150,6 +151,7 @@ export default async function PublicComplaintPage({
             {answered ? (
               <div className="space-y-3">
                 <p className="whitespace-pre-wrap text-sm text-slate-900">{row.response}</p>
+                {row.respuesta_con_ia && <p className="text-xs text-slate-500">{avisoDeIA(row.business_name)}</p>}
                 <p className="text-xs text-slate-500">Fecha de comunicación de la respuesta: {row.responded_at ? fmtDateTime(row.responded_at) : "—"}</p>
               </div>
             ) : (

@@ -117,6 +117,8 @@ export interface ComplaintPublic {
   business_plan: string;
   business_plan_expires_at: string | null;
   business_slug: string;
+  /** La respuesta lleva el aviso de IA. Lo devuelve get_complaint_public desde la migración 0010. */
+  respuesta_con_ia?: boolean;
 }
 
 export interface ActionState {

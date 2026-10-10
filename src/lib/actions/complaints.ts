@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { sendEmail, tplConsumerResponse } from "@/lib/email";
 import { getAppUrl } from "@/lib/env";
+import { avisoDeIA, huecosPendientes } from "@/lib/libia";
 import { createClient, requireUser } from "@/lib/supabase/server";
 import type { ActionState } from "@/lib/types";
 
@@ -17,11 +18,21 @@ export async function respondComplaint(_prev: ActionState, formData: FormData): 
   const status = String(formData.get("status") ?? "");
   const response = String(formData.get("response") ?? "").trim();
   const notify = formData.get("notify") === "on";
+  // La casilla solo aparece si se usó LibIA en el reclamo; sin ella, no hay aviso.
+  const conIA = formData.get("con_ia") === "on";
 
   if (!id || !businessId) return { error: "Reclamo inválido." };
   if (!STATUSES.has(status)) return { error: "Estado inválido." };
   if ((status === "respondido" || status === "cerrado") && response.length < 10) {
     return { error: "Escribe una respuesta de al menos 10 caracteres antes de marcar como respondido." };
+  }
+  // Un borrador de LibIA a medio completar no le llega al consumidor. Como
+  // borrador sí se puede guardar.
+  if (status === "respondido" || status === "cerrado") {
+    const huecos = huecosPendientes(response);
+    if (huecos.length > 0) {
+      return { error: `Completa las partes entre corchetes antes de enviar: ${huecos.join(", ")}.` };
+    }
   }
 
   const { data: current, error: curError } = await supabase
@@ -36,6 +47,7 @@ export async function respondComplaint(_prev: ActionState, formData: FormData): 
   const patch: Record<string, unknown> = {
     status,
     response: response || null,
+    respuesta_con_ia: conIA,
   };
   if (nowResponded && !current.responded_at) patch.responded_at = new Date().toISOString();
 
@@ -51,6 +63,7 @@ export async function respondComplaint(_prev: ActionState, formData: FormData): 
       code: current.code,
       response,
       hojaUrl: `${appUrl}/h/${current.public_token}`,
+      avisoIA: conIA ? avisoDeIA(biz?.name ?? "El proveedor") : null,
     });
     const sent = await sendEmail({ to: current.consumer_email, replyTo: biz?.email, ...tpl });
     // El cambio de estado y la respuesta los anota el trigger; que el correo
